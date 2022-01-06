@@ -1,0 +1,47 @@
+.loginContainer {
+  margin-left: auto;
+  margin-right: auto;
+  width: 300px;
+  background-color: #f16e31;
+  text-align: center;
+  border-radius: 6px;
+  max-height: 300px;
+  transition: max-height 0.3s ease-out;
+  height: 300px;
+}
+
+.loginContainer.loader {
+  max-height: 200px;
+}
+
+.loginForm {
+  padding: 10px;
+}
+
+.loginForm input {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  font-size: 13pt;
+  padding: 10px 10px;
+  border-radius: 6px;
+  width: 80%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: none;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.loginForm input.error {
+  background-color: #febfbf;
+}
+
+.divider {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 80%;
+  height: 1px;
+  background-color: #3a606e;
+}

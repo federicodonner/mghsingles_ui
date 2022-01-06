@@ -1,0 +1,50 @@
+button {
+  color: white;
+  padding: 8px 30px;
+  border-radius: 6px;
+  border: none;
+  margin: 7px 0;
+  font-size: 13pt;
+  cursor: pointer;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+button:active {
+  transform: scale(0.98, 0.98);
+}
+
+button.dark {
+  background-color: #3a606e;
+}
+
+button.dark:hover {
+  background-color: #375b68;
+}
+
+button.light {
+  background-color: #607b7d;
+}
+
+button.light:hover {
+  background-color: #5a7274;
+}
+
+.textButton {
+  cursor: pointer;
+}
+
+.textButton.dark {
+  color: #3a606e;
+}
+
+.textButton.dark:hover {
+  color: #5f4b68;
+}
+
+.textButton.light {
+  color: #607b7d;
+}
+
+.textButton.light:hover {
+  color: #9e3b4f;
+}
