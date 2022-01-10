@@ -25,10 +25,12 @@ export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
   for (const name in data) {
     formData.append(name, data[name]);
   }
+  var accessToken = readFromLS(process.env.REACT_APP_LS_LOGIN_TOKEN);
   var fetchConfig = {
     method: verb,
     headers: {
       "accept-encoding": "gzip, deflate",
+      Authorization: "Bearer " + accessToken,
     },
   };
   if (data) {
@@ -62,7 +64,7 @@ export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
     .catch((e) => {
       var response = {
         status: 500,
-        detail: texts.API_ERROR,
+        message: texts.API_ERROR,
       };
       callbackFail(response);
     });

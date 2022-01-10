@@ -1,0 +1,54 @@
+.cardInList {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  width: 800px;
+  padding: 10px 0;
+}
+
+.cardInList.border {
+  border-bottom: 1px solid #f16e31;
+}
+
+.cardInList.inactive {
+  color: #bbb;
+}
+
+.cardInList .quantity {
+  text-align: center;
+  width: 40px;
+}
+
+.cardInList .name {
+  width: 330px;
+}
+
+.cardInList .set {
+  text-align: center;
+  width: 60px;
+}
+
+.cardInList .language {
+  text-align: center;
+  width: 90px;
+}
+
+.cardInList .condition {
+  text-align: center;
+  width: 60px;
+}
+
+.cardInList .deleteButton {
+  text-align: center;
+  width: 220px;
+  color: #f16e31;
+  cursor: pointer;
+}
+
+.cardInList .dateSold {
+  text-align: center;
+  width: 220px;
+}

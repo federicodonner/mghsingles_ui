@@ -43,7 +43,7 @@ export default function Login() {
       (response) => {
         // If the login is successful, store the token in LS and navigate
         storeInLS(process.env.REACT_APP_LS_LOGIN_TOKEN, response.token);
-        navigate("/home");
+        navigate("/");
       },
       (response) => {
         setLoginLoader(false);

@@ -1,0 +1,15 @@
+.cardListContainer {
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+}
+
+.cardListContainer .title {
+  font-size: 14pt;
+  color: #19647e;
+}
+
+.border {
+  border-bottom: 1px solid #f16e31;
+}

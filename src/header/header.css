@@ -1,6 +1,7 @@
 header {
   position: relative;
   height: 120px;
+  min-width: 900px;
 }
 
 .barraSuperior {

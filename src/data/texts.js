@@ -7,12 +7,18 @@ const texts = {
   ENTER: "Ingresar",
   ACCEPT: "Aceptar",
   CANCEL: "Cancelar",
+  DELETE: "Eliminar",
   CREATE_ACCOUNT: "Crear cuenta",
   FORGOT_PASSWORD: "Olvidé mi contraseña",
   DISCLAIMER:
     "En esta primera versión, CASA no utiliza contraseña para sus usuarios. No te preocupes, nadie podrá acceder a tu información sin que le des permiso.",
   API_ERROR:
     "Ocurrió un error inesperado, por favor inéntalo denuevo más tarde.",
+  ACTIVE_CARDS: "Cartas activas",
+  SOLD_CARDS: "Cartas vendidas",
+  DEACTIVATE: "Desactivar",
+  ACTIVATE: "Activar",
+  SOLD_ON: "Vendida",
 };
 
 module.exports = texts;
