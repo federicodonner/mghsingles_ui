@@ -47,35 +47,37 @@ export default function Collection(props) {
   return (
     <div>
       <Header showMenu={true} />
-      {loader && <div>This is a loader</div>}
-      {!loader && cardsInStock && (
-        <div className="cardListContainer cardsInStock">
-          <div className="title">{texts.ACTIVE_CARDS}</div>
-          {cardsInStock.cards.map((card, index) => {
-            return (
-              <CardInCollection
-                card={card}
-                showBorder={index != cardsInStock.length - 1}
-                key={index}
-              />
-            );
-          })}
-        </div>
-      )}
-      {!loader && cardsSold && (
-        <div className="cardListContainer cardsSold">
-          <div className="title">{texts.SOLD_CARDS}</div>
-          {cardsSold.sales.map((sale, index) => {
-            return (
-              <SoldCard
-                sale={sale}
-                showBorder={index != cardsInStock.length - 1}
-                key={index}
-              />
-            );
-          })}
-        </div>
-      )}
+      <div className="content">
+        {loader && <div>This is a loader</div>}
+        {!loader && cardsInStock && (
+          <div className="cardListContainer cardsInStock">
+            <div className="title">{texts.ACTIVE_CARDS}</div>
+            {cardsInStock.cards.map((card, index) => {
+              return (
+                <CardInCollection
+                  card={card}
+                  showBorder={index != cardsInStock.length - 1}
+                  key={index}
+                />
+              );
+            })}
+          </div>
+        )}
+        {!loader && cardsSold && (
+          <div className="cardListContainer cardsSold">
+            <div className="title">{texts.SOLD_CARDS}</div>
+            {cardsSold.sales.map((sale, index) => {
+              return (
+                <SoldCard
+                  sale={sale}
+                  showBorder={index != cardsInStock.length - 1}
+                  key={index}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
