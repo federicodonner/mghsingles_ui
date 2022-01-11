@@ -10,7 +10,11 @@ export default function CardInCollection(props) {
   return (
     <div className={containerClassNames}>
       <div className="quantity">{props.card.quantity}</div>
-      <div className="name">{props.card.name}</div>
+      <div className="name">
+        {props.card.name.indexOf(" // ") == -1
+          ? props.card.name
+          : props.card.name.split(" // ")[0]}
+      </div>
       <div className="set">{props.card.cardSet.toUpperCase()}</div>
       <div className="language">{props.card.language}</div>
       <div className="condition">{props.card.condition}</div>
