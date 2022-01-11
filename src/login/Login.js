@@ -19,7 +19,9 @@ export default function Login() {
   let navigate = useNavigate();
 
   // Function for logging in the user
-  function loginUser() {
+  function loginUser(e) {
+    // Prever navigation for form submit
+    e.preventDefault();
     // Verifies that the user enterd their username and password
     if (!loginUsername.current.value) {
       setUsernameError(true);
@@ -64,30 +66,34 @@ export default function Login() {
         )}
         {!loginLoader && (
           <div className="loginForm">
-            <input
-              type="text"
-              placeholder={texts.USER_PLACEHOLDER}
-              className={usernameError ? "error" : ""}
-              onChange={() => {
-                setUsernameError(false);
-              }}
-              ref={loginUsername}
-            />
-            <input
-              type="password"
-              placeholder={texts.PASSWORD_PLACEHOLDER}
-              className={passwordError ? "error" : ""}
-              onChange={() => {
-                setPasswordError(false);
-              }}
-              ref={loginPassword}
-            />
-            <button className="dark" onClick={loginUser}>
+            <div className="fields">
+              <form onSubmit={loginUser}>
+                <input
+                  type="text"
+                  placeholder={texts.USER_PLACEHOLDER}
+                  className={usernameError ? "error" : ""}
+                  onChange={() => {
+                    setUsernameError(false);
+                  }}
+                  ref={loginUsername}
+                />
+                <input
+                  type="password"
+                  placeholder={texts.PASSWORD_PLACEHOLDER}
+                  className={passwordError ? "error" : ""}
+                  onChange={() => {
+                    setPasswordError(false);
+                  }}
+                  ref={loginPassword}
+                />
+              </form>
+            </div>
+            <button className="dark login" onClick={loginUser}>
               {texts.ENTER}
             </button>
             <div className="textButton dark">{texts.FORGOT_PASSWORD}</div>
             <div className="divider light"></div>
-            <button className="light">{texts.CREATE_ACCOUNT}</button>
+            <button className="light create">{texts.CREATE_ACCOUNT}</button>
           </div>
         )}
       </div>
