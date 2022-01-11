@@ -12,7 +12,7 @@ export default function CardVersion(props) {
         props.selectVersion(version);
       }}
     >
-      <img src={version.image} />
+      <img src={version.image} alt="version" />
       <div className="set">{version.cardSetName}</div>
     </div>
   );

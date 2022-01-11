@@ -138,7 +138,9 @@ export default function AddCard() {
             />
           </form>
           <button className="orange search" onClick={findCard}>
-            {searchLoader && <img className="loader" src={whiteLoader} />}
+            {searchLoader && (
+              <img className="loader" src={whiteLoader} alt="loader" />
+            )}
             {!searchLoader && <span>{texts.SEARCH}</span>}
           </button>
         </div>
@@ -169,7 +171,7 @@ export default function AddCard() {
             <div className="addCardModal">
               <div className="row">
                 <div className="cardImage">
-                  <img src={selectedVersion.image} />
+                  <img src={selectedVersion.image} alt="selected" />
                 </div>
                 <div className="cardSelectors">
                   <div>
@@ -226,7 +228,9 @@ export default function AddCard() {
                   </select>
                 </div>
                 <button className="orange add" onClick={addVersion}>
-                  {addLoader && <img className="loader" src={whiteLoader} />}
+                  {addLoader && (
+                    <img className="loader" src={whiteLoader} alt="loader" />
+                  )}
                   {!addLoader && <span>{texts.ADD}</span>}
                 </button>
               </div>

@@ -11,7 +11,7 @@ export default function CardInCollection(props) {
     <div className={containerClassNames}>
       <div className="quantity">{props.card.quantity}</div>
       <div className="name">
-        {props.card.name.indexOf(" // ") == -1
+        {props.card.name.indexOf(" // ") === -1
           ? props.card.name
           : props.card.name.split(" // ")[0]}
       </div>
