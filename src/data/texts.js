@@ -28,6 +28,13 @@ const texts = {
   QUANTITY: "Cantidad",
   ADDING: "Añadiendo",
   ADD: "Añadir",
+  HOME: "Home",
+  MY_COLLECTION: "Colección",
+  MY_SALES: "Ventas",
+  MY_ACCOUNT: "Cuenta",
+  BUY: "Comprar",
+  LOGIN: "Ingresar",
+  LOGOUT: "Salir",
 };
 
 module.exports = texts;

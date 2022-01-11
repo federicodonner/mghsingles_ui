@@ -1,41 +1,73 @@
 import "./menu.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import texts from "../data/texts";
+import { logout } from "../utils/fetchFunctions";
 
 export default function Menu(props) {
+  const navigate = useNavigate();
+
   return (
-    <div className="menuContainer">
-      <NavLink
-        to="/"
-        className={(navData) =>
-          navData.isActive ? "selectedButton menuElement" : "menuElement"
-        }
-      >
-        <div className="label">Home</div>
-      </NavLink>
-      <NavLink
-        to="/collection"
-        className={(navData) =>
-          navData.isActive ? "selectedButton menuElement" : "menuElement"
-        }
-      >
-        <div className="label">Mi colección</div>
-      </NavLink>
-      <NavLink
-        to="/sales"
-        className={(navData) =>
-          navData.isActive ? "selectedButton menuElement" : "menuElement"
-        }
-      >
-        <div className="label">Mis ventas</div>
-      </NavLink>
-      <NavLink
-        to="/sales"
-        className={(navData) =>
-          navData.isActive ? "selectedButton menuElement" : "menuElement"
-        }
-      >
-        <div className="label">Comprar cartas</div>
-      </NavLink>
-    </div>
+    <>
+      {props.loggedIn && (
+        <div className="menuContainer">
+          <NavLink
+            to="/home"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.HOME}</div>
+          </NavLink>
+          <NavLink
+            to="/collection"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.MY_COLLECTION}</div>
+          </NavLink>
+          <NavLink
+            to="/sales"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.MY_SALES}</div>
+          </NavLink>
+          <NavLink
+            to="/account"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.MY_ACCOUNT}</div>
+          </NavLink>
+          <div className="separator"></div>
+          <div className="menuElement">
+            <div className="label">
+              <a
+                href=""
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+              >
+                {texts.LOGOUT}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+      {!props.loggedIn && (
+        <div className="menuContainer">
+          <div className="separator"></div>
+          <div className="separator"></div>
+          <div className="separator"></div>
+          <NavLink to="/login" className="menuElement">
+            <div className="label">{texts.LOGIN}</div>
+          </NavLink>
+        </div>
+      )}
+    </>
   );
 }

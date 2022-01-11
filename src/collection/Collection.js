@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
 import CardInCollection from "./CardInCollection";
 import SoldCard from "./SoldCard";
-import { accessAPI } from "../utils/fetchFunctions";
+import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 
 export default function Collection(props) {
   const [loader, setLoader] = useState(true);
   const [cardsInStock, setCardsInStock] = useState(null);
-  const [cardsSold, setCardsSold] = useState(null);
+
+  let navigate = useNavigate();
 
   // When the page loads, get the user's collection
   useEffect(() => {
@@ -22,18 +23,8 @@ export default function Collection(props) {
         setCardsInStock(collection);
       },
       (response) => {
-        console.log(response);
-      }
-    );
-    accessAPI(
-      "GET",
-      "sale",
-      null,
-      (collection) => {
-        setCardsSold(collection);
-      },
-      (response) => {
-        console.log(response);
+        logout();
+        navigate("/login");
       }
     );
   }, []);
@@ -41,13 +32,13 @@ export default function Collection(props) {
   // When both lists are loaded, turn off the loader
   // MISSING, ONE OF THE LISTS IS EMPTY
   useEffect(() => {
-    if (cardsInStock && cardsSold) {
+    if (cardsInStock) {
       setLoader(false);
     }
-  }, [cardsInStock, cardsSold]);
+  }, [cardsInStock]);
   return (
     <div>
-      <Header showMenu={true} />
+      <Header showMenu={true} loggedIn={true} />
       <div className="content">
         {loader && <div>This is a loader</div>}
         {!loader && (
@@ -70,20 +61,6 @@ export default function Collection(props) {
               </div>
             )}
           </>
-        )}
-        {!loader && cardsSold && (
-          <div className="cardListContainer cardsSold">
-            <div className="title">{texts.SOLD_CARDS}</div>
-            {cardsSold.sales.map((sale, index) => {
-              return (
-                <SoldCard
-                  sale={sale}
-                  showBorder={index != cardsInStock.length - 1}
-                  key={index}
-                />
-              );
-            })}
-          </div>
         )}
       </div>
     </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./addCard.css";
 import Header from "../header/Header";
-import { accessAPI } from "../utils/fetchFunctions";
+import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import CardVersion from "./CardVersion";
@@ -20,6 +21,8 @@ export default function AddCard() {
   const foilRef = useRef(null);
   const quantityRef = useRef(null);
 
+  let navigate = useNavigate();
+
   // When the section loads, fetch the possible conditions and languages
   useEffect(() => {
     accessAPI(
@@ -31,7 +34,8 @@ export default function AddCard() {
         setLanguages(response.languages);
       },
       (response) => {
-        console.log(response);
+        logout();
+        navigate("/login");
       }
     );
   }, []);
@@ -118,14 +122,14 @@ export default function AddCard() {
         // Focus and select the text input to make the next search easier
         cardRef.current.focus();
         cardRef.current.select();
-        console.log(response);
+        alert(response.message);
       }
     );
   }
 
   return (
     <div>
-      <Header showMenu={true} />
+      <Header showMenu={true} loggedIn={true} />
       <div className="content">
         <div className="searchContainer">
           <form onSubmit={findCard}>

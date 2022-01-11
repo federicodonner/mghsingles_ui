@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./header.css";
 import Menu from "./Menu";
 import singlesLogo from "../images/mghsinglesLogo.png";
@@ -8,9 +9,11 @@ export default function Header(props) {
     <header>
       <div className="flexContainer">
         <div className="logoContainer">
-          <img src={singlesLogo} className="singlesLogo" alt="MGH Singles" />
+          <Link to="/">
+            <img src={singlesLogo} className="singlesLogo" alt="MGH Singles" />
+          </Link>
         </div>
-        {props.showMenu && <Menu />}
+        {props.showMenu && <Menu loggedIn={props.loggedIn} />}
         <div className="mghlogoContainer">
           <span className="by">by</span>
           <img src={mghlogo} className="mghlogo" alt="MGH" />

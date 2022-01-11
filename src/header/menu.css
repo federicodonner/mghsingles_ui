@@ -4,6 +4,7 @@ a:active,
 a:visited {
   text-decoration: none;
   color: white;
+  cursor: pointer;
 }
 
 .menuContainer {
@@ -17,8 +18,13 @@ a:visited {
 
 .menuElement {
   margin: 5px 10px;
+  height: 25px;
 }
 
 .selectedButton {
   font-weight: 700;
+}
+
+.separator {
+  width: 150px;
 }

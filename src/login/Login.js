@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import Header from "../header/Header";
@@ -7,7 +7,7 @@ import whiteLoader from "../images/whiteLoader.svg";
 import { storeInLS, accessAPI } from "../utils/fetchFunctions";
 
 export default function Login() {
-  const [loginLoader, setLoginLoader] = useState(false);
+  const [loginLoader, setLoginLoader] = useState(true);
 
   // Variables used for highlighting the field if there's an error
   const [usernameError, setUsernameError] = useState(false);
@@ -17,6 +17,24 @@ export default function Login() {
   const loginPassword = useRef(null);
 
   let navigate = useNavigate();
+
+  // When the component loads, verify if the user is loaded
+  useEffect(() => {
+    accessAPI(
+      "GET",
+      "user/me",
+      null,
+      (response) => {
+        // If the response is 200, means the user is logged in
+        // Navigate to home
+        navigate("/home");
+      },
+      (response) => {
+        // If the user is not logged in, turn off the loader
+        setLoginLoader(false);
+      }
+    );
+  }, [navigate]);
 
   // Function for logging in the user
   function loginUser(e) {
@@ -45,7 +63,7 @@ export default function Login() {
       (response) => {
         // If the login is successful, store the token in LS and navigate
         storeInLS(process.env.REACT_APP_LS_LOGIN_TOKEN, response.token);
-        navigate("/");
+        navigate("/home");
       },
       (response) => {
         setLoginLoader(false);
@@ -57,7 +75,7 @@ export default function Login() {
 
   return (
     <div>
-      <Header />
+      <Header showMenu={false} />
       <div className={loginLoader ? "loginContainer loader" : "loginContainer"}>
         {loginLoader && (
           <div className="loaderContainer">

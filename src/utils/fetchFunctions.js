@@ -16,6 +16,11 @@ export function deleteFromLS(key) {
   return localStorage.removeItem(key);
 }
 
+// Operations for logging out the user
+export function logout() {
+  localStorage.removeItem(process.env.REACT_APP_LS_LOGIN_TOKEN);
+}
+
 // Access API
 // With timeout specified in .env
 export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
