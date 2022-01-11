@@ -1,0 +1,14 @@
+.version {
+  padding: 10px 0px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.version img {
+  width: 200px;
+}
+
+.version .set {
+  font-size: 9pt;
+  max-width: 200px;
+}

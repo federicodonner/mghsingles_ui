@@ -19,6 +19,15 @@ const texts = {
   DEACTIVATE: "Desactivar",
   ACTIVATE: "Activar",
   SOLD_ON: "Vendida",
+  ADD_CARD: "Añadir carta",
+  CARD_NAME: "Escribe el nombre de la carta",
+  SEARCH: "Buscar",
+  SELECT_VERSION: "Selecciona la versión de tu carta.",
+  CONDITION: "Estado",
+  LANGUAGE: "Idioma",
+  QUANTITY: "Cantidad",
+  ADDING: "Añadiendo",
+  ADD: "Añadir",
 };
 
 module.exports = texts;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
 import CardInCollection from "./CardInCollection";
@@ -49,19 +50,26 @@ export default function Collection(props) {
       <Header showMenu={true} />
       <div className="content">
         {loader && <div>This is a loader</div>}
-        {!loader && cardsInStock && (
-          <div className="cardListContainer cardsInStock">
-            <div className="title">{texts.ACTIVE_CARDS}</div>
-            {cardsInStock.cards.map((card, index) => {
-              return (
-                <CardInCollection
-                  card={card}
-                  showBorder={index != cardsInStock.length - 1}
-                  key={index}
-                />
-              );
-            })}
-          </div>
+        {!loader && (
+          <>
+            <Link to="add">
+              <button className="orange right">{texts.ADD_CARD}</button>
+            </Link>
+            {cardsInStock && (
+              <div className="cardListContainer cardsInStock">
+                <div className="title">{texts.ACTIVE_CARDS}</div>
+                {cardsInStock.cards.map((card, index) => {
+                  return (
+                    <CardInCollection
+                      card={card}
+                      showBorder={index != cardsInStock.length - 1}
+                      key={index}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
         {!loader && cardsSold && (
           <div className="cardListContainer cardsSold">

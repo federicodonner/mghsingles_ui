@@ -1,16 +1,52 @@
+.content {
+  width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
 button {
   color: white;
-  padding: 8px 30px;
+  height: 36px;
+  padding: 0px 30px;
   border-radius: 6px;
   border: none;
-  margin: 7px 0;
   font-size: 13pt;
   cursor: pointer;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4));
+  display: block;
+}
+
+button.search {
+  display: inline;
+  margin-left: 10px;
+  width: 114px;
+  position: absolute;
+}
+
+button.add {
+  width: 114px;
+}
+
+button .loader {
+  width: 38px;
+}
+
+.right {
+  margin-left: auto;
+  margin-right: 100px;
 }
 
 button:active {
   transform: scale(0.98, 0.98);
+}
+
+button.orange {
+  background-color: #f16e31;
+}
+
+button.orange:hover {
+  background-color: #e86628;
 }
 
 button.dark {
@@ -29,22 +65,14 @@ button.light:hover {
   background-color: #5a7274;
 }
 
-.textButton {
-  cursor: pointer;
+input,
+select {
+  padding: 6px 8px;
+  border: 1px solid gray;
+  font-size: 14pt;
+  border-radius: 6px;
 }
 
-.textButton.dark {
-  color: #3a606e;
-}
-
-.textButton.dark:hover {
-  color: #5f4b68;
-}
-
-.textButton.light {
-  color: #607b7d;
-}
-
-.textButton.light:hover {
-  color: #9e3b4f;
+.bold {
+  font-weight: 700;
 }
