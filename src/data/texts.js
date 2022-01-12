@@ -35,6 +35,12 @@ const texts = {
   BUY: "Comprar",
   LOGIN: "Ingresar",
   LOGOUT: "Salir",
+  CREATE_USERNAME: "Nombre de usuario",
+  CREATE_NAME: "Nombre completo",
+  CREATE_EMAIL: "Email",
+  CREATE_PASSWORD: "Contraseña",
+  CONFIRM_DELETE_CARD_START: "¿Eliminar ",
+  CONFIRM_DELETE_CARD_END: "?",
 };
 
 module.exports = texts;

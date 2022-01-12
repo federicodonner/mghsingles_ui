@@ -5,13 +5,12 @@
   background-color: #f16e31;
   text-align: center;
   border-radius: 6px;
-  max-height: 300px;
-  transition: max-height 0.3s ease-out;
-  height: 300px;
+  max-height: 500px;
+  /* transition: max-height 0.3s ease-out; */
 }
 
 .loginContainer.loader {
-  max-height: 200px;
+  max-height: 210px;
 }
 
 .loginForm {
@@ -48,10 +47,15 @@
 
 .loginForm button.create {
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .loginForm input.error {
   background-color: #febfbf;
+}
+
+.loginForm button.register {
+  margin-top: 30px;
 }
 
 .divider {

@@ -65,6 +65,14 @@ button.light:hover {
   background-color: #5a7274;
 }
 
+.textButton {
+  cursor: pointer;
+}
+
+.textButton.dark {
+  color: #3a606e;
+}
+
 input,
 select {
   padding: 6px 8px;

@@ -9,6 +9,7 @@ import texts from "../data/texts";
 
 export default function Collection(props) {
   const [loader, setLoader] = useState(true);
+  const [collection, setCollection] = useState(null);
   const [cardsInStock, setCardsInStock] = useState(null);
 
   let navigate = useNavigate();
@@ -20,7 +21,8 @@ export default function Collection(props) {
       "collection",
       null,
       (collection) => {
-        setCardsInStock(collection);
+        setCollection(collection);
+        setCardsInStock(collection.cards);
       },
       (response) => {
         logout();
@@ -36,6 +38,19 @@ export default function Collection(props) {
       setLoader(false);
     }
   }, [cardsInStock]);
+
+  // Function called by the cardInCollection component to remove a card from the list
+  function removeCard(cardId) {
+    // Clone the array to delete the item
+    var cardsInStockEdited = JSON.parse(JSON.stringify(cardsInStock));
+    cardsInStock.forEach((card, index) => {
+      if (card.id === cardId) {
+        cardsInStockEdited.splice(index, 1);
+      }
+    });
+    setCardsInStock(cardsInStockEdited);
+  }
+
   return (
     <div>
       <Header showMenu={true} loggedIn={true} />
@@ -49,11 +64,12 @@ export default function Collection(props) {
             {cardsInStock && (
               <div className="cardListContainer cardsInStock">
                 <div className="title">{texts.ACTIVE_CARDS}</div>
-                {cardsInStock.cards.map((card, index) => {
+                {cardsInStock.map((card, index) => {
                   return (
                     <CardInCollection
                       card={card}
                       showBorder={index != cardsInStock.length - 1}
+                      removeCard={removeCard}
                       key={index}
                     />
                   );
