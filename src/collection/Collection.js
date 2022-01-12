@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
 import CardInCollection from "./CardInCollection";
-import SoldCard from "./SoldCard";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 

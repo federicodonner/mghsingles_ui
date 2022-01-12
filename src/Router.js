@@ -5,6 +5,7 @@ import Home from "./home/Home";
 import Collection from "./collection/Collection";
 import AddCard from "./collection/AddCard";
 import Store from "./store/Store";
+import Sales from "./collection/Sales";
 
 class Router extends React.Component {
   render() {
@@ -13,8 +14,9 @@ class Router extends React.Component {
         <Route path="/" element={<Store />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/Collection" element={<Collection />} />
-        <Route path="/Collection/add" element={<AddCard />} />
+        <Route path="/collection" element={<Collection />} />
+        <Route path="/collection/add" element={<AddCard />} />
+        <Route path="/sales" element={<Sales />} />
         <Route path="*" element={<Store />} />
       </Routes>
     );

@@ -23,22 +23,22 @@
 }
 
 .cardInList .name {
-  width: 330px;
+  width: 300px;
 }
 
 .cardInList .set {
   text-align: center;
-  width: 60px;
+  width: 50px;
 }
 
 .cardInList .language {
   text-align: center;
-  width: 90px;
+  width: 70px;
 }
 
 .cardInList .condition {
   text-align: center;
-  width: 60px;
+  width: 40px;
 }
 
 .cardInList .deleteButton {
@@ -48,9 +48,9 @@
   cursor: pointer;
 }
 
-.cardInList .dateSold {
+.cardInList .saleDetails {
   text-align: center;
-  width: 220px;
+  width: 300px;
 }
 
 .cardInList .deleteLoaderContainer {

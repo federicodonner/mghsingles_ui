@@ -23,8 +23,13 @@ export default function SoldCard(props) {
       <div className="set">{props.sale.cardSet.toUpperCase()}</div>
       <div className="language">{props.sale.language}</div>
       <div className="condition">{props.sale.condition}</div>
-      <div className="dateSold">
-        {texts.SOLD_ON}: {formattedDate}
+      <div className="saleDetails">
+        U$S {props.sale.price} (
+        {Math.round(props.sale.price * (1 - props.sale.percentage) * 100) / 100}
+        {" + "}
+        {Math.round(props.sale.price * props.sale.percentage * 100) / 100}){" "}
+        {" el "}
+        {formattedDate}
       </div>
     </div>
   );
