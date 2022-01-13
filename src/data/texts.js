@@ -41,6 +41,9 @@ const texts = {
   CREATE_PASSWORD: "Contraseña",
   CONFIRM_DELETE_CARD_START: "¿Eliminar ",
   CONFIRM_DELETE_CARD_END: "?",
+  AVAILABLE: "Disponibles: ",
+  I_WANT_IT: "Lo quiero",
+  STORE_SEARCH: "Busca en la tienda",
 };
 
 module.exports = texts;

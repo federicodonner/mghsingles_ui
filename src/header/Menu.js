@@ -11,14 +11,6 @@ export default function Menu(props) {
       {props.loggedIn && (
         <div className="menuContainer">
           <NavLink
-            to="/home"
-            className={(navData) =>
-              navData.isActive ? "selectedButton menuElement" : "menuElement"
-            }
-          >
-            <div className="label">{texts.HOME}</div>
-          </NavLink>
-          <NavLink
             to="/collection"
             className={(navData) =>
               navData.isActive ? "selectedButton menuElement" : "menuElement"

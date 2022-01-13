@@ -1,0 +1,62 @@
+.cardInStore {
+  padding: 10px 0px;
+  text-align: center;
+  position: relative;
+}
+
+.cardInStore img {
+  width: 200px;
+}
+
+.cardInStore .set {
+  font-size: 9pt;
+  max-width: 200px;
+}
+
+.cardCover {
+  width: 80%;
+  height: 79%;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  color: white;
+  padding: 10%;
+  border-radius: 10px;
+}
+
+.cardCover .set {
+  font-size: 9pt;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.cardCover .language {
+  margin-bottom: 10px;
+}
+
+.cardCover button {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+}
+
+.paginator {
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 14pt;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.paginator span {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.paginator .pageLink {
+  cursor: pointer;
+}
+
+.paginator .currentPage {
+  font-weight: 700;
+}
