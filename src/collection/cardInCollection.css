@@ -58,6 +58,12 @@
   width: 220px;
 }
 
+.cardInList .foilIcon {
+  width: 21px;
+  margin-bottom: -5px;
+  margin-left: 7px;
+}
+
 .deleteLoader {
   width: 41px;
   margin: -14px;

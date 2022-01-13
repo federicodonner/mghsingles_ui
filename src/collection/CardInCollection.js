@@ -4,6 +4,7 @@ import "./cardInCollection.css";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import orangeLoader from "../images/orangeLoader.svg";
+import foilIcon from "../images/foilIcon.svg";
 
 export default function CardInCollection(props) {
   const [deleteLoader, setDeleteLoader] = useState(false);
@@ -48,9 +49,16 @@ export default function CardInCollection(props) {
     <div className={containerClassNames}>
       <div className="quantity">{props.card.quantity}</div>
       <div className="name">
-        {props.card.name.indexOf(" // ") === -1
-          ? props.card.name
-          : props.card.name.split(" // ")[0]}
+        <span>
+          {props.card.name.indexOf(" // ") === -1
+            ? props.card.name
+            : props.card.name.split(" // ")[0]}
+        </span>
+        {props.card.foil == 1 && (
+          <span>
+            <img src={foilIcon} className="foilIcon" alt="foil" />
+          </span>
+        )}
       </div>
       <div className="set">{props.card.cardSet.toUpperCase()}</div>
       <div className="language">{props.card.language}</div>
