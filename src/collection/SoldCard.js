@@ -25,13 +25,9 @@ export default function SoldCard(props) {
       <div className="condition">{props.sale.condition}</div>
       <div className="saleDetails">
         U$S {props.sale.price} (
-        {Math.round(
-          parseFloat(props.sale.price) *
-            (1 - parseFloat(props.sale.percentage)) *
-            100
-        ) / 100}
+        {Math.round(props.sale.price * (1 - props.sale.percent) * 100) / 100}
         {" + "}
-        {Math.round(props.sale.price * props.sale.percentage * 100) / 100}){" "}
+        {Math.round(props.sale.price * props.sale.percent * 100) / 100}){" "}
         {" el "}
         {formattedDate}
       </div>
