@@ -10,7 +10,7 @@
 }
 
 .loginContainer.loader {
-  max-height: 210px;
+  max-height: 300px;
 }
 
 .loginForm {
@@ -19,7 +19,7 @@
 }
 
 .loginForm .fields {
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .loginForm input {
@@ -39,6 +39,7 @@
 .loginForm button {
   margin-left: auto;
   margin-right: auto;
+  margin-top: 15px;
 }
 
 .loginForm button.login {

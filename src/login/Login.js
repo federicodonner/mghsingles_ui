@@ -53,6 +53,7 @@ export default function Login() {
 
   // Function for logging in the user
   function loginUser(e) {
+    console.log("estoy");
     // Prever navigation for form submit
     e.preventDefault();
     // Verifies that the user enterd their username and password
@@ -126,12 +127,12 @@ export default function Login() {
     accessAPI(
       "POST",
       "user",
-      {
+      JSON.stringify({
         username: createUsernameData,
         name: createNameData,
         email: createEmailData,
         password: createPassword.current.value,
-      },
+      }),
       (response) => {
         // If the login is successful, store the token in LS and navigate
         storeInLS(process.env.REACT_APP_LS_LOGIN_TOKEN, response.token);
@@ -179,11 +180,12 @@ export default function Login() {
                   }}
                   ref={loginPassword}
                 />
+
+                <button className="dark login" type="submit">
+                  {texts.ENTER}
+                </button>
               </form>
             </div>
-            <button className="dark login" onClick={loginUser}>
-              {texts.ENTER}
-            </button>
             <div className="textButton dark">{texts.FORGOT_PASSWORD}</div>
             <div className="divider light"></div>
             <button
@@ -236,10 +238,10 @@ export default function Login() {
                   }}
                   ref={createPassword}
                 />
+                <button className="dark register" type="submit">
+                  {texts.CREATE_ACCOUNT}
+                </button>
               </form>
-              <button className="dark register" onClick={createUser}>
-                {texts.CREATE_ACCOUNT}
-              </button>
               <div className="divider light"></div>
               <button
                 className="light register"
