@@ -100,13 +100,13 @@ export default function AddCard() {
     accessAPI(
       "POST",
       "collection",
-      {
+      JSON.stringify({
         scryfallId: selectedVersion.scryfallId,
         quantity: quantityRef.current.value,
         condition: conditionRef.current.value,
         language: languageRef.current.value,
         foil: foil,
-      },
+      }),
       (response) => {
         // Clears the selected version to close the modal
         setSelectedVersion(null);
@@ -167,12 +167,12 @@ export default function AddCard() {
         {selectedVersion && (
           <>
             <div
-              className="versionSelectorCover"
+              className="modalCover"
               onClick={() => {
                 setSelectedVersion(null);
               }}
             ></div>
-            <div className="addCardModal">
+            <div className="addCardModal modal">
               <div className="row">
                 <div className="cardImage">
                   <img src={selectedVersion.image} alt="selected" />

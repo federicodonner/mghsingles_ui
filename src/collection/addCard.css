@@ -20,39 +20,15 @@
   justify-content: space-between;
 }
 
-.versionSelectorCover {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0.5, 0.5, 0.5, 0);
-  z-index: 1;
-}
-
 .addCardModal {
-  position: fixed;
   background-color: #3a606e;
   width: 390px;
   height: 350px;
-  left: 50%;
   top: 100px;
   margin-left: -195px;
   color: white;
   padding: 24px 24px;
   font-size: 14pt;
-  filter: drop-shadow(10px 10px 30px rgba(0, 0, 0, 1));
-  border: 10px solid black;
-  z-index: 10;
-  border-radius: 16px;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-  margin-bottom: 20px;
 }
 
 .cardSelectors {

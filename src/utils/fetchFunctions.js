@@ -19,28 +19,31 @@ export function deleteFromLS(key) {
 // Operations for logging out the user
 export function logout() {
   localStorage.removeItem(process.env.REACT_APP_LS_LOGIN_TOKEN);
+  localStorage.removeItem(process.env.REACT_APP_LS_SUPERUSER);
 }
 
 // Access API
 // With timeout specified in .env
 export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
   const url = process.env.REACT_APP_API_URL + "/" + endpoint;
-  var formData = new FormData();
+  // var formData = new FormData();
 
-  for (const name in data) {
-    formData.append(name, data[name]);
-  }
+  // for (const name in data) {
+  //   formData.append(name, data[name]);
+  // }
   var accessToken = readFromLS(process.env.REACT_APP_LS_LOGIN_TOKEN);
   var fetchConfig = {
     method: verb,
     headers: {
       "accept-encoding": "gzip, deflate",
       Authorization: "Bearer " + accessToken,
+      "Content-Type": "application/json",
     },
+    body: data,
   };
-  if (data) {
-    fetchConfig.body = formData;
-  }
+  // if (data) {
+  //   fetchConfig.body = formData;
+  // }
   Promise.race([
     // Generate two promies, one with the fecth and the other with the timeout
     // the one that finishes first resolves

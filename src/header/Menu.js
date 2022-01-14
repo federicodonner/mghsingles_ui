@@ -1,10 +1,17 @@
+import React, { useState, useEffect } from "react";
 import "./menu.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import texts from "../data/texts";
-import { logout } from "../utils/fetchFunctions";
+import { logout, readFromLS } from "../utils/fetchFunctions";
 
 export default function Menu(props) {
+  const [isSuperuser, setIsSuperuser] = useState(false);
   const navigate = useNavigate();
+
+  // On render, verifies that the user is a superuser
+  useEffect(() => {
+    setIsSuperuser(readFromLS(process.env.REACT_APP_LS_SUPERUSER));
+  }, []);
 
   return (
     <>
@@ -34,8 +41,17 @@ export default function Menu(props) {
           >
             <div className="label">{texts.MY_ACCOUNT}</div>
           </NavLink>
-          <div className="separator"></div>
-          <div className="menuElement">
+          {isSuperuser && (
+            <NavLink
+              to="/sell"
+              className={(navData) =>
+                navData.isActive ? "selectedButton menuElement" : "menuElement"
+              }
+            >
+              <div className="label">{texts.SELL_CARDS}</div>
+            </NavLink>
+          )}
+          <div className="menuElement logoutButton">
             <div className="label">
               <a
                 href=""

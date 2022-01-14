@@ -37,6 +37,10 @@ export default function Login() {
       null,
       (response) => {
         // If the response is 200, means the user is logged in
+        // If the user is a superuser, store it in LS
+        if (response.superuser) {
+          storeInLS(process.env.REACT_APP_LS_SUPERUSER, "1");
+        }
         // Navigate to home
         navigate("/home");
       },
@@ -67,13 +71,17 @@ export default function Login() {
     accessAPI(
       "POST",
       "oauth",
-      {
+      JSON.stringify({
         username: loginUsername.current.value,
         password: loginPassword.current.value,
-      },
+      }),
       (response) => {
         // If the login is successful, store the token in LS and navigate
         storeInLS(process.env.REACT_APP_LS_LOGIN_TOKEN, response.token);
+        // If the user is a superuser, store it in LS
+        if (response.superuser === 1) {
+          storeInLS(process.env.REACT_APP_LS_SUPERUSER, "1");
+        }
         navigate("/home");
       },
       (response) => {

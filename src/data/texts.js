@@ -44,6 +44,10 @@ const texts = {
   AVAILABLE: "Disponibles: ",
   I_WANT_IT: "Lo quiero",
   STORE_SEARCH: "Busca en la tienda",
+  SELL_CARDS: "Vender",
+  SELECT: "Seleccionar",
+  CARDS_IN_SALE: "Cartas en la venta",
+  FINISH_SALE: "Finalizar venta",
 };
 
 module.exports = texts;

@@ -31,7 +31,7 @@ export default function Collection(props) {
   }, []);
 
   // When both lists are loaded, turn off the loader
-  // MISSING, ONE OF THE LISTS IS EMPTY
+  // MISSING, THE LIST IS EMPTY
   useEffect(() => {
     if (cardsInStock) {
       setLoader(false);

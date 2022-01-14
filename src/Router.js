@@ -5,6 +5,7 @@ import Collection from "./collection/Collection";
 import AddCard from "./collection/AddCard";
 import Store from "./store/Store";
 import Sales from "./collection/Sales";
+import Sell from "./sell/Sell";
 
 class Router extends React.Component {
   render() {
@@ -15,6 +16,7 @@ class Router extends React.Component {
         <Route path="/collection" element={<Collection />} />
         <Route path="/collection/add" element={<AddCard />} />
         <Route path="/sales" element={<Sales />} />
+        <Route path="/sell" element={<Sell />} />
         <Route path="*" element={<Store />} />
       </Routes>
     );
