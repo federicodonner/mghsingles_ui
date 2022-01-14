@@ -6,11 +6,9 @@ import Loader from "../loader/Loader";
 import CardInCollection from "./CardInCollection";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
-import orangeLoader from "../images/orangeLoader.svg";
 
 export default function Collection(props) {
   const [loader, setLoader] = useState(true);
-  const [collection, setCollection] = useState(null);
   const [cardsInStock, setCardsInStock] = useState(null);
 
   let navigate = useNavigate();
@@ -22,7 +20,6 @@ export default function Collection(props) {
       "collection",
       null,
       (collection) => {
-        setCollection(collection);
         setCardsInStock(collection.cards);
       },
       (response) => {
@@ -30,7 +27,7 @@ export default function Collection(props) {
         navigate("/login");
       }
     );
-  }, []);
+  }, [navigate]);
 
   // When both lists are loaded, turn off the loader
   // MISSING, THE LIST IS EMPTY
@@ -69,7 +66,7 @@ export default function Collection(props) {
                   return (
                     <CardInCollection
                       card={card}
-                      showBorder={index != cardsInStock.length - 1}
+                      showBorder={index !== cardsInStock.length - 1}
                       removeCard={removeCard}
                       key={index}
                     />

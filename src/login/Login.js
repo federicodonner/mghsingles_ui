@@ -53,7 +53,6 @@ export default function Login() {
 
   // Function for logging in the user
   function loginUser(e) {
-    console.log("estoy");
     // Prever navigation for form submit
     e.preventDefault();
     // Verifies that the user enterd their username and password

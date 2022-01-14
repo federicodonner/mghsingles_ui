@@ -38,7 +38,7 @@ export default function AddCard() {
         navigate("/login");
       }
     );
-  }, []);
+  }, [navigate]);
 
   // When the conditions and languages are set, turn off the loader
   useEffect(() => {

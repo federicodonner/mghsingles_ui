@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
 import Loader from "../loader/Loader";
-import CardInCollection from "./CardInCollection";
 import SoldCard from "./SoldCard";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 
 export default function Sales(props) {
   const [loader, setLoader] = useState(true);
-  const [collection, setCollection] = useState(null);
   const [soldCards, setSoldCards] = useState(null);
 
   let navigate = useNavigate();
@@ -22,7 +20,6 @@ export default function Sales(props) {
       "sale",
       null,
       (collection) => {
-        setCollection(collection);
         setSoldCards(collection.sales);
       },
       (response) => {
@@ -30,7 +27,7 @@ export default function Sales(props) {
         navigate("/login");
       }
     );
-  }, []);
+  }, [navigate]);
 
   // When both lists are loaded, turn off the loader
   // MISSING, ONE OF THE LISTS IS EMPTY
@@ -52,7 +49,7 @@ export default function Sales(props) {
               return (
                 <SoldCard
                   sale={sale}
-                  showBorder={index != soldCards.length - 1}
+                  showBorder={index !== soldCards.length - 1}
                   key={index}
                 />
               );

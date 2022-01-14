@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../header/Header";
 import CardInStore from "./CardInStore";
 import Loader from "../loader/Loader";
 import "./store.css";
-import { accessAPI, storeInLS } from "../utils/fetchFunctions";
+import { accessAPI, storeInLS, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 
@@ -16,6 +17,8 @@ export default function Store() {
   const [cardsShowing, setCardsShowing] = useState(null);
   const [pages, setPages] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const navigate = useNavigate();
 
   const cardRef = useRef(null);
 
@@ -35,7 +38,13 @@ export default function Store() {
       },
       (response) => {
         // If the user is not logged in, turn off the loader
-        setLoggedIn(false);
+        if (response.status > 400 && response.status < 500) {
+          setLoggedIn(false);
+          logout();
+        } else {
+          alert(response.message);
+          navigate("/");
+        }
       }
     );
 
@@ -46,7 +55,7 @@ export default function Store() {
   function loadPage(page) {
     // Verifies that the requested page is not the current one
     // Avoids requesting new cards when the loader is on
-    if (page != currentPage && !loader) {
+    if (page !== currentPage && !loader) {
       setLoader(true);
       setCurrentPage(page);
       accessAPI(
@@ -58,7 +67,8 @@ export default function Store() {
           setLoader(false);
         },
         (response) => {
-          console.log(response);
+          alert(response.message);
+          navigate("/");
         }
       );
     }
@@ -96,7 +106,8 @@ export default function Store() {
           setCurrentPage(1);
         },
         (response) => {
-          console.log(response);
+          alert(response.message);
+          navigate("/");
         }
       );
     }
@@ -124,7 +135,8 @@ export default function Store() {
         setSearchLoader(false);
       },
       (response) => {
-        console.log(response);
+        alert(response.message);
+        navigate("/");
       }
     );
   }
@@ -162,7 +174,7 @@ export default function Store() {
         )}
         {pages && storeData && (
           <div className="paginator">
-            {currentPage != 1 && (
+            {currentPage !== 1 && (
               <span
                 className="pageLink"
                 onClick={() => {
@@ -176,7 +188,7 @@ export default function Store() {
               return (
                 <span
                   key={page}
-                  className={page != currentPage ? "pageLink" : "currentPage"}
+                  className={page !== currentPage ? "pageLink" : "currentPage"}
                   onClick={() => {
                     loadPage(page);
                   }}
@@ -185,7 +197,7 @@ export default function Store() {
                 </span>
               );
             })}
-            {currentPage != storeData.numberOfPages && (
+            {currentPage !== storeData.numberOfPages && (
               <span
                 className="pageLink"
                 onClick={() => {
