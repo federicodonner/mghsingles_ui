@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Header from "../header/Header";
 import CardInStore from "./CardInStore";
+import Loader from "../loader/Loader";
 import "./store.css";
 import { accessAPI, storeInLS } from "../utils/fetchFunctions";
 import texts from "../data/texts";
@@ -148,7 +149,7 @@ export default function Store() {
             {!searchLoader && <span>{texts.SEARCH}</span>}
           </button>
         </div>
-        {loader && <div>Soy un loader</div>}
+        {loader && <Loader />}
         {!loader && cardsShowing && (
           <div className="cardsInStore">
             {cardsShowing.map((card, index) => {

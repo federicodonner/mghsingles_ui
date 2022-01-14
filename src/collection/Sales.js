@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
+import Loader from "../loader/Loader";
 import CardInCollection from "./CardInCollection";
 import SoldCard from "./SoldCard";
 import { accessAPI, logout } from "../utils/fetchFunctions";
@@ -43,7 +44,7 @@ export default function Sales(props) {
     <div>
       <Header showMenu={true} loggedIn={true} />
       <div className="content">
-        {loader && <div>This is a loader</div>}
+        {loader && <Loader />}
         {!loader && (
           <div className="cardListContainer cardsInStock">
             <div className="title">{texts.SOLD_CARDS}</div>

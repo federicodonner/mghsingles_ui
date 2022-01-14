@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./collection.css";
 import Header from "../header/Header";
+import Loader from "../loader/Loader";
 import CardInCollection from "./CardInCollection";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
+import orangeLoader from "../images/orangeLoader.svg";
 
 export default function Collection(props) {
   const [loader, setLoader] = useState(true);
@@ -54,7 +56,7 @@ export default function Collection(props) {
     <div>
       <Header showMenu={true} loggedIn={true} />
       <div className="content">
-        {loader && <div>This is a loader</div>}
+        {loader && <Loader color="orange" />}
         {!loader && (
           <>
             <Link to="add">

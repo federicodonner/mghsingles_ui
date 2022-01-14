@@ -1,5 +1,4 @@
 import texts from "../data/texts";
-var FormData = require("form-data");
 
 // Store data un LS
 export function storeInLS(key, data) {
@@ -26,11 +25,7 @@ export function logout() {
 // With timeout specified in .env
 export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
   const url = process.env.REACT_APP_API_URL + "/" + endpoint;
-  // var formData = new FormData();
 
-  // for (const name in data) {
-  //   formData.append(name, data[name]);
-  // }
   var accessToken = readFromLS(process.env.REACT_APP_LS_LOGIN_TOKEN);
   var fetchConfig = {
     method: verb,
@@ -41,9 +36,6 @@ export function accessAPI(verb, endpoint, data, callbackSuccess, callbackFail) {
     },
     body: data,
   };
-  // if (data) {
-  //   fetchConfig.body = formData;
-  // }
   Promise.race([
     // Generate two promies, one with the fecth and the other with the timeout
     // the one that finishes first resolves
