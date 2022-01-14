@@ -151,11 +151,14 @@ export default function Store() {
         </div>
         {loader && <Loader />}
         {!loader && cardsShowing && (
-          <div className="cardsInStore">
-            {cardsShowing.map((card, index) => {
-              return <CardInStore key={index} card={card} />;
-            })}
-          </div>
+          <>
+            <div className="title">{texts.CARDS_AVAILABLE_IN_STORE}</div>
+            <div className="cardsInStore">
+              {cardsShowing.map((card, index) => {
+                return <CardInStore key={index} card={card} />;
+              })}
+            </div>
+          </>
         )}
         {pages && storeData && (
           <div className="paginator">

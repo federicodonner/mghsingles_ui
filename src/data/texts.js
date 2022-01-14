@@ -48,6 +48,7 @@ const texts = {
   SELECT: "Seleccionar",
   CARDS_IN_SALE: "Cartas en la venta",
   FINISH_SALE: "Finalizar venta",
+  CARDS_AVAILABLE_IN_STORE: "Cartas disponibles en la tienda",
 };
 
 module.exports = texts;
