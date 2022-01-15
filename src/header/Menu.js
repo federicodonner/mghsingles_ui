@@ -42,14 +42,28 @@ export default function Menu(props) {
             <div className="label">{texts.MY_ACCOUNT}</div>
           </NavLink>
           {isSuperuser && (
-            <NavLink
-              to="/sell"
-              className={(navData) =>
-                navData.isActive ? "selectedButton menuElement" : "menuElement"
-              }
-            >
-              <div className="label">{texts.SELL_CARDS}</div>
-            </NavLink>
+            <>
+              <NavLink
+                to="/sell"
+                className={(navData) =>
+                  navData.isActive
+                    ? "selectedButton menuElement"
+                    : "menuElement"
+                }
+              >
+                <div className="label">{texts.SELL_CARDS}</div>
+              </NavLink>
+              <NavLink
+                to="/payment"
+                className={(navData) =>
+                  navData.isActive
+                    ? "selectedButton menuElement"
+                    : "menuElement"
+                }
+              >
+                <div className="label">{texts.PAYMENT}</div>
+              </NavLink>
+            </>
           )}
           <div className="menuElement logoutButton">
             <div className="label">

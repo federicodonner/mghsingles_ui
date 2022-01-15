@@ -1,5 +1,4 @@
 import "./cardInCollection.css";
-import texts from "../data/texts";
 export default function SoldCard(props) {
   const saleDate = new Date(props.sale.date * 1000);
   const formattedDate =

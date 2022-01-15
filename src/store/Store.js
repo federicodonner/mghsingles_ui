@@ -167,7 +167,9 @@ export default function Store() {
             <div className="title">{texts.CARDS_AVAILABLE_IN_STORE}</div>
             <div className="cardsInStore">
               {cardsShowing.map((card, index) => {
-                return <CardInStore key={index} card={card} />;
+                return (
+                  <CardInStore key={index} card={card} loggedIn={loggedIn} />
+                );
               })}
             </div>
           </>

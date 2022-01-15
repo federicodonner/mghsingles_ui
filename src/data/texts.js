@@ -1,9 +1,9 @@
 const texts = {
   TAGLINE: "En control de tus finanzas",
-  USER_PLACEHOLDER: "usuario",
-  NAME_PLACEHOLDER: "nombre completo",
-  EMAIL_PLACEHOLDER: "email",
-  PASSWORD_PLACEHOLDER: "contraseña",
+  USER_PLACEHOLDER: "Usuario",
+  NAME_PLACEHOLDER: "Nombre completo",
+  EMAIL_PLACEHOLDER: "Email",
+  PASSWORD_PLACEHOLDER: "Contraseña",
   ENTER: "Ingresar",
   ACCEPT: "Aceptar",
   CANCEL: "Cancelar",
@@ -45,10 +45,19 @@ const texts = {
   I_WANT_IT: "Lo quiero",
   STORE_SEARCH: "Busca en la tienda",
   SELL_CARDS: "Vender",
+  PAYMENT: "Pagar",
   SELECT: "Seleccionar",
   CARDS_IN_SALE: "Cartas en la venta",
   FINISH_SALE: "Finalizar venta",
   CARDS_AVAILABLE_IN_STORE: "Cartas disponibles en la tienda",
+  UPDATE_DETAILS: "Actualiza tus datos",
+  UPDATE_PASSWORD: "Actualiza tu contraseña",
+  CURRENT_PASSWORD: "Contraseña actual",
+  NEW_PASSWORD: "Nueva contraseña",
+  PAYMENT_TITLE: "Registrar un pago",
+  AMMOUNT_PLACEHOLDER: "Monto",
+  SELECT_USER: "Usuario",
+  PAYMENT_PROCESSED: "Pago registrado exitosamente",
 };
 
 module.exports = texts;

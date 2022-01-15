@@ -33,7 +33,9 @@ export default function CardInStore(props) {
             {texts.AVAILABLE}
             {card.quantity}
           </div>
-          <button className="orange">{texts.I_WANT_IT}</button>
+          {props.loggedIn && (
+            <button className="orange">{texts.I_WANT_IT}</button>
+          )}
         </div>
       )}
       <img src={card.image} alt="card" />
