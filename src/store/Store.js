@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Header from "../header/Header";
 import CardInStore from "./CardInStore";
 import Loader from "../loader/Loader";
@@ -18,9 +17,34 @@ export default function Store() {
   const [pages, setPages] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const navigate = useNavigate();
-
   const cardRef = useRef(null);
+
+  // Loads the first page of all the cards available in the store
+  // Separated because it's called from different functions
+  const loadInitialCards = useCallback(() => {
+    accessAPI(
+      "GET",
+      "store/1",
+      null,
+      (response) => {
+        // When the first page is loaded, load the cards
+        // and the store details to display
+        var pages = [];
+        for (var i = 1; i <= response.numberOfPages; i++) {
+          pages.push(i);
+        }
+        setPages(pages);
+        setCardsShowing(response.cards);
+        delete response.cards;
+        setStoreData(response);
+        setLoader(false);
+        setSearchLoader(false);
+      },
+      (response) => {
+        alert(response.message);
+      }
+    );
+  }, []);
 
   // When the component loads, verify if the user is loaded
   useEffect(() => {
@@ -42,13 +66,13 @@ export default function Store() {
           setLoggedIn(false);
           logout();
         } else {
-          navigate("/");
+          console.log("Verify");
         }
       }
     );
 
     loadInitialCards();
-  }, []);
+  }, [loadInitialCards]);
 
   // Function triggered by the paginator buttons
   function loadPage(page) {
@@ -67,7 +91,6 @@ export default function Store() {
         },
         (response) => {
           alert(response.message);
-          navigate("/");
         }
       );
     }
@@ -106,38 +129,9 @@ export default function Store() {
         },
         (response) => {
           alert(response.message);
-          navigate("/");
         }
       );
     }
-  }
-
-  // Loads the first page of all the cards available in the store
-  // Separated because it's called from different functions
-  function loadInitialCards() {
-    accessAPI(
-      "GET",
-      "store/1",
-      null,
-      (response) => {
-        // When the first page is loaded, load the cards
-        // and the store details to display
-        var pages = [];
-        for (var i = 1; i <= response.numberOfPages; i++) {
-          pages.push(i);
-        }
-        setPages(pages);
-        setCardsShowing(response.cards);
-        delete response.cards;
-        setStoreData(response);
-        setLoader(false);
-        setSearchLoader(false);
-      },
-      (response) => {
-        alert(response.message);
-        navigate("/");
-      }
-    );
   }
 
   return (
