@@ -5,13 +5,7 @@ import texts from "../data/texts";
 import { logout, readFromLS } from "../utils/fetchFunctions";
 
 export default function Menu(props) {
-  const [isSuperuser, setIsSuperuser] = useState(false);
   const navigate = useNavigate();
-
-  // On render, verifies that the user is a superuser
-  useEffect(() => {
-    setIsSuperuser(readFromLS(process.env.REACT_APP_LS_SUPERUSER));
-  }, []);
 
   return (
     <>
@@ -41,30 +35,6 @@ export default function Menu(props) {
           >
             <div className="label">{texts.MY_ACCOUNT}</div>
           </NavLink>
-          {isSuperuser && (
-            <>
-              <NavLink
-                to="/sell"
-                className={(navData) =>
-                  navData.isActive
-                    ? "selectedButton menuElement"
-                    : "menuElement"
-                }
-              >
-                <div className="label">{texts.SELL_CARDS}</div>
-              </NavLink>
-              <NavLink
-                to="/payment"
-                className={(navData) =>
-                  navData.isActive
-                    ? "selectedButton menuElement"
-                    : "menuElement"
-                }
-              >
-                <div className="label">{texts.PAYMENT}</div>
-              </NavLink>
-            </>
-          )}
           <div className="menuElement logoutButton">
             <div
               onClick={() => {

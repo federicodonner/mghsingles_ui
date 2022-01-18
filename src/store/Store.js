@@ -55,10 +55,6 @@ export default function Store() {
       (response) => {
         // If the response is 200, means the user is logged in
         setLoggedIn(true);
-        // If the user is a superuser, store it in LS
-        if (response.superuser) {
-          storeInLS(process.env.REACT_APP_LS_SUPERUSER, "1");
-        }
       },
       (response) => {
         // If the user is not logged in, turn off the loader
