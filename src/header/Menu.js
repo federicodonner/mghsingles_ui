@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./menu.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import texts from "../data/texts";
-import { logout, readFromLS } from "../utils/fetchFunctions";
+import { logout } from "../utils/fetchFunctions";
 
 export default function Menu(props) {
   const navigate = useNavigate();

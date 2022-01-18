@@ -3,7 +3,7 @@ import Header from "../header/Header";
 import CardInStore from "./CardInStore";
 import Loader from "../loader/Loader";
 import "./store.css";
-import { accessAPI, storeInLS, logout } from "../utils/fetchFunctions";
+import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 
