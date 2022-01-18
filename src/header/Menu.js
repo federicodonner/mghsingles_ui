@@ -40,6 +40,9 @@ export default function Menu(props) {
               onClick={() => {
                 logout();
                 navigate("/");
+                if (props.logOutHideMenu) {
+                  props.logOutHideMenu();
+                }
               }}
             >
               {texts.LOGOUT}

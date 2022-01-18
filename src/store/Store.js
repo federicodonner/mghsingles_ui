@@ -130,9 +130,20 @@ export default function Store() {
     }
   }
 
+  // Function triggerd from the logout button in the manu to hide the rest of the menu
+  // The Menu component needs the parent to change the prop
+  // In the other sections, it navigates to "/" but in Store it needs to parent to update
+  function logOutHideMenu() {
+    setLoggedIn(false);
+  }
+
   return (
     <div>
-      <Header showMenu={true} loggedIn={loggedIn} />
+      <Header
+        showMenu={true}
+        loggedIn={loggedIn}
+        logOutHideMenu={logOutHideMenu}
+      />
       <div className="content">
         <div className="searchContainer">
           <form onSubmit={findCard}>

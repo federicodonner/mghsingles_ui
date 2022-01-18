@@ -13,7 +13,12 @@ export default function Header(props) {
             <img src={singlesLogo} className="singlesLogo" alt="MGH Singles" />
           </Link>
         </div>
-        {props.showMenu && <Menu loggedIn={props.loggedIn} />}
+        {props.showMenu && (
+          <Menu
+            loggedIn={props.loggedIn}
+            logOutHideMenu={props.logOutHideMenu}
+          />
+        )}
         <div className="mghlogoContainer">
           <span className="by">by</span>
           <img src={mghlogo} className="mghlogo" alt="MGH" />
