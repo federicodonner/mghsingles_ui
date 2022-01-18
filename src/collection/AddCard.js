@@ -99,7 +99,7 @@ export default function AddCard() {
     }
     accessAPI(
       "POST",
-      "collection",
+      "card",
       JSON.stringify({
         scryfallId: selectedVersion.scryfallId,
         quantity: quantityRef.current.value,
