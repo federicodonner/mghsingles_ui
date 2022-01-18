@@ -42,7 +42,6 @@ export default function Store() {
           setLoggedIn(false);
           logout();
         } else {
-          alert(response.message);
           navigate("/");
         }
       }

@@ -1,3 +1,8 @@
 button.updateDetails {
-  margin-bottom: 40px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.detailField {
+  margin-top: 10px;
 }
