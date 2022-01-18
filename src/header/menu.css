@@ -1,7 +1,8 @@
 a,
 a:hover,
 a:active,
-a:visited {
+a:visited,
+.menuElement div {
   text-decoration: none;
   color: white;
   cursor: pointer;

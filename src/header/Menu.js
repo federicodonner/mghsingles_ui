@@ -66,16 +66,13 @@ export default function Menu(props) {
             </>
           )}
           <div className="menuElement logoutButton">
-            <div className="label">
-              <a
-                href=""
-                onClick={() => {
-                  logout();
-                  navigate("/");
-                }}
-              >
-                {texts.LOGOUT}
-              </a>
+            <div
+              onClick={() => {
+                logout();
+                navigate("/");
+              }}
+            >
+              {texts.LOGOUT}
             </div>
           </div>
         </div>
