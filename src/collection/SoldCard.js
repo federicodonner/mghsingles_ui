@@ -19,15 +19,22 @@ export default function SoldCard(props) {
     <div className={containerClassNames}>
       <div className="quantity">{props.sale.quantity}</div>
       <div className="name">{props.sale.name}</div>
-      <div className="set">{props.sale.cardSet.toUpperCase()}</div>
+      <div className="set">{props.sale.cardset.toUpperCase()}</div>
       <div className="language">{props.sale.language}</div>
       <div className="condition">{props.sale.condition}</div>
       <div className="saleDetails">
-        U$S {props.sale.price} (
-        {Math.round(props.sale.price * (1 - props.sale.percent) * 100) / 100}
+        U$S {props.sale.price * props.sale.quantity} (
+        {Math.round(
+          props.sale.price *
+            props.sale.quantity *
+            (1 - props.sale.percent) *
+            100
+        ) / 100}
         {" + "}
-        {Math.round(props.sale.price * props.sale.percent * 100) / 100}){" "}
-        {" el "}
+        {Math.round(
+          props.sale.price * props.sale.quantity * props.sale.percent * 100
+        ) / 100}
+        ) {" el "}
         {formattedDate}
       </div>
     </div>

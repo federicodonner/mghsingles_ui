@@ -51,6 +51,7 @@ const texts = {
   FINISH_SALE: "Finalizar venta",
   CARDS_AVAILABLE_IN_STORE: "Cartas disponibles en la tienda",
   UPDATE_DETAILS: "Actualiza tus datos",
+  UPDATED_DETAILS: "Tus datos han sido actualizados.",
   UPDATE_PASSWORD: "Actualiza tu contraseña",
   CURRENT_PASSWORD: "Contraseña actual",
   NEW_PASSWORD: "Nueva contraseña",

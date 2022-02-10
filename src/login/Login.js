@@ -33,7 +33,7 @@ export default function Login() {
   useEffect(() => {
     accessAPI(
       "GET",
-      "user/me",
+      "player/me",
       null,
       (response) => {
         // If the response is 200, means the user is logged in
@@ -117,7 +117,7 @@ export default function Login() {
     setLoginLoader(true);
     accessAPI(
       "POST",
-      "user",
+      "player",
       JSON.stringify({
         username: createUsernameData,
         name: createNameData,

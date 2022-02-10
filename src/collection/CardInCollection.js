@@ -60,7 +60,7 @@ export default function CardInCollection(props) {
           </span>
         )}
       </div>
-      <div className="set">{props.card.cardSet.toUpperCase()}</div>
+      <div className="set">{props.card.cardset.toUpperCase()}</div>
       <div className="language">{props.card.language}</div>
       <div className="condition">{props.card.condition}</div>
       {!deleteLoader && (

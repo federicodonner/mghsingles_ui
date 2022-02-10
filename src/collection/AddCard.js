@@ -101,7 +101,7 @@ export default function AddCard() {
       "POST",
       "card",
       JSON.stringify({
-        scryfallId: selectedVersion.scryfallId,
+        scryfallId: selectedVersion.scryfallid,
         quantity: quantityRef.current.value,
         condition: conditionRef.current.value,
         language: languageRef.current.value,
