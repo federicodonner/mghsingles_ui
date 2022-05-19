@@ -32,4 +32,3 @@ jobs:
           local-dir: ./build/
           server-dir: mghsingles.federicodonner.com/public_html/
           # dangerous-clean-slate: true
-          dry-run: true
