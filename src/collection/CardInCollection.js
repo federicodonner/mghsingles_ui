@@ -15,9 +15,9 @@ export default function CardInCollection(props) {
   // On the first render, set the classnames depending on the props
   useEffect(() => {
     if (props.showBorder) {
-      setContainerClassNames(containerClassNames + " border");
+      setContainerClassNames('cardInList  border');
     }
-  }, []);
+  }, [props.showBorder]);
 
   function deleteCard() {
     if (
@@ -54,7 +54,7 @@ export default function CardInCollection(props) {
             ? props.card.name
             : props.card.name.split(" // ")[0]}
         </span>
-        {props.card.foil == 1 && (
+        {props.card.foil === 1 && (
           <span>
             <img src={foilIcon} className="foilIcon" alt="foil" />
           </span>
