@@ -4,7 +4,7 @@
   position: relative;
 }
 
-.cardInStore img {
+.cardInStore .cardImg {
   width: 200px;
 }
 
@@ -38,3 +38,31 @@
   margin-right: auto;
   margin-top: 30px;
 }
+
+.priceContainer {
+  position: relative;
+}
+
+.cklogo {
+  width: 29px;
+  position: relative;
+  top: 6px;
+}
+
+.priceNotFound {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: #f16e31;
+  margin-top: 10px;
+}
+
+.priceLoader {
+  width: 40px;
+  display: inline;
+  position: relative;
+  top: 13px;
+}
+
+/* Revisar
+background: linear-gradient(135deg,rgba(222,197,37,0),rgba(222,197,37,0) 1%,rgba(255,8,8,.06) 19%,rgba(239,111,23,.1) 32%,rgba(222,213,37,.23) 45%,rgba(36,222,101,.39) 62%,rgba(47,221,109,.4) 63%,rgba(216,208,239,.39) 79%,rgba(131,123,173,.38) 88%,rgba(136,129,178,.38) 89%,rgba(193,191,234,0));
+*/

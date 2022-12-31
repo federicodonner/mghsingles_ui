@@ -21,7 +21,7 @@ button.search {
   display: inline;
   margin-left: 10px;
   width: 114px;
-  position: absolute;
+  /* position: absolute; */
 }
 
 button.add {

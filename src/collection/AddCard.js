@@ -2,20 +2,23 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./addCard.css";
 import Header from "../header/Header";
+import CardSearchBar from "../cardSearchBar/CardSearchBar";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import CardVersion from "./CardVersion";
 
 export default function AddCard() {
-  const [searchLoader, setSearchLoader] = useState(true);
   const [addLoader, setAddLoader] = useState(false);
+  const [searchReady, setSearchReady] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(false);
   const [conditions, setConditions] = useState(null);
   const [languages, setLanguages] = useState(null);
 
-  const cardRef = useRef(null);
+  // This card counter is used to force an update in the child
+  const [cardCounter, setCardCounter] = useState(0);
+
   const conditionRef = useRef(null);
   const languageRef = useRef(null);
   const foilRef = useRef(null);
@@ -40,49 +43,12 @@ export default function AddCard() {
     );
   }, [navigate]);
 
-  // When the conditions and languages are set, turn off the loader
+  // When the conditions and languages are set, set the flag to turn off the search loader
   useEffect(() => {
     if (conditions && languages) {
-      setSearchLoader(false);
+      setSearchReady(true);
     }
   }, [conditions, languages]);
-
-  // Whenever new search results arrive, turn off the loader
-  useEffect(() => {
-    if (searchResults) {
-      setSearchLoader(false);
-      // Focus and select the text input to make the next search easier
-      cardRef.current.focus();
-      cardRef.current.select();
-    }
-  }, [searchResults]);
-
-  // Function triggered when the search button is pressed
-  function findCard(e) {
-    e.preventDefault();
-    // Verifies that the user entered something
-    if (!cardRef.current.value) {
-      return false;
-    }
-    // Turns on the loader and clears the past search results
-    setSearchLoader(true);
-    setSearchResults(null);
-    accessAPI(
-      "GET",
-      "card/versions/" + cardRef.current.value,
-      null,
-      (response) => {
-        setSearchResults(response);
-      },
-      (response) => {
-        alert(response.message);
-        setSearchLoader(false);
-        // Focus and select the text input to make the next search easier
-        cardRef.current.focus();
-        cardRef.current.select();
-      }
-    );
-  }
 
   // Function triggered when the user selects a version of the card
   function selectVersion(version) {
@@ -93,9 +59,9 @@ export default function AddCard() {
   function addVersion() {
     // Turns on the add card loader
     setAddLoader(true);
-    let foil = "0";
+    let variant = "";
     if (foilRef.current.checked) {
-      foil = "1";
+      variant = "foil";
     }
     accessAPI(
       "POST",
@@ -105,23 +71,25 @@ export default function AddCard() {
         quantity: quantityRef.current.value,
         condition: conditionRef.current.value,
         language: languageRef.current.value,
-        foil: foil,
+        variant: variant,
       }),
       (response) => {
         // Clears the selected version to close the modal
         setSelectedVersion(null);
         setAddLoader(false);
+        setCardCounter(cardCounter + 1);
         // Focus and select the text input to make the next search easier
-        cardRef.current.focus();
-        cardRef.current.select();
+        // cardRef.current.focus();
+        // cardRef.current.select();
       },
       (response) => {
         // Clears the selected version to close the modal
         setSelectedVersion(null);
         setAddLoader(false);
+        setSearchReady(true);
         // Focus and select the text input to make the next search easier
-        cardRef.current.focus();
-        cardRef.current.select();
+        // cardRef.current.focus();
+        // cardRef.current.select();
         alert(response.message);
       }
     );
@@ -131,39 +99,29 @@ export default function AddCard() {
     <div>
       <Header showMenu={true} loggedIn={true} />
       <div className="content">
-        <div className="searchContainer">
-          <form onSubmit={findCard}>
-            <input
-              type="text"
-              ref={cardRef}
-              placeholder={texts.CARD_NAME}
-              disabled={searchLoader}
-              autoFocus
-            />
-          </form>
-          <button className="orange search" onClick={findCard}>
-            {searchLoader && (
-              <img className="loader" src={whiteLoader} alt="loader" />
-            )}
-            {!searchLoader && <span>{texts.SEARCH}</span>}
-          </button>
-        </div>
-        {searchResults && (
-          <>
-            <div>{texts.SELECT_VERSION}</div>
-            <div className="versionContainer">
-              {searchResults.map((version, index) => {
-                return (
-                  <CardVersion
-                    key={index}
-                    version={version}
-                    selectVersion={selectVersion}
-                  />
-                );
-              })}
-            </div>
-          </>
-        )}
+        <CardSearchBar
+          setSearchResults={setSearchResults}
+          searchReady={searchReady}
+          refresh={cardCounter}
+        />
+        {searchResults &&
+          searchResults.cards &&
+          searchResults.cards.length > 0 && (
+            <>
+              <div>{texts.SELECT_VERSION}</div>
+              <div className="versionContainer">
+                {searchResults.cards.map((version, index) => {
+                  return (
+                    <CardVersion
+                      key={index}
+                      version={version}
+                      selectVersion={selectVersion}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
         {selectedVersion && (
           <>
             <div

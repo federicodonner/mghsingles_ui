@@ -1,5 +1,4 @@
 const texts = {
-  TAGLINE: "En control de tus finanzas",
   USER_PLACEHOLDER: "Usuario",
   NAME_PLACEHOLDER: "Nombre completo",
   EMAIL_PLACEHOLDER: "Email",
@@ -10,8 +9,6 @@ const texts = {
   DELETE: "Eliminar",
   CREATE_ACCOUNT: "Crear cuenta",
   FORGOT_PASSWORD: "Olvidé mi contraseña",
-  DISCLAIMER:
-    "En esta primera versión, CASA no utiliza contraseña para sus usuarios. No te preocupes, nadie podrá acceder a tu información sin que le des permiso.",
   API_ERROR:
     "Ocurrió un error inesperado, por favor inéntalo denuevo más tarde.",
   ACTIVE_CARDS: "Cartas activas",
@@ -59,6 +56,11 @@ const texts = {
   AMMOUNT_PLACEHOLDER: "Monto",
   SELECT_USER: "Usuario",
   PAYMENT_PROCESSED: "Pago registrado exitosamente",
+  SELECT_SET: "Seleccione un set para ver sus cartas",
+  CLEAR: "Limpiar",
+  FILTERS: " Filtros",
+  LOADING_PRICE: "Cargando precio",
+  PRICE_NOT_FOUND: "Precio no encontrado",
 };
 
 module.exports = texts;
