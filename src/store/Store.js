@@ -30,8 +30,6 @@ export default function Store() {
         if (response.status > 400 && response.status < 500) {
           setLoggedIn(false);
           logout();
-        } else {
-          console.log("Verify");
         }
       }
     );
@@ -92,7 +90,7 @@ export default function Store() {
           setPages={setPages}
         />
         {loader && <Loader />}
-        {!loader && searchResults.cards && (
+        {!loader && searchResults?.cards && (
           <>
             <div className="title">{texts.CARDS_AVAILABLE_IN_STORE}</div>
             <div className="cardsInStore">

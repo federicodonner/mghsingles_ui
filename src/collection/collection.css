@@ -10,6 +10,11 @@
   color: #19647e;
 }
 
+.cardListContainer .title button {
+  display: inline;
+  margin-left: 10px;
+}
+
 .border {
   border-bottom: 1px solid #f16e31;
 }

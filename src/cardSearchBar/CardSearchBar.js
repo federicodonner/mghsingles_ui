@@ -18,7 +18,7 @@ export default function CardSearchBar(props) {
       "card/sets",
       null,
       (response) => {
-        setCardSets(response.sets);
+        setCardSets(response);
       },
       (response) => {
         alert(texts.API_ERROR);
@@ -28,8 +28,8 @@ export default function CardSearchBar(props) {
 
   // When the conditions and languages are set, turn off the loader
   useEffect(() => {
-    if (cardSets.length) {
-      setSearchLoader(!props.searchReady);
+    if (cardSets && cardSets.length) {
+      setSearchLoader(false);
     }
   }, [cardSets, props.searchReady]);
 
@@ -99,10 +99,10 @@ export default function CardSearchBar(props) {
         `card/set/${setSelectRef.current.value}`,
         null,
         (response) => {
-          console.log(response);
+          props.setSearchResults(response);
         },
-        (response) => {
-          console.log(response);
+        () => {
+          // TODO: surface search failures to the user; they are ignored today.
         }
       );
     }
@@ -188,13 +188,14 @@ export default function CardSearchBar(props) {
             <option value="0" disabled>
               {texts.SELECT_SET}
             </option>
-            {cardSets.map((set) => {
-              return (
-                <option value={set.id} key={set.id}>
-                  {set.cardsetname}
-                </option>
-              );
-            })}
+            {cardSets &&
+              cardSets.map((set) => {
+                return (
+                  <option value={set.cardset} key={set.cardset}>
+                    {set.cardsetname}
+                  </option>
+                );
+              })}
           </select>
         </form>
         <button className="orange search" onClick={clearSet}>

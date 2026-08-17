@@ -1,11 +1,12 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./login/Login";
-import Collection from "./collection/Collection";
+import CollectionSection from "./collection/CollectionSection";
 import AddCard from "./collection/AddCard";
 import Store from "./store/Store";
 import Sales from "./collection/Sales";
 import Account from "./account/Account";
+import Sorter from "./sorter/Sorter";
 
 class Router extends React.Component {
   render() {
@@ -13,8 +14,9 @@ class Router extends React.Component {
       <Routes>
         <Route path="/" element={<Store />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/collection" element={<Collection />} />
-        <Route path="/collection/add" element={<AddCard />} />
+        <Route path="/collection" element={<CollectionSection />} />
+        <Route path="/collection/add/:collectionId" element={<AddCard />} />
+        <Route path="/collection/sorter/:collectionId" element={<Sorter />} />
         <Route path="/sales" element={<Sales />} />
         <Route path="/account" element={<Account />} />
         <Route path="*" element={<Store />} />

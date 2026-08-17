@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./addCard.css";
 import Header from "../header/Header";
 import CardSearchBar from "../cardSearchBar/CardSearchBar";
@@ -25,6 +25,7 @@ export default function AddCard() {
   const quantityRef = useRef(null);
 
   let navigate = useNavigate();
+  let { collectionId } = useParams();
 
   // When the section loads, fetch the possible conditions and languages
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function AddCard() {
     }
     accessAPI(
       "POST",
-      "card",
+      `card/${collectionId}`,
       JSON.stringify({
         scryfallId: selectedVersion.scryfallid,
         quantity: quantityRef.current.value,
