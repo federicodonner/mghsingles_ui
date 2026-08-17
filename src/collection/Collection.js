@@ -27,9 +27,6 @@ export default function Collection(props) {
           <Link to={`add/${collection.id}`}>
             <button className="orange ">{texts.ADD_CARD}</button>
           </Link>
-          <Link to={`sorter/${collection.id}`}>
-            <button className="orange ">{texts.SORT_BINDER}</button>
-          </Link>
         </div>
 
         {collection.card &&

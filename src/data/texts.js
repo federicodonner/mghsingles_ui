@@ -61,7 +61,6 @@ const texts = {
   FILTERS: " Filtros",
   LOADING_PRICE: "Cargando precio",
   PRICE_NOT_FOUND: "Precio no encontrado",
-  SORT_BINDER: "Organizar carpeta",
 };
 
 module.exports = texts;
