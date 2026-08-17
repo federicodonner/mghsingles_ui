@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./cardInCollection.css";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
+import { isFoil } from "../utils/finishes";
 import orangeLoader from "../images/orangeLoader.svg";
 import foilIcon from "../images/foilIcon.svg";
 
@@ -53,7 +54,7 @@ export default function CardInCollection(props) {
           {/* Split cards ("Front // Back") show only the front face. */}
           {(props.card.cardgeneral?.name ?? "").split(" // ")[0]}
         </span>
-        {props.card.variant === "foil" && (
+        {isFoil(props.card.variant) && (
           <span>
             <img src={foilIcon} className="foilIcon" alt="foil" />
           </span>

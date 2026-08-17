@@ -4,6 +4,7 @@ import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
+import { isFoil, finishLabel } from "../utils/finishes";
 import "./orders.css";
 
 // A date arrives as unix seconds, not milliseconds.
@@ -105,8 +106,8 @@ export default function Orders() {
                     </span>
                     <span className="lineMeta">{line.condition}</span>
                     <span className="lineMeta">{line.language}</span>
-                    {line.variant === "foil" && (
-                      <span className="lineMeta">foil</span>
+                    {isFoil(line.variant) && (
+                      <span className="lineMeta">{finishLabel(line.variant)}</span>
                     )}
                     <span className="linePrice">U$S {line.price}</span>
                   </div>

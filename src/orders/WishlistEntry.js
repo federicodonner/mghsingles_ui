@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
+import { finishLabel, isFoil } from "../utils/finishes";
 
 // One wishlist row, with an expandable editor for its three constraints.
 //
@@ -8,7 +9,11 @@ import { accessAPI } from "../utils/fetchFunctions";
 // a customer can pin three acceptable printings while still taking any language,
 // or accept any printing in only English or Spanish.
 export default function WishlistEntry(props) {
-  const { entry, conditions, languages, variants, onChanged, onRemove } = props;
+  const { entry, conditions, languages, onChanged, onRemove } = props;
+
+  // Only offer finishes this card exists in at all — no "foil" for a card that
+  // has no foil printing. The API computes this across every printing.
+  const finishOptions = entry.availableFinishes ?? [];
 
   const [open, setOpen] = useState(false);
   const [versions, setVersions] = useState(null); // printings, loaded lazily
@@ -88,13 +93,9 @@ export default function WishlistEntry(props) {
   function countSummary(picked) {
     return picked.length ? `${picked.length}` : texts.WISHLIST_ANY;
   }
-  // Finishes are bare strings from the API rather than {id, name} rows, so they
-  // are labelled from texts with the raw value as a fallback for anything new.
-  const variantLabel = (variant) =>
-    texts[`VARIANT_${variant.replace(/-/g, "_")}`] ?? variant;
   function variantSummary(picked) {
     if (!picked.length) return texts.WISHLIST_ANY;
-    return picked.map(variantLabel).join(", ");
+    return picked.map(finishLabel).join(", ");
   }
 
   return (
@@ -135,39 +136,59 @@ export default function WishlistEntry(props) {
         <div className="constraintEditor">
           <div className="constraintHint">{texts.WISHLIST_ANY_HINT}</div>
 
-          <div className="constraintColumns">
-            <div className="constraintColumn versions">
+          <div className="constraintColumn versions">
               <div className="constraintTitle">{texts.WISHLIST_VERSIONS}</div>
               {loadingVersions && (
                 <div className="constraintLoading">
                   {texts.WISHLIST_LOADING_VERSIONS}
                 </div>
               )}
-              {versions &&
-                versions.map((version) => (
-                  <label className="constraintOption" key={version.scryfallid}>
-                    <input
-                      type="checkbox"
-                      checked={pickedVersions.includes(version.scryfallid)}
-                      onChange={() =>
-                        toggle(
-                          pickedVersions,
-                          setPickedVersions,
-                          version.scryfallid
-                        )
-                      }
-                    />
-                    <span className="versionSet">
-                      {(version.cardsetcode ?? "").toUpperCase()}
-                    </span>
-                    <span className="versionNumber">
-                      #{version.collectornumber}
-                    </span>
-                    <span className="versionName">{version.cardsetname}</span>
-                  </label>
-                ))}
-            </div>
+              {/* Picked by eye: printings differ by art, and an etched
+                  printing has its own collector number and image, so it shows
+                  up here as its own tile. */}
+              <div className="versionGrid">
+                {versions &&
+                  versions.map((version) => {
+                    const picked = pickedVersions.includes(version.scryfallid);
+                    return (
+                      <div
+                        className={picked ? "versionTile picked" : "versionTile"}
+                        key={version.scryfallid}
+                        title={`${version.cardsetname} #${version.collectornumber}`}
+                        onClick={() =>
+                          toggle(
+                            pickedVersions,
+                            setPickedVersions,
+                            version.scryfallid
+                          )
+                        }
+                      >
+                        {version.image ? (
+                          <img src={version.image} alt={version.cardsetname} />
+                        ) : (
+                          <span className="versionNoImage">
+                            {version.cardsetname}
+                          </span>
+                        )}
+                        <span className="versionCaption">
+                          {(version.cardsetcode ?? "").toUpperCase()} #
+                          {version.collectornumber}
+                        </span>
+                        {/* Flag the finishes that are unique to this printing,
+                            since that is why it exists separately. */}
+                        {(version.finishes ?? []).some(isFoil) &&
+                          !(version.finishes ?? []).includes("nonfoil") && (
+                            <span className="versionFinish">
+                              {version.finishes.map(finishLabel).join(" / ")}
+                            </span>
+                          )}
+                      </div>
+                    );
+                  })}
+              </div>
+          </div>
 
+          <div className="constraintColumns">
             <div className="constraintColumn">
               <div className="constraintTitle">{texts.WISHLIST_LANGUAGES}</div>
               {languages.map((language) => (
@@ -202,18 +223,23 @@ export default function WishlistEntry(props) {
 
             <div className="constraintColumn">
               <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
-              {variants.map((variant) => (
-                <label className="constraintOption" key={variant}>
+              {finishOptions.map((finish) => (
+                <label className="constraintOption" key={finish}>
                   <input
                     type="checkbox"
-                    checked={pickedVariants.includes(variant)}
+                    checked={pickedVariants.includes(finish)}
                     onChange={() =>
-                      toggle(pickedVariants, setPickedVariants, variant)
+                      toggle(pickedVariants, setPickedVariants, finish)
                     }
                   />
-                  <span>{variantLabel(variant)}</span>
+                  <span>{finishLabel(finish)}</span>
                 </label>
               ))}
+              {finishOptions.length === 1 && (
+                <div className="onlyFinish">
+                  {texts.ONLY_FINISH} {finishLabel(finishOptions[0])}
+                </div>
+              )}
             </div>
           </div>
 
@@ -231,7 +257,9 @@ export default function WishlistEntry(props) {
           </span>
           <span className="lineMeta">{card.condition}</span>
           <span className="lineMeta">{card.language}</span>
-          {card.variant === "foil" && <span className="lineMeta">foil</span>}
+          {isFoil(card.variant) && (
+            <span className="lineMeta">{finishLabel(card.variant)}</span>
+          )}
           <span className="lineMeta">
             {texts.AVAILABLE_NOW}: {card.available}
           </span>

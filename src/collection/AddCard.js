@@ -4,6 +4,7 @@ import "./addCard.css";
 import Header from "../header/Header";
 import CardSearchBar from "../cardSearchBar/CardSearchBar";
 import { accessAPI, logout } from "../utils/fetchFunctions";
+import { finishesFor, finishLabel, DEFAULT_FINISH } from "../utils/finishes";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import CardVersion from "./CardVersion";
@@ -13,6 +14,8 @@ export default function AddCard() {
   const [searchReady, setSearchReady] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(false);
+  // Which finish of the selected printing is being added.
+  const [selectedFinish, setSelectedFinish] = useState(DEFAULT_FINISH);
   const [conditions, setConditions] = useState(null);
   const [languages, setLanguages] = useState(null);
 
@@ -21,7 +24,6 @@ export default function AddCard() {
 
   const conditionRef = useRef(null);
   const languageRef = useRef(null);
-  const foilRef = useRef(null);
   const quantityRef = useRef(null);
 
   let navigate = useNavigate();
@@ -54,16 +56,17 @@ export default function AddCard() {
   // Function triggered when the user selects a version of the card
   function selectVersion(version) {
     setSelectedVersion(version);
+    // Reset to the printing's first available finish — the previous choice may
+    // not even exist for this one.
+    setSelectedFinish(finishesFor(version)[0] ?? DEFAULT_FINISH);
   }
 
   // Function triggered when the user accepts the modal
   function addVersion() {
     // Turns on the add card loader
     setAddLoader(true);
-    let variant = "";
-    if (foilRef.current.checked) {
-      variant = "foil";
-    }
+    // The printing decides what is possible; default to its only finish.
+    const variant = selectedFinish ?? finishesFor(selectedVersion)[0];
     accessAPI(
       "POST",
       `card/${collectionId}`,
@@ -163,14 +166,29 @@ export default function AddCard() {
                       })}
                     </select>
                   </div>
-                  <div>
-                    <input
-                      type="checkbox"
-                      id="foil"
-                      value="foil"
-                      ref={foilRef}
-                    />
-                    <label>Foil</label>
+                  <div className="finishPicker">
+                    {/* Offered finishes come from THIS printing. Half of all
+                        printings exist in only one, and a single option is
+                        stated rather than presented as a choice. */}
+                    {finishesFor(selectedVersion).length === 1 && (
+                      <span className="onlyFinish">
+                        {texts.ONLY_FINISH}{" "}
+                        {finishLabel(finishesFor(selectedVersion)[0])}
+                      </span>
+                    )}
+                    {finishesFor(selectedVersion).length > 1 &&
+                      finishesFor(selectedVersion).map((finish) => (
+                        <label className="finishOption" key={finish}>
+                          <input
+                            type="radio"
+                            name="finish"
+                            value={finish}
+                            checked={selectedFinish === finish}
+                            onChange={() => setSelectedFinish(finish)}
+                          />
+                          <span>{finishLabel(finish)}</span>
+                        </label>
+                      ))}
                   </div>
                 </div>
               </div>

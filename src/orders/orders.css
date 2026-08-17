@@ -233,11 +233,77 @@ button.small {
    pushing the rest of the page down.
    It must not GROW, or it eats the slack and pushes the fourth short column
    onto its own row. */
+/* Versions take the full width: they are picture tiles, not a checkbox list,
+   and the three short categories read better in a row beneath them. */
 .constraintColumn.versions {
-  flex: 0 1 340px;
-  max-height: 260px;
+  width: 100%;
+  max-height: 300px;
   overflow-y: auto;
   padding-right: 8px;
+  margin-bottom: 16px;
+}
+
+/* Printings are picked by eye — the art is the distinguishing feature, and an
+   etched printing has its own image entirely. */
+.versionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 84px);
+  gap: 10px;
+}
+
+.versionTile {
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  padding: 2px;
+  text-align: center;
+}
+
+.versionTile:hover {
+  border-color: #f0c0a0;
+}
+
+.versionTile.picked {
+  border-color: #e8722c;
+  background: #fdf1e8;
+}
+
+.versionTile img {
+  width: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.versionNoImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 110px;
+  font-size: 0.65em;
+  background: #f2f2f2;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.versionCaption {
+  display: block;
+  font-size: 0.7em;
+  color: #777;
+  margin-top: 2px;
+}
+
+/* Called out only when a printing exists solely in a foil finish, since that
+   is the reason it is a separate tile at all. */
+.versionFinish {
+  display: block;
+  font-size: 0.65em;
+  color: #e8722c;
+}
+
+.onlyFinish {
+  color: #777;
+  font-size: 0.85em;
+  margin-top: 4px;
 }
 
 .constraintTitle {

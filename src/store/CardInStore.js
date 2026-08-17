@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./cardInStore.css";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
+import { isFoil, finishLabel } from "../utils/finishes";
 
 export default function CardInStore(props) {
   // Load the version details in state
@@ -45,7 +46,9 @@ export default function CardInStore(props) {
           <div className="condition">
             {card.condition}
             {/* Printing is a variant string now, not a foil flag. */}
-            {card.variant === "foil" && <span className="foil"> - foil</span>}
+            {isFoil(card.variant) && (
+              <span className="foil"> - {finishLabel(card.variant)}</span>
+            )}
           </div>
           <div className="language">{card.language}</div>
           <div className="quantity">
