@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./menu.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import texts from "../data/texts";
-import { logout } from "../utils/fetchFunctions";
+import { logout, accessAPI } from "../utils/fetchFunctions";
 
 export default function Menu(props) {
   const navigate = useNavigate();
+
+  // Unread count for the Pedidos badge. Fetched here because the menu is on
+  // every page, so the customer learns about a set-aside card wherever they are.
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (!props.loggedIn) return;
+    accessAPI(
+      "GET",
+      "notification",
+      null,
+      (response) => setUnread(response.unread ?? 0),
+      () => setUnread(0)
+    );
+  }, [props.loggedIn]);
 
   return (
     <>
@@ -25,7 +39,10 @@ export default function Menu(props) {
               navData.isActive ? "selectedButton menuElement" : "menuElement"
             }
           >
-            <div className="label">{texts.ORDERS}</div>
+            <div className="label">
+              {texts.ORDERS}
+              {unread > 0 && <span className="menuBadge">{unread}</span>}
+            </div>
           </NavLink>
           <NavLink
             to="/wishlist"

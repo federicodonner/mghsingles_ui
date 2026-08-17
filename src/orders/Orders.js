@@ -23,6 +23,7 @@ function formatDate(seconds) {
 export default function Orders() {
   const [loader, setLoader] = useState(true);
   const [orders, setOrders] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const navigate = useNavigate();
 
@@ -45,8 +46,30 @@ export default function Orders() {
 
   useEffect(() => {
     load();
+    accessAPI(
+      "GET",
+      "notification",
+      null,
+      (response) => {
+        setNotifications(response.items ?? []);
+        // Opening this page IS reading them: everything they announce is on
+        // the screen underneath.
+        if (response.unread > 0) accessAPI("POST", "notification/read", null, () => {}, () => {});
+      },
+      () => setNotifications([])
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function dismissNotification(item) {
+    accessAPI(
+      "DELETE",
+      `notification/${item.id}`,
+      null,
+      () => setNotifications((list) => list.filter((n) => n.id !== item.id)),
+      (response) => alert(response.message)
+    );
+  }
 
   function cancelOrder(order) {
     if (!window.confirm(texts.CONFIRM_CANCEL_ORDER)) return;
@@ -59,16 +82,44 @@ export default function Orders() {
     );
   }
 
+  // Pending orders are the pick-up list; everything else is history.
+  const pending = orders.filter((order) => order.status === "pending");
+  const closed = orders.filter((order) => order.status !== "pending");
+
   return (
     <div>
       <Header showMenu={true} loggedIn={true} />
       {loader && <Loader color="orange" />}
       {!loader && (
         <div className="ordersContainer">
-          <div className="title">{texts.MY_ORDERS}</div>
-          {!orders.length && <div className="emptyState">{texts.NO_ORDERS}</div>}
+          {/* Anything the shop set aside is announced here, because the
+              customer has no other way to find out. */}
+          {notifications.map((item) => (
+            <div className="notice" key={item.id}>
+              <span className="noticeText">
+                {item.kind === "wishlist_withdrawal_ready"
+                  ? texts.NOTIF_withdrawal
+                  : texts.NOTIF_purchase}
+                : <strong>{item.cardname}</strong>
+                {item.cardsetcode && ` (${item.cardsetcode.toUpperCase()})`}
+                {item.kind === "wishlist_withdrawal_ready" &&
+                  ` — ${texts.NOTIF_NO_CHARGE}`}
+              </span>
+              <button
+                className="orange small"
+                onClick={() => dismissNotification(item)}
+              >
+                {texts.NOTIF_DISMISS}
+              </button>
+            </div>
+          ))}
 
-          {orders.map((order) => (
+          <div className="title">{texts.TO_PICK_UP}</div>
+          <div className="pickupExplain">{texts.PICKUP_EXPLAIN}</div>
+          {!pending.length && (
+            <div className="emptyState">{texts.NOTHING_TO_PICK_UP}</div>
+          )}
+          {pending.map((order) => (
             <div className={`orderCard ${order.status}`} key={order.id}>
               <div className="orderHeader">
                 <span className={`orderStatus ${order.status}`}>
@@ -109,16 +160,62 @@ export default function Orders() {
                     {isFoil(line.variant) && (
                       <span className="lineMeta">{finishLabel(line.variant)}</span>
                     )}
-                    <span className="linePrice">U$S {line.price}</span>
+                    <span className="linePrice">
+                      {line.kind === "withdrawal"
+                        ? texts.LINE_FREE
+                        : `U$S ${line.price}`}
+                    </span>
                   </div>
                 ))}
               </div>
 
               {order.status === "pending" && (
-                <div className="pickupNote">{texts.PICKUP_NOTE}</div>
+                <div className="pickupNote">
+                  {/* A bag of nothing but the customer's own cards has nothing
+                      to pay for, so do not tell them to pay. */}
+                  {order.lines.every((line) => line.kind === "withdrawal")
+                    ? texts.PICKUP_NOTE_FREE
+                    : texts.PICKUP_NOTE}
+                </div>
               )}
             </div>
           ))}
+
+          {/* Closed orders are history, not something to act on. */}
+          {closed.length > 0 && (
+            <>
+              <div className="title historyTitle">{texts.ORDER_HISTORY}</div>
+              {closed.map((order) => (
+                <div className={`orderCard ${order.status}`} key={order.id}>
+                  <div className="orderHeader">
+                    <span className={`orderStatus ${order.status}`}>
+                      {texts[`ORDER_STATUS_${order.status}`] ?? order.status}
+                    </span>
+                    <span className="orderDate">{formatDate(order.created)}</span>
+                    <span className="orderTotal">
+                      {texts.ORDER_TOTAL} U$S {order.total}
+                    </span>
+                  </div>
+                  <div className="orderLines">
+                    {order.lines.map((line) => (
+                      <div className="orderLine" key={line.id}>
+                        <span className="lineQuantity">{line.quantity}</span>
+                        <span className="lineName">{line.name}</span>
+                        <span className="lineSet">
+                          {(line.cardsetcode ?? "").toUpperCase()}
+                        </span>
+                        <span className="linePrice">
+                          {line.kind === "withdrawal"
+                            ? texts.LINE_FREE
+                            : `U$S ${line.price}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>

@@ -349,3 +349,29 @@ button.small {
   color: #b06a3b;
   font-size: 0.85em;
 }
+
+/* ---- set-aside notices ----------------------------------------------- */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fdf1e8;
+  border: 1px solid #f0c0a0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.noticeText {
+  flex: 1 1 auto;
+}
+
+.pickupExplain {
+  color: #777;
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.historyTitle {
+  margin-top: 32px;
+}
