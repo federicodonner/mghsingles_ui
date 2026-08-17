@@ -17,6 +17,7 @@ export default function Wishlist() {
   // they are fetched once here rather than per row.
   const [conditions, setConditions] = useState([]);
   const [languages, setLanguages] = useState([]);
+  const [variants, setVariants] = useState([]);
   const nameRef = useRef(null);
 
   const navigate = useNavigate();
@@ -47,10 +48,12 @@ export default function Wishlist() {
       (response) => {
         setConditions(response.conditions ?? []);
         setLanguages(response.languages ?? []);
+        setVariants(response.variants ?? []);
       },
       () => {
         setConditions([]);
         setLanguages([]);
+        setVariants([]);
       }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,6 +114,7 @@ export default function Wishlist() {
               entry={entry}
               conditions={conditions}
               languages={languages}
+              variants={variants}
               onChanged={load}
               onRemove={removeEntry}
             />

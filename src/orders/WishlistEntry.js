@@ -8,7 +8,7 @@ import { accessAPI } from "../utils/fetchFunctions";
 // a customer can pin three acceptable printings while still taking any language,
 // or accept any printing in only English or Spanish.
 export default function WishlistEntry(props) {
-  const { entry, conditions, languages, onChanged, onRemove } = props;
+  const { entry, conditions, languages, variants, onChanged, onRemove } = props;
 
   const [open, setOpen] = useState(false);
   const [versions, setVersions] = useState(null); // printings, loaded lazily
@@ -19,6 +19,7 @@ export default function WishlistEntry(props) {
   const [pickedVersions, setPickedVersions] = useState(entry.versions);
   const [pickedLanguages, setPickedLanguages] = useState(entry.languageids);
   const [pickedConditions, setPickedConditions] = useState(entry.conditionids);
+  const [pickedVariants, setPickedVariants] = useState(entry.variants);
 
   function toggleOpen() {
     const next = !open;
@@ -60,6 +61,7 @@ export default function WishlistEntry(props) {
         versions: pickedVersions,
         languageids: pickedLanguages,
         conditionids: pickedConditions,
+        variants: pickedVariants,
       },
       () => {
         setSaving(false);
@@ -85,6 +87,14 @@ export default function WishlistEntry(props) {
   }
   function countSummary(picked) {
     return picked.length ? `${picked.length}` : texts.WISHLIST_ANY;
+  }
+  // Finishes are bare strings from the API rather than {id, name} rows, so they
+  // are labelled from texts with the raw value as a fallback for anything new.
+  const variantLabel = (variant) =>
+    texts[`VARIANT_${variant.replace(/-/g, "_")}`] ?? variant;
+  function variantSummary(picked) {
+    if (!picked.length) return texts.WISHLIST_ANY;
+    return picked.map(variantLabel).join(", ");
   }
 
   return (
@@ -115,6 +125,9 @@ export default function WishlistEntry(props) {
         <span>
           {texts.WISHLIST_GRADES}:{" "}
           {namedSummary(entry.conditionids, conditions)}
+        </span>
+        <span>
+          {texts.WISHLIST_FINISHES}: {variantSummary(entry.variants)}
         </span>
       </div>
 
@@ -183,6 +196,22 @@ export default function WishlistEntry(props) {
                     }
                   />
                   <span>{condition.name}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="constraintColumn">
+              <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
+              {variants.map((variant) => (
+                <label className="constraintOption" key={variant}>
+                  <input
+                    type="checkbox"
+                    checked={pickedVariants.includes(variant)}
+                    onChange={() =>
+                      toggle(pickedVariants, setPickedVariants, variant)
+                    }
+                  />
+                  <span>{variantLabel(variant)}</span>
                 </label>
               ))}
             </div>
