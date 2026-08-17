@@ -8,6 +8,7 @@ import Sales from "./collection/Sales";
 import Account from "./account/Account";
 import Orders from "./orders/Orders";
 import Wishlist from "./orders/Wishlist";
+import MyStorage from "./storage/MyStorage";
 
 class Router extends React.Component {
   render() {
@@ -21,6 +22,7 @@ class Router extends React.Component {
         <Route path="/account" element={<Account />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/mystorage" element={<MyStorage />} />
         <Route path="*" element={<Store />} />
       </Routes>
     );

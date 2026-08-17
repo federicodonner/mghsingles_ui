@@ -7,7 +7,7 @@ description: Build, run and drive the mghsingles customer storefront UI headless
 
 Create React App 5 + React 17 + react-router 6. Spanish-language MTG singles
 storefront. Talks to `mghsingles_api` via `REACT_APP_API_URL` (dev default
-`http://localhost:3001`).
+`http://localhost:3101`).
 
 The agent path is `.claude/skills/run-mghsingles-customer/driver.mjs`: a
 headless-Chrome REPL that reads one command per line on stdin, so a whole flow
@@ -114,7 +114,7 @@ npm start
 ```
 
 Same `react-scripts start` as above, but with CRA's defaults: opens a real
-browser at `http://localhost:3000` and expects the API on `:3001` (from
+browser at `http://localhost:3000` and expects the API on `:3101` (from
 `.env.development`). Useless headless — and it fails outright if 3000 is taken,
 which is why the agent path pins `PORT` and `BROWSER=none`.
 
@@ -135,6 +135,25 @@ EOF
 ```
 
 ## Gotchas
+
+- **`/mystorage` is the customer's own binders and boxes** (`src/storage/`,
+  menu label "Contenedores"). It is the customer half of the container
+  lifecycle: they create one (it starts `released`, in their hands), announce
+  they are bringing it in (`returning`), and ask for one back (`retired`). The
+  shop makes the other two moves from the admin app. The page draws its buttons
+  from the `cando` array the API returns for each container rather than deciding
+  locally which move is legal — if a button is missing, look at `cando` in the
+  response before looking at the component.
+
+  Retiring pops a `confirm` and then, if any copies are already in a buyer's
+  pick-up bag, an `alert` saying how many stay behind. When driving it headless,
+  stub both first or the click appears to do nothing:
+
+  ```
+  eval window.confirm = () => true; window.__alerts = []; window.alert = (m) => window.__alerts.push(m); 'ok'
+  clicktext Pedir que me lo devuelvan
+  eval window.__alerts
+  ```
 
 - **`ls` before you write selectors.** Buttons here are `button.login`,
   `button.create`, `button.search` — generic class names reused across pages,

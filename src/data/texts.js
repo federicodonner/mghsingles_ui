@@ -112,6 +112,35 @@ const texts = {
   WISHLIST_EXCLUDED_1: "Hay ",
   WISHLIST_EXCLUDED_2: " en la tienda que no coinciden con tus preferencias.",
   WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
+
+  // Binders and boxes the customer owns. The lifecycle mirrors
+  // services/storageState.js in the API.
+  MY_STORAGE: "Contenedores",
+  MY_STORAGE_TITLE: "Mis carpetas y cajas",
+  NO_STORAGE: "Todavía no tenés ninguna carpeta ni caja.",
+  NEW_STORAGE: "Nuevo contenedor",
+  STORAGE_NAME: "Nombre",
+  BINDER: "Carpeta",
+  SORTED_BOX: "Caja ordenada",
+  UNSORTED_BOX: "Caja sin ordenar",
+  CREATE: "Crear",
+  CARDS: "cartas",
+  RENAME: "Renombrar",
+  DELETE: "Eliminar",
+  STATE_FOR_SALE: "En la tienda, en venta",
+  STATE_RETIRED: "Pediste que te lo devuelvan",
+  STATE_RELEASED: "Lo tenés vos",
+  STATE_RETURNING: "Lo estás llevando a la tienda",
+  DO_RETIRE: "Pedir que me lo devuelvan",
+  DO_RETURN: "Llevarlo a la tienda",
+  RETIRE_EXPLAIN:
+    "Sus cartas dejan de estar a la venta en cuanto lo pedís, aunque todavía esté en la tienda.",
+  RETIRED_COMMITTED_1: "Quedan ",
+  RETIRED_COMMITTED_2:
+    " carta(s) apartadas para un pedido; esas ya están comprometidas y se quedan en la tienda.",
+  CONFIRM_DELETE_STORAGE: "¿Eliminar este contenedor?",
+  STORAGE_LOCKED:
+    "Sólo podés reordenarlo mientras lo tengas vos.",
 };
 
 module.exports = texts;
