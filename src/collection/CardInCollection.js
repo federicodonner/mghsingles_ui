@@ -23,7 +23,7 @@ export default function CardInCollection(props) {
     if (
       window.confirm(
         texts.CONFIRM_DELETE_CARD_START +
-          props.card.name +
+          (props.card.cardgeneral?.name ?? "") +
           texts.CONFIRM_DELETE_CARD_END
       )
     ) {
@@ -50,9 +50,8 @@ export default function CardInCollection(props) {
       <div className="quantity">{props.card.quantity}</div>
       <div className="name">
         <span>
-          {props.card.name.indexOf(" // ") === -1
-            ? props.card.name
-            : props.card.name.split(" // ")[0]}
+          {/* Split cards ("Front // Back") show only the front face. */}
+          {(props.card.cardgeneral?.name ?? "").split(" // ")[0]}
         </span>
         {props.card.variant === "foil" && (
           <span>
@@ -60,7 +59,10 @@ export default function CardInCollection(props) {
           </span>
         )}
       </div>
-      <div className="set">{props.card.cardset.toUpperCase()}</div>
+      {/* The set code column is `cardsetcode`; `cardset` is the relation. */}
+      <div className="set">
+        {(props.card.cardgeneral?.cardsetcode ?? "").toUpperCase()}
+      </div>
       <div className="language">{props.card.language}</div>
       <div className="condition">{props.card.condition}</div>
       {!deleteLoader && (

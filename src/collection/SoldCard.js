@@ -1,11 +1,13 @@
 import "./cardInCollection.css";
 export default function SoldCard(props) {
   const saleDate = new Date(props.sale.date * 1000);
+  // getMonth() is zero-based. The +1 must be parenthesised: inside a string
+  // concatenation chain it otherwise appends "1" rather than adding, which
+  // rendered July as month 71.
   const formattedDate =
-    saleDate.getDate() +
+    String(saleDate.getDate()).padStart(2, "0") +
     "/" +
-    saleDate.getMonth() +
-    1 +
+    String(saleDate.getMonth() + 1).padStart(2, "0") +
     "/" +
     saleDate.getFullYear();
 
@@ -19,7 +21,8 @@ export default function SoldCard(props) {
     <div className={containerClassNames}>
       <div className="quantity">{props.sale.quantity}</div>
       <div className="name">{props.sale.name}</div>
-      <div className="set">{props.sale.cardset.toUpperCase()}</div>
+      {/* The set code column is `cardsetcode`; `cardset` is the relation. */}
+      <div className="set">{(props.sale.cardsetcode ?? "").toUpperCase()}</div>
       <div className="language">{props.sale.language}</div>
       <div className="condition">{props.sale.condition}</div>
       <div className="saleDetails">
