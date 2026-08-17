@@ -4,6 +4,7 @@ import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
+import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
 
 // Entries are card names, not printings — so one entry covers every printing
@@ -12,6 +13,10 @@ import "./orders.css";
 export default function Wishlist() {
   const [loader, setLoader] = useState(true);
   const [entries, setEntries] = useState([]);
+  // The condition and language lists are shared by every entry's editor, so
+  // they are fetched once here rather than per row.
+  const [conditions, setConditions] = useState([]);
+  const [languages, setLanguages] = useState([]);
   const nameRef = useRef(null);
 
   const navigate = useNavigate();
@@ -35,6 +40,19 @@ export default function Wishlist() {
 
   useEffect(() => {
     load();
+    accessAPI(
+      "GET",
+      "card/modifiers",
+      null,
+      (response) => {
+        setConditions(response.conditions ?? []);
+        setLanguages(response.languages ?? []);
+      },
+      () => {
+        setConditions([]);
+        setLanguages([]);
+      }
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -88,44 +106,14 @@ export default function Wishlist() {
 
         {!loader &&
           entries.map((entry) => (
-            <div className="wishlistRow" key={entry.id}>
-              <div className="wishlistHead">
-                <span className="wishlistName">{entry.name}</span>
-                <span
-                  className={
-                    entry.inStock.length ? "stockBadge in" : "stockBadge out"
-                  }
-                >
-                  {entry.inStock.length ? texts.IN_STOCK_NOW : texts.NOT_IN_STOCK}
-                </span>
-                <button
-                  className="orange small"
-                  onClick={() => removeEntry(entry)}
-                >
-                  {texts.DELETE}
-                </button>
-              </div>
-
-              {/* What is actually purchasable right now for this name. */}
-              {entry.inStock.map((card) => (
-                <div className="wishlistStock" key={card.cardid}>
-                  <span className="lineSet">
-                    {(card.cardsetcode ?? "").toUpperCase()}
-                  </span>
-                  <span className="lineMeta">{card.condition}</span>
-                  <span className="lineMeta">{card.language}</span>
-                  {card.variant === "foil" && (
-                    <span className="lineMeta">foil</span>
-                  )}
-                  <span className="lineMeta">
-                    {texts.AVAILABLE_NOW}: {card.available}
-                  </span>
-                  {card.price !== null && (
-                    <span className="linePrice">U$S {card.price}</span>
-                  )}
-                </div>
-              ))}
-            </div>
+            <WishlistEntry
+              key={entry.id}
+              entry={entry}
+              conditions={conditions}
+              languages={languages}
+              onChanged={load}
+              onRemove={removeEntry}
+            />
           ))}
       </div>
     </div>

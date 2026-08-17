@@ -84,6 +84,19 @@ const texts = {
   AVAILABLE_NOW: "Disponibles",
   RESERVED_BY_OTHERS: "reservadas",
   PICKUP_NOTE: "Pagas y retiras en la tienda.",
+  WISHLIST_ANY: "Cualquiera",
+  WISHLIST_VERSIONS: "Versiones",
+  WISHLIST_LANGUAGES: "Idiomas",
+  WISHLIST_GRADES: "Estados",
+  WISHLIST_EDIT: "Preferencias",
+  WISHLIST_CLOSE: "Cerrar",
+  WISHLIST_SAVE: "Guardar preferencias",
+  WISHLIST_SAVED: "Preferencias guardadas.",
+  WISHLIST_ANY_HINT:
+    "Si no marcas nada en una categoría, aceptas cualquiera.",
+  WISHLIST_EXCLUDED_1: "Hay ",
+  WISHLIST_EXCLUDED_2: " en la tienda que no coinciden con tus preferencias.",
+  WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
 };
 
 module.exports = texts;
