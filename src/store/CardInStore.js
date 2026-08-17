@@ -1,68 +1,95 @@
 import React, { useState } from "react";
 import "./cardInStore.css";
 import texts from "../data/texts";
-import cklogo from "../images/cklogo.svg";
-import whiteLoaderImg from "../images/whiteLoader.svg";
+import { accessAPI } from "../utils/fetchFunctions";
 
 export default function CardInStore(props) {
   // Load the version details in state
   const [showingDetails, setShowingDetails] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [reserving, setReserving] = useState(false);
 
-  function mouseRollOverIn() {
-    setShowingDetails(true);
-  }
+  const card = props.card;
+  // `available` is stock minus what other customers are holding; fall back to
+  // quantity for any caller that has not been updated to send it.
+  const available = card.available ?? card.quantity ?? 0;
 
-  function mouseRollOverOut() {
-    setShowingDetails(false);
+  function reserve() {
+    setReserving(true);
+    accessAPI(
+      "POST",
+      "order",
+      { lines: [{ cardid: card.id, quantity }] },
+      () => {
+        setReserving(false);
+        alert(texts.RESERVED_OK);
+        if (props.onReserved) props.onReserved();
+      },
+      (response) => {
+        setReserving(false);
+        alert(response.message);
+      }
+    );
   }
 
   return (
     <div
       className="cardInStore"
-      onMouseEnter={mouseRollOverIn}
-      onMouseLeave={mouseRollOverOut}
+      onMouseEnter={() => setShowingDetails(true)}
+      onMouseLeave={() => setShowingDetails(false)}
     >
       {showingDetails && (
         <div className="cardCover">
-          <div className="set">{props.card.cardSetName}</div>
+          {/* The API returns cardsetname; this used to read cardSetName. */}
+          <div className="set">{card.cardsetname}</div>
           <div className="condition">
-            {props.card.condition}
-            {props.card.foil === 1 && <span className="foil"> - foil</span>}
+            {card.condition}
+            {/* Printing is a variant string now, not a foil flag. */}
+            {card.variant === "foil" && <span className="foil"> - foil</span>}
           </div>
-          <div className="language">{props.card.language}</div>
+          <div className="language">{card.language}</div>
           <div className="quantity">
             {texts.AVAILABLE}
-            {props.card.quantity}
-          </div>
-          <div className="price">
-            {props.pricesLoader && (
-              <div className="priceLoaderContainer">
-                <img src={cklogo} className="cklogo" alt="CardKingdom" />
-                <img
-                  src={whiteLoaderImg}
-                  className="priceLoader"
-                  alt="loader"
-                />
-              </div>
-            )}
-            {!props.pricesLoader && props.card && props.card.price && (
-              <div className="priceContainer">
-                <a href={props.card.ckurl} target="_blank" rel="noreferrer">
-                  <img src={cklogo} className="cklogo" alt="CardKingdom" />$
-                  {props.card.price.toFixed(2)}
-                </a>
-              </div>
-            )}
-            {!props.pricesLoader && props.card && !props.card.price && (
-              <div className="priceNotFound">{texts.PRICE_NOT_FOUND}</div>
+            {available}
+            {card.reserved > 0 && (
+              <span className="reservedNote">
+                {" "}
+                ({card.reserved} {texts.RESERVED_BY_OTHERS})
+              </span>
             )}
           </div>
-          {props.loggedIn && (
-            <button className="orange">{texts.I_WANT_IT}</button>
+          {card.price !== null && card.price !== undefined && (
+            <div className="price">
+              <div className="priceContainer">U$S {card.price}</div>
+            </div>
+          )}
+
+          {props.loggedIn && available > 0 && (
+            <div className="reserveRow">
+              {/* Only worth a selector when there is more than one to take. */}
+              {available > 1 && (
+                <select
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                >
+                  {Array.from({ length: available }, (_, i) => (
+                    <option value={i + 1} key={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <button className="orange" onClick={reserve} disabled={reserving}>
+                {texts.RESERVE}
+              </button>
+            </div>
+          )}
+          {props.loggedIn && available <= 0 && (
+            <div className="soldOut">{texts.NOT_IN_STOCK}</div>
           )}
         </div>
       )}
-      <img src={props.card.image} alt="card" className="cardImg" />
+      <img src={card.image} alt="card" className="cardImg" />
     </div>
   );
 }

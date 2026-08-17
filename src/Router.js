@@ -6,6 +6,8 @@ import AddCard from "./collection/AddCard";
 import Store from "./store/Store";
 import Sales from "./collection/Sales";
 import Account from "./account/Account";
+import Orders from "./orders/Orders";
+import Wishlist from "./orders/Wishlist";
 
 class Router extends React.Component {
   render() {
@@ -17,6 +19,8 @@ class Router extends React.Component {
         <Route path="/collection/add/:collectionId" element={<AddCard />} />
         <Route path="/sales" element={<Sales />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="*" element={<Store />} />
       </Routes>
     );

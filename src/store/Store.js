@@ -14,6 +14,8 @@ export default function Store() {
   const [searchResults, setSearchResults] = useState(null);
   const [searchReady, setSearchReady] = useState(false);
   const [pages, setPages] = useState(null);
+  // Remembered so a reservation can re-read the page it was made on.
+  const [currentPage, setCurrentPage] = useState(1);
 
   // When the component loads, verify if the user is loaded
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function Store() {
   // Also triggered on first render to
   // load the first page of all the cards available in the store
   const loadPage = useCallback((page) => {
+    setCurrentPage(page);
     // Verifies that the requested page is not the current one
     // Avoids requesting new cards when the loader is on
     setLoader(true);
@@ -94,9 +97,16 @@ export default function Store() {
           <>
             <div className="title">{texts.CARDS_AVAILABLE_IN_STORE}</div>
             <div className="cardsInStore">
-              {searchResults.cards.map((card, index) => {
+              {searchResults.cards.map((card) => {
                 return (
-                  <CardInStore key={index} card={card} loggedIn={loggedIn} />
+                  <CardInStore
+                    key={card.id}
+                    card={card}
+                    loggedIn={loggedIn}
+                    // Re-read the page so availability reflects the hold that
+                    // was just placed.
+                    onReserved={() => loadPage(currentPage)}
+                  />
                 );
               })}
             </div>

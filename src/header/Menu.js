@@ -20,6 +20,22 @@ export default function Menu(props) {
             <div className="label">{texts.MY_COLLECTION}</div>
           </NavLink>
           <NavLink
+            to="/orders"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.ORDERS}</div>
+          </NavLink>
+          <NavLink
+            to="/wishlist"
+            className={(navData) =>
+              navData.isActive ? "selectedButton menuElement" : "menuElement"
+            }
+          >
+            <div className="label">{texts.WISHLIST}</div>
+          </NavLink>
+          <NavLink
             to="/sales"
             className={(navData) =>
               navData.isActive ? "selectedButton menuElement" : "menuElement"
