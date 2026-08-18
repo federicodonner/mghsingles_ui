@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Pagination from "@mui/material/Pagination";
+import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Header from "../header/Header";
@@ -26,6 +27,13 @@ export default function Store() {
   const [criteria, setCriteria] = useState(null);
   const [page, setPage] = useState(1);
   const [error, setError] = useState(null);
+  // Names already on this customer's wishlist, lowercased.
+  //
+  // Held here rather than per tile because a search can return several
+  // printings of the same card, and adding it from one of them has to settle
+  // every other tile for that card too — a wishlist entry is a name.
+  const [wishlisted, setWishlisted] = useState(new Set());
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     accessAPI(
@@ -41,6 +49,30 @@ export default function Store() {
       }
     );
   }, []);
+
+  // So a card already wanted shows as such rather than inviting a click that
+  // bounces off a duplicate.
+  useEffect(() => {
+    if (!loggedIn) {
+      setWishlisted(new Set());
+      return;
+    }
+    accessAPI(
+      "GET",
+      "wishlist",
+      null,
+      (response) =>
+        setWishlisted(
+          new Set((response ?? []).map((entry) => entry.name.toLowerCase()))
+        ),
+      () => setWishlisted(new Set())
+    );
+  }, [loggedIn]);
+
+  function markWishlisted(name) {
+    setWishlisted((current) => new Set(current).add(name.toLowerCase()));
+    setToast(`${name} — ${texts.ADDED_TO_WISHLIST}`);
+  }
 
   const run = useCallback((next, wantedPage) => {
     if (!next) {
@@ -139,7 +171,13 @@ export default function Store() {
                 guessed at a breakpoint. */}
             <Box className="storeResults">
               {cards.map((card) => (
-                <StoreResult key={card.id} card={card} loggedIn={loggedIn} />
+                <StoreResult
+                  key={card.id}
+                  card={card}
+                  loggedIn={loggedIn}
+                  wishlisted={wishlisted.has((card.name ?? "").toLowerCase())}
+                  onWishlisted={markWishlisted}
+                />
               ))}
             </Box>
 
@@ -156,6 +194,14 @@ export default function Store() {
           </>
         )}
       </div>
+
+      <Snackbar
+        open={Boolean(toast)}
+        autoHideDuration={3000}
+        onClose={() => setToast(null)}
+        message={toast}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </div>
   );
 }

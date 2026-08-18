@@ -126,6 +126,8 @@ const texts = {
     "Buscá por nombre, edición, tipo o color para ver qué tenemos en la tienda.",
   LOGIN_TO_ORDER: "Ingresa para pedir",
   ADD_TO_WISHLIST: "Agregar a deseados",
+  IN_WISHLIST: "Ya está en tus deseados",
+  ADDED_TO_WISHLIST: "agregada a tus deseados",
   CURRENCY: "U$S",
   COLOR_W: "Blanco",
   COLOR_U: "Azul",

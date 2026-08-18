@@ -156,7 +156,15 @@ EOF
   identical for every printing of a card, so it only earns its place as a filter.
 
   The button at the bottom of each tile is login-aware: "Ingresa para pedir"
-  routes to /login when logged out, "Agregar a deseados" when logged in.
+  routes to /login when logged out, "Agregar a deseados" when logged in, which
+  POSTs the card NAME to `wishlist` — not this printing's set, language, grade
+  and finish, which would be a lot to infer from one click.
+
+  Store.js holds the set of wishlisted names, not each tile, because a search
+  can return several printings of the same card and adding it from one has to
+  settle every tile for that card. A 400 from the POST means "already on the
+  list", which is not a failure — the button settles into its added state
+  rather than raising an alert.
 
 - **Size MUI components with `sx`, not a CSS class.** MUI's own styles sit in a
   layer that outranks a plain class, so `.storeResultArt { width: 86px }` lost

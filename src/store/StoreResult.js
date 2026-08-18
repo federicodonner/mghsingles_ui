@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import texts from "../data/texts";
+import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import "./storeResult.css";
 
@@ -32,8 +33,34 @@ const ART_SX = {
   bgcolor: "#f0f0f0",
 };
 
-export default function StoreResult({ card, loggedIn }) {
+export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }) {
   const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
+
+  // A wishlist entry is a card NAME, so this adds the name and nothing else.
+  // Silently pinning the entry to this printing's set, language, grade and
+  // finish would be a lot to infer from one click — and the customer would then
+  // have to go and undo four constraints they never chose. Preferences are
+  // picked deliberately, on the wishlist itself.
+  function addToWishlist() {
+    setAdding(true);
+    accessAPI(
+      "POST",
+      "wishlist",
+      { name: card.name },
+      () => {
+        setAdding(false);
+        onWishlisted(card.name);
+      },
+      (response) => {
+        setAdding(false);
+        // Already on the list is not a failure: what the customer wanted is
+        // true either way, so the button just settles into its added state.
+        if (response.status === 400) onWishlisted(card.name);
+        else alert(response.message);
+      }
+    );
+  }
 
   return (
     <Card
@@ -110,8 +137,15 @@ export default function StoreResult({ card, loggedIn }) {
         {/* Pushed to the bottom so the buttons line up across a row of tiles
             whose text runs to different lengths. */}
       {loggedIn ? (
-        <Button size="small" fullWidth sx={{ mt: "auto" }}>
-          {texts.ADD_TO_WISHLIST}
+        <Button
+          size="small"
+          fullWidth
+          sx={{ mt: "auto" }}
+          variant={wishlisted ? "outlined" : "contained"}
+          disabled={adding || wishlisted}
+          onClick={addToWishlist}
+        >
+          {wishlisted ? texts.IN_WISHLIST : texts.ADD_TO_WISHLIST}
         </Button>
       ) : (
         <Button
