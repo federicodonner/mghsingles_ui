@@ -142,6 +142,14 @@ const texts = {
   // services/storageState.js in the API.
   MY_STORAGE: "Contenedores",
   MY_STORAGE_TITLE: "Mis carpetas y cajas",
+  UNFILED_TITLE: "Cartas sin contenedor",
+  UNFILED_HINT:
+    "Estas copias tuyas todavía no están en ninguna carpeta o caja.",
+  CONTAINER_EMPTY: "Este contenedor está vacío.",
+  BACK_TO_STORAGE: "Volver",
+  REMOVE_FROM_CONTAINER: "Sacar",
+  PAGE: "Página",
+  POCKET: "bolsillo",
   NO_STORAGE: "Todavía no tenés ninguna carpeta ni caja.",
   NEW_STORAGE: "Nuevo contenedor",
   STORAGE_NAME: "Nombre",

@@ -184,6 +184,20 @@ EOF
   price, so `mt: auto` on the button had nothing to push against and the buttons
   came out ragged across a row.
 
+- **Contenedores is the customer's only view of their cards.** The separate
+  Colección section is gone; `/mystorage` lists containers, `/mystorage/:id`
+  opens one, `/mystorage/:id/add` adds a card into it. Every container opens
+  whatever state it is in — the cards are the customer's whether the shop is
+  holding them or not — and nothing is greyed out. Only EDITING is gated, and
+  the page says why rather than leaving the missing buttons to be puzzled over.
+
+  The list also shows copies with no container at all (`mystorage/unfiled`),
+  because with Colección gone those would otherwise be invisible.
+
+  Adding a card is two API calls — create the card, then place a copy — since
+  the card exists whether or not it has a home. The customer performs one
+  action; AddCard does the second half.
+
 - **`/mystorage` is the customer's own binders and boxes** (`src/storage/`,
   menu label "Contenedores"). It is the customer half of the container
   lifecycle: they create one (it starts `released`, in their hands), announce

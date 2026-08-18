@@ -30,7 +30,21 @@ export default function AddCard() {
   const quantityRef = useRef(null);
 
   let navigate = useNavigate();
-  let { collectionId } = useParams();
+  // Reached from a container: the card is created in the customer's collection
+  // and then filed into that container, so adding a card and putting it
+  // somewhere is one action rather than two screens.
+  const { storageId } = useParams();
+  const [collectionId, setCollectionId] = useState(null);
+
+  useEffect(() => {
+    accessAPI(
+      "GET",
+      "collection",
+      null,
+      (response) => setCollectionId(response?.[0]?.id ?? null),
+      () => setCollectionId(null)
+    );
+  }, []);
 
   // When the section loads, fetch the possible conditions and languages
   useEffect(() => {
@@ -80,6 +94,19 @@ export default function AddCard() {
         variant: variant,
       }),
       (response) => {
+        // File it into the container this was opened from. Two calls because
+        // creating a card and placing a copy are genuinely two facts — the card
+        // exists whether or not it has a home — but the customer performs one
+        // action and should not have to do the second half themselves.
+        if (storageId && response?.card?.id) {
+          accessAPI(
+            "POST",
+            `mystorage/${storageId}/place`,
+            { cardid: response.card.id },
+            () => {},
+            (placeError) => alert(placeError.message)
+          );
+        }
         // Clears the selected version to close the modal
         setSelectedVersion(null);
         setAddLoader(false);

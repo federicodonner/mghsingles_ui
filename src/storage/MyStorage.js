@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "../header/Header";
 import Loader from "../loader/Loader";
 import texts from "../data/texts";
@@ -7,6 +7,9 @@ import { accessAPI, logout } from "../utils/fetchFunctions";
 import "./myStorage.css";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 
 const TYPE_LABELS = {
@@ -37,6 +40,10 @@ const MOVE_LABELS = {
 export default function MyStorage() {
   const [loader, setLoader] = useState(true);
   const [units, setUnits] = useState([]);
+  // Copies that are not in any container. Contenedores is the only place a
+  // customer sees their cards now, so a copy with no placement has to be shown
+  // somewhere or it simply disappears.
+  const [unfiled, setUnfiled] = useState([]);
 
   const nameRef = useRef(null);
   const typeRef = useRef(null);
@@ -62,6 +69,13 @@ export default function MyStorage() {
 
   useEffect(() => {
     load();
+    accessAPI(
+      "GET",
+      "mystorage/unfiled",
+      null,
+      (response) => setUnfiled(response ?? []),
+      () => setUnfiled([])
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -155,11 +169,12 @@ export default function MyStorage() {
               <div className="emptyNote">{texts.NO_STORAGE}</div>
             )}
             {units.map((unit) => (
-              <div
-                className={unit.forsale ? "myStorageRow" : "myStorageRow away"}
-                key={unit.id}
-              >
-                <span className="storageName">{unit.name}</span>
+              <div className="myStorageRow" key={unit.id}>
+                {/* Opens whatever state it is in. The cards are the customer's
+                    whether the shop is holding the container or not. */}
+                <Link to={`/mystorage/${unit.id}`} className="storageName">
+                  {unit.name}
+                </Link>
                 <span className="storageType">{TYPE_LABELS[unit.type]}</span>
                 <span className="storageCount">
                   {unit.cardcount} {texts.CARDS}
@@ -199,6 +214,35 @@ export default function MyStorage() {
               </div>
             ))}
           </div>
+
+          {/* Copies with no container. Shown rather than hidden: they are the
+              customer's cards, and Contenedores is now the only place their
+              cards appear at all. */}
+          {unfiled.length > 0 && (
+            <div className="myStorageList">
+              <div className="title">{texts.UNFILED_TITLE}</div>
+              <Alert severity="info" sx={{ mb: 1 }}>
+                {texts.UNFILED_HINT}
+              </Alert>
+              {unfiled.map((row) => (
+                <div className="myStorageRow" key={row.cardid}>
+                  <Typography sx={{ fontWeight: 600, flex: "1 1 200px" }}>
+                    {row.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {row.cardsetname}
+                  </Typography>
+                  <Stack direction="row" spacing={0.5}>
+                    <Chip size="small" label={row.condition} />
+                    <Chip size="small" variant="outlined" label={row.language} />
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary">
+                    x{row.copies}
+                  </Typography>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
