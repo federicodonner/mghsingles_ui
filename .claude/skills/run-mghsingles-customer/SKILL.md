@@ -136,6 +136,25 @@ EOF
 
 ## Gotchas
 
+- **The storefront shows nothing until you search.** `/` opens with the search
+  panel and an empty state; it no longer loads every card in the shop as full
+  card art on first paint. Results come from `store/search` and are stock only,
+  laid out as a grid of tiles (`store/StoreResult.js`), each showing set,
+  condition, language and finish — the facts that distinguish one copy from
+  another printing. The type line is deliberately not on the tile: it is
+  identical for every printing of a card, so it only earns its place as a filter.
+
+  The button at the bottom of each tile is login-aware: "Ingresa para pedir"
+  routes to /login when logged out, "Agregar a deseados" when logged in.
+
+- **Size MUI components with `sx`, not a CSS class.** MUI's own styles sit in a
+  layer that outranks a plain class, so `.storeResultArt { width: 86px }` lost
+  to CardMedia's `width: 100%` and the art stretched across the whole row. The
+  same rule explains why the result tile is a flex column via `sx` on the Card:
+  a nested `height: 100%` Stack was shorter than the tile whenever a card had no
+  price, so `mt: auto` on the button had nothing to push against and the buttons
+  came out ragged across a row.
+
 - **`/mystorage` is the customer's own binders and boxes** (`src/storage/`,
   menu label "Contenedores"). It is the customer half of the container
   lifecycle: they create one (it starts `released`, in their hands), announce

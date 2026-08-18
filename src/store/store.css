@@ -1,49 +1,9 @@
-.searchContainer {
-  margin-left: auto;
-  margin-right: auto;
+/* The storefront page frame. The old grid of full-size card art lived here;
+   results are rows now, and each row styles itself. */
+.storeEmpty {
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
   text-align: center;
-  margin-bottom: 20px;
-}
-
-.searchContainer form {
-  display: inline;
-}
-
-.searchContainer .MuiTextField-root {
-  width: 400px;
-  max-width: 100%;
-}
-
-.cardsInStore {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.title {
-  font-size: 14pt;
-  color: #19647e;
-}
-
-.paginator {
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 14pt;
-  margin-bottom: 40px;
-  margin-top: 10px;
-}
-
-.paginator span {
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
-.paginator .pageLink {
-  cursor: pointer;
-}
-
-.paginator .currentPage {
-  font-weight: 700;
 }

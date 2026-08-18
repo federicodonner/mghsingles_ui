@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addCard.css";
 import Header from "../header/Header";
-import CardSearchBar from "../cardSearchBar/CardSearchBar";
+import CatalogueSearch from "./CatalogueSearch";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { finishesFor, finishLabel, DEFAULT_FINISH } from "../utils/finishes";
 import texts from "../data/texts";
@@ -15,7 +15,6 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 
 export default function AddCard() {
   const [addLoader, setAddLoader] = useState(false);
-  const [searchReady, setSearchReady] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(false);
   // Which finish of the selected printing is being added.
@@ -53,7 +52,6 @@ export default function AddCard() {
   // When the conditions and languages are set, set the flag to turn off the search loader
   useEffect(() => {
     if (conditions && languages) {
-      setSearchReady(true);
     }
   }, [conditions, languages]);
 
@@ -94,7 +92,6 @@ export default function AddCard() {
         // Clears the selected version to close the modal
         setSelectedVersion(null);
         setAddLoader(false);
-        setSearchReady(true);
         // Focus and select the text input to make the next search easier
         // cardRef.current.focus();
         // cardRef.current.select();
@@ -107,9 +104,8 @@ export default function AddCard() {
     <div>
       <Header showMenu={true} loggedIn={true} />
       <div className="content">
-        <CardSearchBar
+        <CatalogueSearch
           setSearchResults={setSearchResults}
-          searchReady={searchReady}
           refresh={cardCounter}
         />
         {searchResults &&

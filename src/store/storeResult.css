@@ -1,0 +1,26 @@
+/* The results grid. Tiles are ~300px, so a normal window fits three or four
+   across and a narrow one falls back to a single column with no breakpoint
+   having to be guessed. */
+.storeResults {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+/* Sizing and the flex column live in `sx` on the component — MUI's own styles
+   outrank a plain class here. */
+
+.storeResultName {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.storeResult .setCode {
+  color: #999;
+}
+
+.storeResultPrice {
+  color: #33586b;
+  font-weight: 700;
+  line-height: 1.2;
+}

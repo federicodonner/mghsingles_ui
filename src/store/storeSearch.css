@@ -1,0 +1,32 @@
+/* The search panel. Layout only — every control in it is a MUI component and
+   takes its appearance from the theme. */
+.storeSearch {
+  margin: 8px 0 4px;
+  padding: 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.storeSearch .searchName {
+  flex: 1 1 320px;
+  min-width: 220px;
+}
+
+.storeSearch .searchSelect {
+  flex: 0 1 220px;
+  min-width: 160px;
+}
+
+/* A colour toggle carries its own ink so the row is scannable without reading
+   every label. The selected state keeps MUI's own treatment on top. */
+.storeSearch .colour {
+  min-width: 62px;
+  font-weight: 600;
+}
+.storeSearch .colour-W { color: #8a7a44; }
+.storeSearch .colour-U { color: #1b6ca8; }
+.storeSearch .colour-B { color: #4a4a4a; }
+.storeSearch .colour-R { color: #b4342a; }
+.storeSearch .colour-G { color: #2e7d4f; }
+.storeSearch .colour-C { color: #777; }

@@ -113,6 +113,29 @@ const texts = {
   WISHLIST_EXCLUDED_2: " en la tienda que no coinciden con tus preferencias.",
   WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
 
+  // Storefront search. The options offered are built from what the shop
+  // actually holds, so these label real choices rather than the whole game.
+  SEARCH_NAME: "Nombre de la carta",
+  SEARCH_SET: "Edición",
+  SEARCH_TYPE: "Tipo",
+  SEARCH_COLORS: "Colores",
+  SEARCH_ANY: "Cualquiera",
+  SEARCH_RESULTS: "Resultados",
+  SEARCH_TRUNCATED:
+    "Hay más cartas de las que podemos mostrar; afiná la búsqueda.",
+  NO_RESULTS: "No hay cartas en la tienda que coincidan con esa búsqueda.",
+  STORE_PROMPT:
+    "Buscá por nombre, edición, tipo o color para ver qué tenemos en la tienda.",
+  LOGIN_TO_ORDER: "Ingresa para pedir",
+  ADD_TO_WISHLIST: "Agregar a deseados",
+  CURRENCY: "U$S",
+  COLOR_W: "Blanco",
+  COLOR_U: "Azul",
+  COLOR_B: "Negro",
+  COLOR_R: "Rojo",
+  COLOR_G: "Verde",
+  COLOR_C: "Incoloro",
+
   // Binders and boxes the customer owns. The lifecycle mirrors
   // services/storageState.js in the API.
   MY_STORAGE: "Contenedores",
