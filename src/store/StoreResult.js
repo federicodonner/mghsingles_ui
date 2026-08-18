@@ -37,27 +37,32 @@ export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
 
-  // A wishlist entry is a card NAME, so this adds the name and nothing else.
-  // Silently pinning the entry to this printing's set, language, grade and
-  // finish would be a lot to infer from one click — and the customer would then
-  // have to go and undo four constraints they never chose. Preferences are
-  // picked deliberately, on the wishlist itself.
+  // Pin the entry to THIS copy — printing, grade, language and finish.
+  //
+  // Not just the name. Everything on this page is in stock, so the next
+  // matcher run will set the card aside within minutes; an entry that only
+  // named the card would let it bag any other printing the shop happens to
+  // have. The customer clicked a Spanish foil from Secret Lair, and that is
+  // what should end up in their bag.
   function addToWishlist() {
     setAdding(true);
     accessAPI(
       "POST",
       "wishlist",
-      { name: card.name },
+      {
+        name: card.name,
+        versions: [card.scryfallid],
+        conditionids: [card.conditionid],
+        languageids: [card.languageid],
+        variants: [card.variant],
+      },
       () => {
         setAdding(false);
-        onWishlisted(card.name);
+        onWishlisted(card);
       },
       (response) => {
         setAdding(false);
-        // Already on the list is not a failure: what the customer wanted is
-        // true either way, so the button just settles into its added state.
-        if (response.status === 400) onWishlisted(card.name);
-        else alert(response.message);
+        alert(response.message);
       }
     );
   }

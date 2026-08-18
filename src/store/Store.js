@@ -27,12 +27,13 @@ export default function Store() {
   const [criteria, setCriteria] = useState(null);
   const [page, setPage] = useState(1);
   const [error, setError] = useState(null);
-  // Names already on this customer's wishlist, lowercased.
+  // Stock rows this customer's wishlist already covers, by card id.
   //
-  // Held here rather than per tile because a search can return several
-  // printings of the same card, and adding it from one of them has to settle
-  // every other tile for that card too — a wishlist entry is a name.
-  const [wishlisted, setWishlisted] = useState(new Set());
+  // By ROW, not by name: an entry pinned to the Tenth Edition printing does not
+  // cover the Secret Lair one, and a button reporting "already on your list"
+  // over a version the wishlist will never match would be a lie. The API
+  // answers this with the same matcher that actually sets cards aside.
+  const [covered, setCovered] = useState({});
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
@@ -50,28 +51,32 @@ export default function Store() {
     );
   }, []);
 
-  // So a card already wanted shows as such rather than inviting a click that
-  // bounces off a duplicate.
-  useEffect(() => {
-    if (!loggedIn) {
-      setWishlisted(new Set());
+  // Asked per result set, since coverage depends on the exact rows on screen.
+  const refreshCoverage = useCallback((rows) => {
+    if (!loggedIn || !rows.length) {
+      setCovered({});
       return;
     }
+    const ids = rows.map((c) => c.id).join(",");
     accessAPI(
       "GET",
-      "wishlist",
+      `wishlist/covers?cardids=${ids}`,
       null,
-      (response) =>
-        setWishlisted(
-          new Set((response ?? []).map((entry) => entry.name.toLowerCase()))
-        ),
-      () => setWishlisted(new Set())
+      (response) => setCovered(response ?? {}),
+      () => setCovered({})
     );
   }, [loggedIn]);
 
-  function markWishlisted(name) {
-    setWishlisted((current) => new Set(current).add(name.toLowerCase()));
-    setToast(`${name} — ${texts.ADDED_TO_WISHLIST}`);
+  useEffect(() => {
+    refreshCoverage(results?.cards ?? []);
+  }, [results, refreshCoverage]);
+
+  function markWishlisted(card) {
+    setCovered((current) => ({ ...current, [card.id]: true }));
+    setToast(`${card.name} (${card.cardsetcode?.toUpperCase()}) — ${texts.ADDED_TO_WISHLIST}`);
+    // Adding one printing can widen the entry enough to cover others on screen,
+    // so the whole page is re-asked rather than guessed at.
+    refreshCoverage(results?.cards ?? []);
   }
 
   const run = useCallback((next, wantedPage) => {
@@ -175,7 +180,7 @@ export default function Store() {
                   key={card.id}
                   card={card}
                   loggedIn={loggedIn}
-                  wishlisted={wishlisted.has((card.name ?? "").toLowerCase())}
+                  wishlisted={Boolean(covered[card.id])}
                   onWishlisted={markWishlisted}
                 />
               ))}
