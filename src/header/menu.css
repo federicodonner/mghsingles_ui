@@ -1,45 +1,15 @@
-a,
-a:hover,
-a:active,
-a:visited,
-.menuElement div {
-  text-decoration: none;
-  color: white;
-  cursor: pointer;
-}
-
+/* The nav bar is MUI Buttons in a Stack now, so the old per-item flex and
+   margin rules are gone — spacing comes from the Stack, the active state from
+   NavLink's `.active` class, and colour from the theme. What remains is only
+   what MUI has no opinion about. */
 .menuContainer {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
   margin-right: auto;
-  margin-left: 30px;
+  margin-left: 24px;
+  flex-wrap: wrap;
 }
 
-.menuElement {
-  margin: 5px 10px;
-  height: 25px;
-}
-
-.selectedButton {
-  font-weight: 700;
-}
-
-.separator {
-  width: 150px;
-}
-
-/* Unread set-aside notifications. Lives on the menu so it is visible from any
-   page, not only once the customer thinks to look at their orders. */
-.menuBadge {
-  display: inline-block;
-  margin-left: 6px;
-  background: #fff;
-  color: #e8722c;
-  border-radius: 9px;
-  padding: 0 6px;
-  font-size: 0.75em;
-  font-weight: bold;
-  vertical-align: middle;
+/* The unread badge sits half outside the label, so the row needs a little
+   right padding on that item to keep the count off its neighbour. */
+.menuContainer .MuiBadge-root {
+  padding-right: 6px;
 }

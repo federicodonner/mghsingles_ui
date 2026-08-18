@@ -9,8 +9,9 @@
   display: inline;
 }
 
-.searchContainer input {
+.searchContainer .MuiTextField-root {
   width: 400px;
+  max-width: 100%;
 }
 
 .setSelectorContainer{

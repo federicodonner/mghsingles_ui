@@ -3,6 +3,8 @@ import "./cardInStore.css";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function CardInStore(props) {
   // Load the version details in state
@@ -71,7 +73,7 @@ export default function CardInStore(props) {
             <div className="reserveRow">
               {/* Only worth a selector when there is more than one to take. */}
               {available > 1 && (
-                <select
+                <TextField select SelectProps={{ native: true }}
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
                 >
@@ -80,11 +82,11 @@ export default function CardInStore(props) {
                       {i + 1}
                     </option>
                   ))}
-                </select>
+                </TextField>
               )}
-              <button className="orange" onClick={reserve} disabled={reserving}>
+              <Button onClick={reserve} disabled={reserving}>
                 {texts.RESERVE}
-              </button>
+              </Button>
             </div>
           )}
           {props.loggedIn && available <= 0 && (

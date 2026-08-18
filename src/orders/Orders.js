@@ -6,6 +6,7 @@ import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import "./orders.css";
+import Button from "@mui/material/Button";
 
 // A date arrives as unix seconds, not milliseconds.
 function formatDate(seconds) {
@@ -105,12 +106,11 @@ export default function Orders() {
                 {item.kind === "wishlist_withdrawal_ready" &&
                   ` — ${texts.NOTIF_NO_CHARGE}`}
               </span>
-              <button
-                className="orange small"
+              <Button size="small"
                 onClick={() => dismissNotification(item)}
               >
                 {texts.NOTIF_DISMISS}
-              </button>
+              </Button>
             </div>
           ))}
 
@@ -136,12 +136,11 @@ export default function Orders() {
                   {texts.ORDER_TOTAL} U$S {order.total}
                 </span>
                 {order.status === "pending" && (
-                  <button
-                    className="orange small"
-                    onClick={() => cancelOrder(order)}
-                  >
+                  <Button variant="outlined" color="error" size="small"
+ onClick={() => cancelOrder(order)}
+ >
                     {texts.CANCEL_ORDER}
-                  </button>
+                  </Button>
                 )}
               </div>
 

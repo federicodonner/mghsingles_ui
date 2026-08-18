@@ -3,6 +3,8 @@ import { accessAPI } from "../utils/fetchFunctions";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import "./cardSearchBar.css";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function CardSearchBar(props) {
   const [searchLoader, setSearchLoader] = useState(true);
@@ -159,30 +161,30 @@ export default function CardSearchBar(props) {
     <div className="searchBarContainer">
       <div className="searchContainer">
         <form onSubmit={findCard}>
-          <input
+          <TextField
             type="text"
-            ref={cardRef}
+            inputRef={cardRef}
             placeholder={texts.CARD_NAME}
             disabled={searchLoader}
             autoFocus
           />
         </form>
-        <button className="orange search" onClick={findCard}>
+        <Button className="search" onClick={findCard}>
           {searchLoader && (
             <img className="loader" src={whiteLoader} alt="loader" />
           )}
           {!searchLoader && <span>{texts.SEARCH}</span>}
-        </button>
-        <button className="orange search" onClick={clearSearch}>
+        </Button>
+        <Button className="search" onClick={clearSearch}>
           <span>{texts.CLEAR}</span>
-        </button>
+        </Button>
       </div>
       <div className="setSelectorContainer">
         <form>
-          <select
+          <TextField select SelectProps={{ native: true }}
             className="setSelector"
             defaultValue="0"
-            ref={setSelectRef}
+            inputRef={setSelectRef}
             onChange={setSelect}
           >
             <option value="0" disabled>
@@ -196,17 +198,17 @@ export default function CardSearchBar(props) {
                   </option>
                 );
               })}
-          </select>
+          </TextField>
         </form>
-        <button className="orange search" onClick={clearSet}>
+        <Button className="search" onClick={clearSet}>
           {searchLoader && (
             <img className="loader" src={whiteLoader} alt="loader" />
           )}
           {!searchLoader && <span>{texts.CLEAR}</span>}
-        </button>
-        <button className="orange search" onClick={toggleFilters}>
+        </Button>
+        <Button className="search" onClick={toggleFilters}>
           <span>{texts.FILTERS}</span>
-        </button>
+        </Button>
       </div>
     </div>
   );

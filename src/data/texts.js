@@ -126,7 +126,6 @@ const texts = {
   CREATE: "Crear",
   CARDS: "cartas",
   RENAME: "Renombrar",
-  DELETE: "Eliminar",
   STATE_FOR_SALE: "En la tienda, en venta",
   STATE_RETIRED: "Pediste que te lo devuelvan",
   STATE_RELEASED: "Lo tenés vos",

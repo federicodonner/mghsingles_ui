@@ -6,6 +6,8 @@ import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 // Entries are card names, not printings — so one entry covers every printing
 // and condition the shop might take in. Each row says what is on sale for it
@@ -89,14 +91,14 @@ export default function Wishlist() {
         <div className="title">{texts.MY_WISHLIST}</div>
 
         <form className="wishlistForm" onSubmit={addEntry}>
-          <input
+          <TextField
             type="text"
             placeholder={texts.WISHLIST_PLACEHOLDER}
-            ref={nameRef}
+            inputRef={nameRef}
           />
-          <button type="submit" className="orange">
+          <Button type="submit">
             {texts.ADD_WISHLIST}
-          </button>
+          </Button>
         </form>
 
         {loader && <Loader color="orange" />}

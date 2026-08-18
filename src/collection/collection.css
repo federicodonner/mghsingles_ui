@@ -10,8 +10,7 @@
   color: #19647e;
 }
 
-.cardListContainer .title button {
-  display: inline;
+.cardListContainer .title .MuiButton-root {
   margin-left: 10px;
 }
 

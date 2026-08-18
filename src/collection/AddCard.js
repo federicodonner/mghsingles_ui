@@ -8,6 +8,10 @@ import { finishesFor, finishLabel, DEFAULT_FINISH } from "../utils/finishes";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import CardVersion from "./CardVersion";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Radio from "@mui/material/Radio";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 export default function AddCard() {
   const [addLoader, setAddLoader] = useState(false);
@@ -141,10 +145,10 @@ export default function AddCard() {
                 </div>
                 <div className="cardSelectors">
                   <div>
-                    <select
+                    <TextField select SelectProps={{ native: true }}
                       name="conditions"
                       id="conditions"
-                      ref={conditionRef}
+                      inputRef={conditionRef}
                     >
                       {conditions.map((condition) => {
                         return (
@@ -153,10 +157,10 @@ export default function AddCard() {
                           </option>
                         );
                       })}
-                    </select>
+                    </TextField>
                   </div>
                   <div>
-                    <select name="languages" id="languages" ref={languageRef}>
+                    <TextField select SelectProps={{ native: true }} name="languages" id="languages" inputRef={languageRef}>
                       {languages.map((language) => {
                         return (
                           <option key={language.id} value={language.id}>
@@ -164,7 +168,7 @@ export default function AddCard() {
                           </option>
                         );
                       })}
-                    </select>
+                    </TextField>
                   </div>
                   <div className="finishPicker">
                     {/* Offered finishes come from THIS printing. Half of all
@@ -178,16 +182,20 @@ export default function AddCard() {
                     )}
                     {finishesFor(selectedVersion).length > 1 &&
                       finishesFor(selectedVersion).map((finish) => (
-                        <label className="finishOption" key={finish}>
-                          <input
-                            type="radio"
-                            name="finish"
-                            value={finish}
-                            checked={selectedFinish === finish}
-                            onChange={() => setSelectedFinish(finish)}
-                          />
-                          <span>{finishLabel(finish)}</span>
-                        </label>
+                        <FormControlLabel
+                          key={finish}
+                          className="finishOption"
+                          control={
+                            <Radio
+                              size="small"
+                              name="finish"
+                              value={finish}
+                              checked={selectedFinish === finish}
+                              onChange={() => setSelectedFinish(finish)}
+                            />
+                          }
+                          label={finishLabel(finish)}
+                        />
                       ))}
                   </div>
                 </div>
@@ -195,7 +203,7 @@ export default function AddCard() {
               <div className="row">
                 <div>
                   {texts.QUANTITY}:{" "}
-                  <select name="quantity" id="quantity" ref={quantityRef}>
+                  <TextField select SelectProps={{ native: true }} name="quantity" id="quantity" inputRef={quantityRef}>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -206,14 +214,14 @@ export default function AddCard() {
                     <option value="8">8</option>
                     <option value="9">9</option>
                     <option value="10">10</option>
-                  </select>
+                  </TextField>
                 </div>
-                <button className="orange add" onClick={addVersion}>
+                <Button className="add" onClick={addVersion}>
                   {addLoader && (
                     <img className="loader" src={whiteLoader} alt="loader" />
                   )}
                   {!addLoader && <span>{texts.ADD}</span>}
-                </button>
+                </Button>
               </div>
             </div>
           </>

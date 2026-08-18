@@ -5,6 +5,9 @@ import Loader from "../loader/Loader";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import "./myStorage.css";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
 
 const TYPE_LABELS = {
   binder: texts.BINDER,
@@ -135,15 +138,15 @@ export default function MyStorage() {
         <div className="myStorageContainer">
           <form className="myStorageForm" onSubmit={createUnit}>
             <span className="formTitle">{texts.NEW_STORAGE}</span>
-            <input type="text" placeholder={texts.STORAGE_NAME} ref={nameRef} />
-            <select ref={typeRef} defaultValue="binder">
+            <TextField type="text" placeholder={texts.STORAGE_NAME} inputRef={nameRef} />
+            <TextField select SelectProps={{ native: true }} inputRef={typeRef} defaultValue="binder">
               <option value="binder">{texts.BINDER}</option>
               <option value="sorted_box">{texts.SORTED_BOX}</option>
               <option value="unsorted_box">{texts.UNSORTED_BOX}</option>
-            </select>
-            <button type="submit" className="dark">
+            </TextField>
+            <Button type="submit">
               {texts.CREATE}
-            </button>
+            </Button>
           </form>
 
           <div className="myStorageList">
@@ -161,31 +164,34 @@ export default function MyStorage() {
                 <span className="storageCount">
                   {unit.cardcount} {texts.CARDS}
                 </span>
-                <span className="storageBadge">
-                  {STATE_LABELS[unit.state]}
-                </span>
+                <Chip
+                  size="small"
+                  variant={unit.forsale ? "filled" : "outlined"}
+                  color={unit.forsale ? "success" : "default"}
+                  label={STATE_LABELS[unit.state]}
+                  className="storageBadge"
+                />
                 {(unit.cando || []).map((to) => (
-                  <button
-                    key={to}
-                    className="dark small"
-                    onClick={() => move(unit, to)}
+                  <Button
+ key={to}
+ size="small"
+ onClick={() => move(unit, to)}
                   >
                     {MOVE_LABELS[to] || to}
-                  </button>
+                  </Button>
                 ))}
                 {/* Renaming and deleting are edits, so they follow the same
                     rule as rearranging: only while the customer holds it. */}
                 {unit.editable ? (
                   <>
-                    <button className="light small" onClick={() => rename(unit)}>
+                    <Button variant="outlined" size="small" onClick={() => rename(unit)}>
                       {texts.RENAME}
-                    </button>
-                    <button
-                      className="light small"
-                      onClick={() => removeUnit(unit)}
-                    >
+                    </Button>
+                    <Button variant="outlined" color="error" size="small"
+ onClick={() => removeUnit(unit)}
+ >
                       {texts.DELETE}
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <span className="lockedNote">{texts.STORAGE_LOCKED}</span>

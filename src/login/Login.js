@@ -5,6 +5,10 @@ import Header from "../header/Header";
 import texts from "../data/texts";
 import whiteLoader from "../images/whiteLoader.svg";
 import { storeInLS, accessAPI } from "../utils/fetchFunctions";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
 
 export default function Login() {
   const [loginLoader, setLoginLoader] = useState(true);
@@ -153,95 +157,98 @@ export default function Login() {
           <div className="loginForm">
             <div className="fields">
               <form onSubmit={loginUser}>
-                <input
-                  type="text"
-                  placeholder={texts.USER_PLACEHOLDER}
-                  className={usernameError ? "error" : ""}
-                  onChange={() => {
-                    setUsernameError(false);
-                  }}
-                  ref={loginUsername}
-                />
-                <input
-                  type="password"
-                  placeholder={texts.PASSWORD_PLACEHOLDER}
-                  className={passwordError ? "error" : ""}
-                  onChange={() => {
-                    setPasswordError(false);
-                  }}
-                  ref={loginPassword}
-                />
-
-                <button className="dark login" type="submit">
-                  {texts.ENTER}
-                </button>
+                <Stack spacing={2}>
+                  {/* inputRef, not ref: TextField is a wrapper, and the code
+                      below reads .current.value off the actual input. */}
+                  <TextField
+                    type="text"
+                    placeholder={texts.USER_PLACEHOLDER}
+                    error={usernameError}
+                    onChange={() => setUsernameError(false)}
+                    inputRef={loginUsername}
+                    fullWidth
+                  />
+                  <TextField
+                    type="password"
+                    placeholder={texts.PASSWORD_PLACEHOLDER}
+                    error={passwordError}
+                    onChange={() => setPasswordError(false)}
+                    inputRef={loginPassword}
+                    fullWidth
+                  />
+                  <Button className="login" type="submit" fullWidth>
+                    {texts.ENTER}
+                  </Button>
+                </Stack>
               </form>
             </div>
-            <div className="textButton dark">{texts.FORGOT_PASSWORD}</div>
-            <div className="divider light"></div>
-            <button
-              className="light create"
-              onClick={() => {
-                setCreatingAccount(true);
-              }}
+            <Button variant="text" color="secondary" className="forgot">
+              {texts.FORGOT_PASSWORD}
+            </Button>
+            <Divider sx={{ my: 2 }} />
+            <Button
+              variant="outlined"
+              color="secondary"
+              className="create"
+              fullWidth
+              onClick={() => setCreatingAccount(true)}
             >
               {texts.CREATE_ACCOUNT}
-            </button>
+            </Button>
           </div>
         )}
         {!loginLoader && creatingAccount && (
           <div className="loginForm">
             <div className="fields">
               <form onSubmit={createUser}>
-                <input
-                  type="text"
-                  placeholder={texts.CREATE_USERNAME}
-                  className={createUsernameError ? "error" : ""}
-                  onChange={() => {
-                    setCreateUsernameError(false);
-                  }}
-                  ref={createUsername}
-                />
-                <input
-                  type="text"
-                  placeholder={texts.CREATE_NAME}
-                  className={createNameError ? "error" : ""}
-                  onChange={() => {
-                    setCreateNameError(false);
-                  }}
-                  ref={createName}
-                />
-                <input
-                  type="text"
-                  placeholder={texts.CREATE_EMAIL}
-                  className={createEmailError ? "error" : ""}
-                  onChange={() => {
-                    setCreateEmailError(false);
-                  }}
-                  ref={createEmail}
-                />
-                <input
-                  type="password"
-                  placeholder={texts.CREATE_PASSWORD}
-                  className={createPasswordError ? "error" : ""}
-                  onChange={() => {
-                    setCreatePasswordError(false);
-                  }}
-                  ref={createPassword}
-                />
-                <button className="dark register" type="submit">
-                  {texts.CREATE_ACCOUNT}
-                </button>
+                <Stack spacing={2}>
+                  <TextField
+                    type="text"
+                    placeholder={texts.CREATE_USERNAME}
+                    error={createUsernameError}
+                    onChange={() => setCreateUsernameError(false)}
+                    inputRef={createUsername}
+                    fullWidth
+                  />
+                  <TextField
+                    type="text"
+                    placeholder={texts.CREATE_NAME}
+                    error={createNameError}
+                    onChange={() => setCreateNameError(false)}
+                    inputRef={createName}
+                    fullWidth
+                  />
+                  <TextField
+                    type="text"
+                    placeholder={texts.CREATE_EMAIL}
+                    error={createEmailError}
+                    onChange={() => setCreateEmailError(false)}
+                    inputRef={createEmail}
+                    fullWidth
+                  />
+                  <TextField
+                    type="password"
+                    placeholder={texts.CREATE_PASSWORD}
+                    error={createPasswordError}
+                    onChange={() => setCreatePasswordError(false)}
+                    inputRef={createPassword}
+                    fullWidth
+                  />
+                  <Button className="register" type="submit" fullWidth>
+                    {texts.CREATE_ACCOUNT}
+                  </Button>
+                </Stack>
               </form>
-              <div className="divider light"></div>
-              <button
-                className="light register"
-                onClick={() => {
-                  setCreatingAccount(false);
-                }}
+              <Divider sx={{ my: 2 }} />
+              <Button
+                variant="outlined"
+                color="secondary"
+                className="register"
+                fullWidth
+                onClick={() => setCreatingAccount(false)}
               >
                 {texts.CANCEL}
-              </button>
+              </Button>
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import CardInCollection from "./CardInCollection";
 import texts from "../data/texts";
+import Button from "@mui/material/Button";
 
 export default function Collection(props) {
   const [collection, setCollection] = useState(props.collection);
@@ -25,7 +26,7 @@ export default function Collection(props) {
           {collection.name}
 
           <Link to={`add/${collection.id}`}>
-            <button className="orange ">{texts.ADD_CARD}</button>
+            <Button >{texts.ADD_CARD}</Button>
           </Link>
         </div>
 
