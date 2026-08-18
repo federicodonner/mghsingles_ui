@@ -102,6 +102,8 @@ const texts = {
   VARIANT_etched: "Foil etched",
   ONLY_FINISH: "Solo existe en",
   WISHLIST_EDIT: "Preferencias",
+  WISHLIST_QUANTITY: "Cantidad",
+  WISHLIST_WANT: "Querés",
   WISHLIST_CLOSE: "Cerrar",
   WISHLIST_SAVE: "Guardar preferencias",
   WISHLIST_SAVED: "Preferencias guardadas.",

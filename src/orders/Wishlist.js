@@ -8,6 +8,8 @@ import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
 import CardNameAutocomplete from "./CardNameAutocomplete";
 
 // Entries are card names, not printings — so one entry covers every printing
@@ -23,6 +25,9 @@ export default function Wishlist() {
   // The chosen suggestion, not free text: the field only yields a real card
   // name, so an entry can never be for a card that does not exist.
   const [chosen, setChosen] = useState(null);
+  // 1 to 4 — the deck limit. Wanting more of one card is a conversation with
+  // the shop rather than a wishlist row.
+  const [quantity, setQuantity] = useState(1);
 
   const navigate = useNavigate();
 
@@ -67,9 +72,10 @@ export default function Wishlist() {
     accessAPI(
       "POST",
       "wishlist",
-      { name: chosen },
+      { name: chosen, quantity },
       () => {
         setChosen(null);
+        setQuantity(1);
         load();
       },
       (response) => alert(response.message)
@@ -103,6 +109,19 @@ export default function Wishlist() {
           useFlexGap
         >
           <CardNameAutocomplete value={chosen} onChange={setChosen} />
+          <TextField
+            select
+            label={texts.WISHLIST_QUANTITY}
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            sx={{ flex: "0 0 auto", width: 110 }}
+          >
+            {[1, 2, 3, 4].map((n) => (
+              <MenuItem value={n} key={n}>
+                {n}
+              </MenuItem>
+            ))}
+          </TextField>
           {/* Disabled until a real card is picked — submitting half-typed text
               would create an entry that never matches anything. */}
           <Button type="submit" disabled={!chosen}>

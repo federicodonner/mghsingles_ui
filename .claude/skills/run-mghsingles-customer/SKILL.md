@@ -136,6 +136,11 @@ EOF
 
 ## Gotchas
 
+- **A wishlist entry can ask for 1-4 copies.** The picker sits beside the card
+  autocomplete on the add form and again in the preferences editor; the row
+  shows an `x3` chip only when it is more than one, since `x1` on every row is
+  noise. The API caps and clamps, so a bad value cannot get in.
+
 - **The wishlist shows wants, not stock.** No availability badge, no in-stock
   lines, no "we have some but they do not match" note — just the card name and
   the chosen preferences. The name field is a MUI `Autocomplete` fed by
