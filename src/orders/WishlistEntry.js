@@ -105,11 +105,6 @@ export default function WishlistEntry(props) {
     <div className="wishlistRow">
       <div className="wishlistHead">
         <span className="wishlistName">{entry.name}</span>
-        <span
-          className={entry.inStock.length ? "stockBadge in" : "stockBadge out"}
-        >
-          {entry.inStock.length ? texts.IN_STOCK_NOW : texts.NOT_IN_STOCK}
-        </span>
         <Button size="small" onClick={toggleOpen}>
           {open ? texts.WISHLIST_CLOSE : texts.WISHLIST_EDIT}
         </Button>
@@ -263,35 +258,6 @@ export default function WishlistEntry(props) {
         </div>
       )}
 
-      {/* What is purchasable right now and passes the filters. */}
-      {entry.inStock.map((card) => (
-        <div className="wishlistStock" key={card.cardid}>
-          <span className="lineSet">
-            {(card.cardsetcode ?? "").toUpperCase()}
-          </span>
-          <span className="lineMeta">{card.condition}</span>
-          <span className="lineMeta">{card.language}</span>
-          {isFoil(card.variant) && (
-            <span className="lineMeta">{finishLabel(card.variant)}</span>
-          )}
-          <span className="lineMeta">
-            {texts.AVAILABLE_NOW}: {card.available}
-          </span>
-          {card.price !== null && (
-            <span className="linePrice">U$S {card.price}</span>
-          )}
-        </div>
-      ))}
-
-      {/* Distinguishes "the shop has none" from "the shop has some but they
-          do not match what you asked for". */}
-      {!entry.inStock.length && entry.excluded > 0 && (
-        <div className="excludedNote">
-          {texts.WISHLIST_EXCLUDED_1}
-          {entry.excluded}
-          {texts.WISHLIST_EXCLUDED_2}
-        </div>
-      )}
     </div>
   );
 }

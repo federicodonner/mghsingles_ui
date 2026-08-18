@@ -88,9 +88,7 @@ const texts = {
   NO_ORDERS: "Todavía no hiciste ningún pedido.",
   NO_WISHLIST: "Tu lista de deseados está vacía.",
   ADD_WISHLIST: "Agregar a deseados",
-  WISHLIST_PLACEHOLDER: "Nombre exacto de la carta",
-  IN_STOCK_NOW: "Disponible ahora",
-  NOT_IN_STOCK: "Sin stock",
+  WISHLIST_PLACEHOLDER: "Buscá una carta",
   AVAILABLE_NOW: "Disponibles",
   RESERVED_BY_OTHERS: "reservadas",
   PICKUP_NOTE: "Pagas y retiras en la tienda.",
@@ -109,9 +107,9 @@ const texts = {
   WISHLIST_SAVED: "Preferencias guardadas.",
   WISHLIST_ANY_HINT:
     "Si no marcas nada en una categoría, aceptas cualquiera.",
-  WISHLIST_EXCLUDED_1: "Hay ",
-  WISHLIST_EXCLUDED_2: " en la tienda que no coinciden con tus preferencias.",
   WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
+  AUTOCOMPLETE_HINT: "Escribí al menos dos letras.",
+  AUTOCOMPLETE_NONE: "No hay cartas con ese nombre.",
 
   // Storefront search. The options offered are built from what the shop
   // actually holds, so these label real choices rather than the whole game.

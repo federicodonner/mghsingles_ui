@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../header/Header";
 import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,8 @@ import { accessAPI, logout } from "../utils/fetchFunctions";
 import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
+import CardNameAutocomplete from "./CardNameAutocomplete";
 
 // Entries are card names, not printings — so one entry covers every printing
 // and condition the shop might take in. Each row says what is on sale for it
@@ -19,7 +20,9 @@ export default function Wishlist() {
   // they are fetched once here rather than per row.
   const [conditions, setConditions] = useState([]);
   const [languages, setLanguages] = useState([]);
-  const nameRef = useRef(null);
+  // The chosen suggestion, not free text: the field only yields a real card
+  // name, so an entry can never be for a card that does not exist.
+  const [chosen, setChosen] = useState(null);
 
   const navigate = useNavigate();
 
@@ -60,14 +63,13 @@ export default function Wishlist() {
 
   function addEntry(e) {
     e.preventDefault();
-    const name = nameRef.current.value.trim();
-    if (!name) return;
+    if (!chosen) return;
     accessAPI(
       "POST",
       "wishlist",
-      { name },
+      { name: chosen },
       () => {
-        nameRef.current.value = "";
+        setChosen(null);
         load();
       },
       (response) => alert(response.message)
@@ -90,16 +92,23 @@ export default function Wishlist() {
       <div className="ordersContainer">
         <div className="title">{texts.MY_WISHLIST}</div>
 
-        <form className="wishlistForm" onSubmit={addEntry}>
-          <TextField
-            type="text"
-            placeholder={texts.WISHLIST_PLACEHOLDER}
-            inputRef={nameRef}
-          />
-          <Button type="submit">
+        <Stack
+          component="form"
+          onSubmit={addEntry}
+          direction="row"
+          spacing={1}
+          alignItems="flex-start"
+          className="wishlistForm"
+          flexWrap="wrap"
+          useFlexGap
+        >
+          <CardNameAutocomplete value={chosen} onChange={setChosen} />
+          {/* Disabled until a real card is picked — submitting half-typed text
+              would create an entry that never matches anything. */}
+          <Button type="submit" disabled={!chosen}>
             {texts.ADD_WISHLIST}
           </Button>
-        </form>
+        </Stack>
 
         {loader && <Loader color="orange" />}
         {!loader && !entries.length && (

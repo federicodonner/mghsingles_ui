@@ -136,6 +136,17 @@ EOF
 
 ## Gotchas
 
+- **The wishlist shows wants, not stock.** No availability badge, no in-stock
+  lines, no "we have some but they do not match" note — just the card name and
+  the chosen preferences. The name field is a MUI `Autocomplete` fed by
+  `card/names`, deliberately NOT `freeSolo`: entries are matched against stock
+  by name, so free text lets a typo create an entry that silently never matches.
+  The add button stays disabled until a real card is picked.
+
+  Driving it: the field is `input[role="combobox"]`, and note the form contains
+  **two** buttons — the Autocomplete's own popup toggle comes first, so
+  `click form button` hits that one. Use `click button[type=submit]`.
+
 - **The storefront shows nothing until you search.** `/` opens with the search
   panel and an empty state; it no longer loads every card in the shop as full
   card art on first paint. Results come from `store/search` and are stock only,
