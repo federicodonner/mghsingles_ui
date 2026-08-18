@@ -8,13 +8,24 @@ import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
 import CardNameAutocomplete from "./CardNameAutocomplete";
 
 // Entries are card names, not printings — so one entry covers every printing
 // and condition the shop might take in. Each row says what is on sale for it
 // right now.
+// Alphabetical, except for anything added in this sitting — those sit on top,
+// newest first, so a row you just created is where you are already looking.
+// `recent` is component state, so a reload settles everything into name order.
+function sortForDisplay(entries, recent) {
+  const rank = new Map(recent.map((id, i) => [id, i]));
+  return entries.slice().sort((a, b) => {
+    const ra = rank.has(a.id) ? rank.get(a.id) : Infinity;
+    const rb = rank.has(b.id) ? rank.get(b.id) : Infinity;
+    if (ra !== rb) return ra - rb;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export default function Wishlist() {
   const [loader, setLoader] = useState(true);
   const [entries, setEntries] = useState([]);
@@ -25,9 +36,13 @@ export default function Wishlist() {
   // The chosen suggestion, not free text: the field only yields a real card
   // name, so an entry can never be for a card that does not exist.
   const [chosen, setChosen] = useState(null);
-  // 1 to 4 — the deck limit. Wanting more of one card is a conversation with
-  // the shop rather than a wishlist row.
-  const [quantity, setQuantity] = useState(1);
+  // Entries added in this sitting, newest first.
+  //
+  // The API returns the list alphabetically, which is what you want for finding
+  // a card — but a row you just added would drop into the middle of the list
+  // and look like nothing happened. These float to the top until the page is
+  // reloaded, so the thing you just did stays where you are looking.
+  const [recent, setRecent] = useState([]);
 
   const navigate = useNavigate();
 
@@ -72,10 +87,10 @@ export default function Wishlist() {
     accessAPI(
       "POST",
       "wishlist",
-      { name: chosen, quantity },
-      () => {
+      { name: chosen },
+      (response) => {
         setChosen(null);
-        setQuantity(1);
+        if (response?.id) setRecent((ids) => [response.id, ...ids]);
         load();
       },
       (response) => alert(response.message)
@@ -109,19 +124,6 @@ export default function Wishlist() {
           useFlexGap
         >
           <CardNameAutocomplete value={chosen} onChange={setChosen} />
-          <TextField
-            select
-            label={texts.WISHLIST_QUANTITY}
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            sx={{ flex: "0 0 auto", width: 110 }}
-          >
-            {[1, 2, 3, 4].map((n) => (
-              <MenuItem value={n} key={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </TextField>
           {/* Disabled until a real card is picked — submitting half-typed text
               would create an entry that never matches anything. */}
           <Button type="submit" disabled={!chosen}>
@@ -135,7 +137,7 @@ export default function Wishlist() {
         )}
 
         {!loader &&
-          entries.map((entry) => (
+          sortForDisplay(entries, recent).map((entry) => (
             <WishlistEntry
               key={entry.id}
               entry={entry}

@@ -3,7 +3,6 @@ import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { finishLabel, isFoil } from "../utils/finishes";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
@@ -26,6 +25,24 @@ export default function WishlistEntry(props) {
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [saving, setSaving] = useState(false);
   const [wanted, setWanted] = useState(entry.quantity ?? 1);
+
+  // Shown immediately and written behind it. On failure the control goes back
+  // to what the server still holds, rather than displaying a number that was
+  // never saved.
+  function changeQuantity(next) {
+    const previous = wanted;
+    setWanted(next);
+    accessAPI(
+      "PUT",
+      `wishlist/${entry.id}`,
+      { quantity: next },
+      () => {},
+      (response) => {
+        setWanted(previous);
+        alert(response.message);
+      }
+    );
+  }
 
   // Local working copy so ticking boxes does not save on every click.
   const [pickedVersions, setPickedVersions] = useState(entry.versions);
@@ -70,7 +87,6 @@ export default function WishlistEntry(props) {
       "PUT",
       `wishlist/${entry.id}`,
       {
-        quantity: wanted,
         versions: pickedVersions,
         languageids: pickedLanguages,
         conditionids: pickedConditions,
@@ -110,11 +126,24 @@ export default function WishlistEntry(props) {
     <div className="wishlistRow">
       <div className="wishlistHead">
         <span className="wishlistName">{entry.name}</span>
-        {/* Only worth saying when it is more than one — a "x1" on every row is
-            noise. */}
-        {entry.quantity > 1 && (
-          <Chip size="small" label={`x${entry.quantity}`} />
-        )}
+
+        {/* How many you want, next to the card it belongs to. Saved on change:
+            it is one value with an obvious meaning, so making it wait behind
+            the preferences editor's Save would be a step for nothing. */}
+        <TextField
+          select
+          size="small"
+          label={texts.WISHLIST_QUANTITY}
+          value={wanted}
+          onChange={(e) => changeQuantity(Number(e.target.value))}
+          sx={{ width: 96 }}
+        >
+          {[1, 2, 3, 4].map((n) => (
+            <MenuItem value={n} key={n}>
+              {n}
+            </MenuItem>
+          ))}
+        </TextField>
         <Button size="small" onClick={toggleOpen}>
           {open ? texts.WISHLIST_CLOSE : texts.WISHLIST_EDIT}
         </Button>
@@ -148,21 +177,6 @@ export default function WishlistEntry(props) {
       {open && (
         <div className="constraintEditor">
           <div className="constraintHint">{texts.WISHLIST_ANY_HINT}</div>
-
-          <TextField
-            select
-            size="small"
-            label={texts.WISHLIST_QUANTITY}
-            value={wanted}
-            onChange={(e) => setWanted(Number(e.target.value))}
-            sx={{ width: 110, mb: 1 }}
-          >
-            {[1, 2, 3, 4].map((n) => (
-              <MenuItem value={n} key={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </TextField>
 
           <div className="constraintColumn versions">
               <div className="constraintTitle">{texts.WISHLIST_VERSIONS}</div>

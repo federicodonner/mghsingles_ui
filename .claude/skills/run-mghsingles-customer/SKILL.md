@@ -136,10 +136,15 @@ EOF
 
 ## Gotchas
 
-- **A wishlist entry can ask for 1-4 copies.** The picker sits beside the card
-  autocomplete on the add form and again in the preferences editor; the row
-  shows an `x3` chip only when it is more than one, since `x1` on every row is
-  noise. The API caps and clamps, so a bad value cannot get in.
+- **A wishlist entry can ask for 1-4 copies.** The picker sits on the row
+  itself, next to the card it belongs to, and saves on change — adding is just
+  picking a name. The API caps and clamps, so a bad value cannot get in.
+
+- **The list is alphabetical, except for this sitting's additions.** Anything
+  added since the page loaded sits on top, newest first, so a row you just
+  created does not drop into the middle of the list and look like nothing
+  happened. The "recent" list is component state, so a reload settles everything
+  into name order — that is deliberate, not a bug to fix.
 
 - **The wishlist shows wants, not stock.** No availability badge, no in-stock
   lines, no "we have some but they do not match" note — just the card name and
