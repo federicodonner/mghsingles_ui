@@ -41,10 +41,11 @@ export default function StoreResult({ card, loggedIn }) {
       className="storeResult"
       /* The tile itself is the flex column, so `mt: auto` on the button has the
          full height to push against and the buttons line up across a row even
-         when one card has no price and another does. */
+         when one card has no price and another does.
+         No `height: 100%` — a grid item already stretches to its row, and
+         asking for it as well is what made the tile overflow. */
       sx={{
         p: 1.5,
-        height: "100%",
         display: "flex",
         flexDirection: "column",
         gap: 1.25,
