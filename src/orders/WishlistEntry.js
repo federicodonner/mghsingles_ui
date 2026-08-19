@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "../utils/toast";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { finishLabel, isFoil } from "../utils/finishes";
@@ -39,7 +40,7 @@ export default function WishlistEntry(props) {
       () => {},
       (response) => {
         setWanted(previous);
-        alert(response.message);
+        toast(response.message);
       }
     );
   }
@@ -99,7 +100,7 @@ export default function WishlistEntry(props) {
       },
       (response) => {
         setSaving(false);
-        alert(response.message);
+        toast(response.message);
       }
     );
   }

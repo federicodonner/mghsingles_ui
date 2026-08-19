@@ -12,9 +12,10 @@ import { logout, accessAPI } from "../utils/fetchFunctions";
 // step with the others — which is how the old menu ended up with each link
 // carrying its own copy of the active-class expression.
 const LINKS = [
-  { to: "/orders", label: texts.ORDERS, badge: "unread" },
+  { to: "/home", label: texts.STORE },
   { to: "/wishlist", label: texts.WISHLIST },
   { to: "/mystorage", label: texts.MY_STORAGE },
+  { to: "/orders", label: texts.ORDERS, badge: "unread" },
   { to: "/sales", label: texts.MY_SALES },
   { to: "/account", label: texts.MY_ACCOUNT },
 ];

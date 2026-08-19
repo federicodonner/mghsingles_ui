@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "../utils/toast";
+import { confirmDialog } from "../utils/confirm";
 import Header from "../header/Header";
+import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
@@ -7,6 +10,7 @@ import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import "./orders.css";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 // A date arrives as unix seconds, not milliseconds.
 function formatDate(seconds) {
@@ -38,7 +42,7 @@ export default function Orders() {
         setLoader(false);
       },
       (response) => {
-        alert(response.message);
+        toast(response.message);
         logout();
         navigate("/login");
       }
@@ -68,18 +72,18 @@ export default function Orders() {
       `notification/${item.id}`,
       null,
       () => setNotifications((list) => list.filter((n) => n.id !== item.id)),
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
-  function cancelOrder(order) {
-    if (!window.confirm(texts.CONFIRM_CANCEL_ORDER)) return;
+  async function cancelOrder(order) {
+    if (!(await confirmDialog(texts.CONFIRM_CANCEL_ORDER))) return;
     accessAPI(
       "DELETE",
       `order/${order.id}`,
       null,
       () => load(),
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
@@ -114,8 +118,7 @@ export default function Orders() {
             </div>
           ))}
 
-          <div className="title">{texts.TO_PICK_UP}</div>
-          <div className="pickupExplain">{texts.PICKUP_EXPLAIN}</div>
+          <Title title={texts.TO_PICK_UP} subtitle={texts.PICKUP_EXPLAIN} />
           {!pending.length && (
             <div className="emptyState">{texts.NOTHING_TO_PICK_UP}</div>
           )}
@@ -143,9 +146,6 @@ export default function Orders() {
                   </Button>
                 )}
               </div>
-
-              {order.note && <div className="orderNote">{order.note}</div>}
-
               <div className="orderLines">
                 {order.lines.map((line) => (
                   <div className="orderLine" key={line.id}>
@@ -183,7 +183,9 @@ export default function Orders() {
           {/* Closed orders are history, not something to act on. */}
           {closed.length > 0 && (
             <>
-              <div className="title historyTitle">{texts.ORDER_HISTORY}</div>
+              <Box className="historyTitle">
+                <Title title={texts.ORDER_HISTORY} />
+              </Box>
               {closed.map((order) => (
                 <div className={`orderCard ${order.status}`} key={order.id}>
                   <div className="orderHeader">

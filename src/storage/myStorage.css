@@ -4,26 +4,6 @@
   padding-bottom: 60px;
 }
 
-/* ---- new container form --------------------------------------------- */
-.myStorageForm {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.myStorageForm .formTitle {
-  font-size: 1.1em;
-  color: #33586b;
-  margin-right: 10px;
-}
-
-/* Appearance comes from the theme now; only the layout is ours. */
-.myStorageForm .MuiTextField-root {
-  min-width: 180px;
-}
-
 /* ---- the list -------------------------------------------------------- */
 .myStorageList .title {
   font-size: 1.3em;

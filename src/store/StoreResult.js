@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -36,36 +37,36 @@ const ART_SX = {
 export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }) {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
+  // Copies of this row the customer bought in this sitting. Availability on
+  // screen drops with it, since the copies are reserved server-side.
+  const [bought, setBought] = useState(0);
 
-  // Pin the entry to THIS copy — printing, grade, language and finish.
+  // Buy THIS copy — printing, grade, language and finish, exactly as clicked.
   //
-  // Not just the name. Everything on this page is in stock, so the next
-  // matcher run will set the card aside within minutes; an entry that only
-  // named the card would let it bag any other printing the shop happens to
-  // have. The customer clicked a Spanish foil from Secret Lair, and that is
-  // what should end up in their bag.
-  function addToWishlist() {
+  // Everything on this page is in stock, so there is nothing to wait for: the
+  // API raises the wishlist match itself and puts the copy straight into the
+  // customer's bag, reserved away from everyone else. The wishlist road still
+  // exists — on the Deseados page — for cards the shop does not have yet.
+  function buyCard() {
     setAdding(true);
     accessAPI(
       "POST",
-      "wishlist",
-      {
-        name: card.name,
-        versions: [card.scryfallid],
-        conditionids: [card.conditionid],
-        languageids: [card.languageid],
-        variants: [card.variant],
-      },
-      () => {
+      "wishlist/buy",
+      { cardid: card.id },
+      (response) => {
         setAdding(false);
+        setBought((n) => n + 1);
+        toast(response.message, "success");
         onWishlisted(card);
       },
       (response) => {
         setAdding(false);
-        alert(response.message);
+        toast(response.message);
       }
     );
   }
+
+  const availableNow = Math.max(0, (card.available ?? 0) - bought);
 
   return (
     <Card
@@ -135,8 +136,16 @@ export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }
             </Typography>
           )}
         <Typography variant="body2" color="text.secondary">
-          {texts.AVAILABLE_NOW}: {card.available}
+          {texts.AVAILABLE_NOW}: {availableNow}
         </Typography>
+        {/* Covered by a wishlist entry — worth knowing, but no reason to stop
+            a purchase: the entry answers itself when the copy lands in the
+            bag. */}
+        {wishlisted && bought === 0 && (
+          <Typography variant="caption" color="text.secondary">
+            {texts.IN_WISHLIST}
+          </Typography>
+        )}
       </Box>
 
         {/* Pushed to the bottom so the buttons line up across a row of tiles
@@ -146,11 +155,13 @@ export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }
           size="small"
           fullWidth
           sx={{ mt: "auto" }}
-          variant={wishlisted ? "outlined" : "contained"}
-          disabled={adding || wishlisted}
-          onClick={addToWishlist}
+          variant={availableNow <= 0 ? "outlined" : "contained"}
+          disabled={adding || availableNow <= 0}
+          onClick={buyCard}
         >
-          {wishlisted ? texts.IN_WISHLIST : texts.ADD_TO_WISHLIST}
+          {/* Still buyable while copies remain — somebody may want two. Only
+              when their purchase took the last one does the button retire. */}
+          {availableNow <= 0 && bought > 0 ? texts.RESERVED_FOR_YOU : texts.BUY_NOW}
         </Button>
       ) : (
         <Button

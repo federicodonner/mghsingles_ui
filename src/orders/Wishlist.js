@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "../utils/toast";
 import Header from "../header/Header";
+import Title from "../elementos/Title";
+import SideForm from "../elementos/SideForm";
 import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
@@ -43,6 +46,8 @@ export default function Wishlist() {
   // and look like nothing happened. These float to the top until the page is
   // reloaded, so the thing you just did stays where you are looking.
   const [recent, setRecent] = useState([]);
+  // Whether the add-to-wishlist form is slid out.
+  const [adding, setAdding] = useState(false);
 
   const navigate = useNavigate();
 
@@ -56,7 +61,7 @@ export default function Wishlist() {
         setLoader(false);
       },
       (response) => {
-        alert(response.message);
+        toast(response.message);
         logout();
         navigate("/login");
       }
@@ -93,7 +98,7 @@ export default function Wishlist() {
         if (response?.id) setRecent((ids) => [response.id, ...ids]);
         load();
       },
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
@@ -103,7 +108,7 @@ export default function Wishlist() {
       `wishlist/${entry.id}`,
       null,
       () => load(),
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
@@ -111,25 +116,12 @@ export default function Wishlist() {
     <div>
       <Header showMenu={true} loggedIn={true} />
       <div className="ordersContainer">
-        <div className="title">{texts.MY_WISHLIST}</div>
-
-        <Stack
-          component="form"
-          onSubmit={addEntry}
-          direction="row"
-          spacing={1}
-          alignItems="flex-start"
-          className="wishlistForm"
-          flexWrap="wrap"
-          useFlexGap
-        >
-          <CardNameAutocomplete value={chosen} onChange={setChosen} />
-          {/* Disabled until a real card is picked — submitting half-typed text
-              would create an entry that never matches anything. */}
-          <Button type="submit" disabled={!chosen}>
-            {texts.ADD_WISHLIST}
-          </Button>
-        </Stack>
+        <Title
+          title={texts.MY_WISHLIST}
+          buttons={[
+            { label: texts.ADD_WISHLIST, onClick: () => setAdding(true) },
+          ]}
+        />
 
         {loader && <Loader color="orange" />}
         {!loader && !entries.length && (
@@ -148,6 +140,23 @@ export default function Wishlist() {
             />
           ))}
       </div>
+
+      {/* Stays open across adds — a wishlist grows a few cards at a time, and
+          each new entry floats to the top of the list behind the form. */}
+      <SideForm
+        open={adding}
+        onClose={() => setAdding(false)}
+        title={texts.ADD_WISHLIST}
+      >
+        <Stack component="form" onSubmit={addEntry} spacing={2}>
+          <CardNameAutocomplete value={chosen} onChange={setChosen} />
+          {/* Disabled until a real card is picked — submitting half-typed text
+              would create an entry that never matches anything. */}
+          <Button type="submit" disabled={!chosen}>
+            {texts.ADD_WISHLIST}
+          </Button>
+        </Stack>
+      </SideForm>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Header from "../header/Header";
+import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import StoreSearch from "./StoreSearch";
 import StoreResult from "./StoreResult";
@@ -147,17 +148,12 @@ export default function Store() {
 
         {!searching && results && (
           <>
-            <Stack
-              direction="row"
-              alignItems="baseline"
-              spacing={1}
-              sx={{ mt: 3, mb: 1 }}
-            >
-              <Typography variant="h6">{texts.SEARCH_RESULTS}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {results.numberOfCards} {texts.CARDS}
-              </Typography>
-            </Stack>
+            <Box sx={{ mt: 3 }}>
+              <Title
+                title={texts.SEARCH_RESULTS}
+                subtitle={`${results.numberOfCards} ${texts.CARDS}`}
+              />
+            </Box>
 
             {results.truncated && (
               <Alert severity="warning" sx={{ mb: 2 }}>

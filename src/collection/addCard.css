@@ -1,33 +1,15 @@
-.versionContainer {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.addCardModal {
-  background-color: #3a606e;
-  width: 390px;
-  height: 350px;
-  top: 100px;
-  margin-left: -195px;
-  color: white;
-  padding: 24px 24px;
-  font-size: 14pt;
-}
-
-.cardSelectors {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-}
-
-.cardSelectors div {
-  margin-bottom: 30px;
-}
-
-.addCardModal .row .cardImage img {
+.cardImage img {
   width: 200px;
+  border-radius: 8px;
+}
+
+/* Kept tall enough to be observable even between loads, so the infinite
+   scroll always has something to intersect. */
+.versionsSentinel {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Finish is a separate control rather than another version tile: nonfoil and

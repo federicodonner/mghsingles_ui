@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import Header from "../header/Header";
@@ -82,8 +83,15 @@ export default function Login() {
       },
       (response) => {
         setLoginLoader(false);
-        loginUsername.current.value = enteredLoginUsername;
-        alert(response.message);
+        toast(response.message);
+        // The form is unmounted while the loader shows, so the ref is empty
+        // until React puts the input back; restore once it exists again.
+        // (Writing to the null ref here used to throw, which is why the old
+        // alert() never appeared on a failed login.)
+        setTimeout(() => {
+          if (loginUsername.current)
+            loginUsername.current.value = enteredLoginUsername;
+        }, 0);
       }
     );
   }
@@ -135,11 +143,15 @@ export default function Login() {
       },
       (response) => {
         setLoginLoader(false);
-        // Restores the data entered
-        createUsername.current.value = createUsernameData;
-        createName.current.value = createNameData;
-        createEmail.current.value = createEmailData;
-        alert(response.message);
+        toast(response.message);
+        // Restore after React re-mounts the form — same null-ref timing as
+        // the login path above.
+        setTimeout(() => {
+          if (createUsername.current)
+            createUsername.current.value = createUsernameData;
+          if (createName.current) createName.current.value = createNameData;
+          if (createEmail.current) createEmail.current.value = createEmailData;
+        }, 0);
       }
     );
   }

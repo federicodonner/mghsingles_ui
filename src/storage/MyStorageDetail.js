@@ -1,16 +1,22 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { toast } from "../utils/toast";
+import { useParams, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Header from "../header/Header";
+import Title from "../elementos/Title";
+import SideForm from "../elementos/SideForm";
+import AddCardPanel from "../collection/AddCardPanel";
 import Loader from "../loader/Loader";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
-import { isFoil, finishLabel } from "../utils/finishes";
+import BinderEditor from "./BinderEditor";
+import BoxEditor from "./BoxEditor";
 import "./myStorage.css";
 
 const TYPE_LABELS = {
@@ -26,18 +32,23 @@ const STATE_LABELS = {
   returning: texts.STATE_RETURNING,
 };
 
-// What is inside one of the customer's containers.
+// One of the customer's containers, opened.
 //
 // EVERY container opens, whatever state it is in — the cards are the customer's
-// whether the shop is holding them or not, and being unable to look at your own
-// binder because it is on a shelf would be absurd. Only editing is gated: a
-// container the shop holds cannot be rearranged from here, because the cards
-// are not in front of you.
+// whether the shop is holding them or not. Only editing is gated, because a
+// container on the shop's shelf is not in front of you to rearrange.
+//
+// How it is shown depends on what it is: a binder is pages of pockets you drag
+// cards around, a sorted box is a list you can reorder, an unsorted box is a
+// list in alphabetical order because it has no order of its own.
 export default function MyStorageDetail() {
   const { storageId } = useParams();
   const navigate = useNavigate();
   const [loader, setLoader] = useState(true);
   const [unit, setUnit] = useState(null);
+  const [leaving, setLeaving] = useState(false);
+  // Whether the add-a-card sidebar is slid out.
+  const [adding, setAdding] = useState(false);
 
   const load = useCallback(() => {
     accessAPI(
@@ -49,7 +60,7 @@ export default function MyStorageDetail() {
         setLoader(false);
       },
       (response) => {
-        alert(response.message);
+        toast(response.message);
         if (response.status === 401) {
           logout();
           navigate("/login");
@@ -64,37 +75,87 @@ export default function MyStorageDetail() {
     load();
   }, [load]);
 
-  function removePlacement(placementid) {
+  // Every mutation re-reads the container rather than patching state in place.
+  // Depths, sequences and stack membership all shift when a card moves, and
+  // guessing the new arrangement client-side is how a view starts disagreeing
+  // with what is actually stored.
+  const after = (response) => load();
+  const onError = (response) => toast(response.message);
+
+  const move = (placementid, position) =>
+    accessAPI(
+      "PUT",
+      `mystorage/placement/${placementid}/position`,
+      position,
+      after,
+      onError
+    );
+
+  const duplicate = (placementid) =>
+    accessAPI(
+      "POST",
+      `mystorage/placement/${placementid}/duplicate`,
+      null,
+      after,
+      onError
+    );
+
+  const remove = (placementid) =>
     accessAPI(
       "DELETE",
       `mystorage/placement/${placementid}`,
       null,
-      () => load(),
-      (response) => alert(response.message)
+      after,
+      onError
     );
+
+  const reorder = (placementids) =>
+    accessAPI(
+      "PUT",
+      `mystorage/${storageId}/order`,
+      { placementids },
+      after,
+      onError
+    );
+
+  // While the shop holds the container the customer cannot rearrange it, but
+  // the cards are still theirs: asking for one back raises a withdrawal on
+  // the shop's queue, and nothing moves until somebody physically pulls it.
+  const withdrawable = Boolean(unit && !unit.editable && unit.forsale);
+  const requestWithdraw = (placementid) =>
+    accessAPI(
+      "POST",
+      `mystorage/placement/${placementid}/withdraw`,
+      null,
+      (response) => toast(response.message, "success"),
+      onError
+    );
+
+  const standbyCount = unit?.standby?.length ?? 0;
+
+  // Leaving with cards still in stand-by throws them away — a card with nowhere
+  // to live is exactly what this model does not allow. Warned about first,
+  // because it is destructive and not obvious.
+  function leave() {
+    if (unit?.editable && standbyCount > 0) {
+      setLeaving(true);
+      return;
+    }
+    navigate("/mystorage");
   }
 
-  // Binders come back as pages of pockets, boxes as a flat list. Flattened here
-  // so one renderer covers both — the customer is reading a list of cards
-  // either way, and the pocket coordinates are shown as a label rather than
-  // reproduced as a grid.
-  const cards = unit
-    ? unit.type === "binder"
-      ? (unit.pages ?? [])
-          .filter(Boolean)
-          .flatMap((page) =>
-            page.pockets.flatMap((pocket) =>
-              pocket.cards.map((card) => ({
-                ...card,
-                where: `${texts.PAGE} ${page.page} · ${texts.POCKET} ${pocket.pocket}`,
-              }))
-            )
-          )
-      : (unit.cards ?? []).map((card) => ({
-          ...card,
-          where: card.sequence ? `#${card.sequence}` : null,
-        }))
-    : [];
+  function discardAndLeave() {
+    accessAPI(
+      "POST",
+      `mystorage/${storageId}/discard-standby`,
+      null,
+      () => navigate("/mystorage"),
+      (response) => {
+        setLeaving(false);
+        toast(response.message);
+      }
+    );
+  }
 
   return (
     <div>
@@ -103,119 +164,104 @@ export default function MyStorageDetail() {
         {loader && <Loader color="blue" />}
         {!loader && unit && (
           <>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1.5}
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ mb: 2 }}
-            >
-              <Button
-                component={Link}
-                to="/mystorage"
-                variant="outlined"
-                size="small"
-              >
-                {texts.BACK_TO_STORAGE}
-              </Button>
-              <Typography variant="h6">{unit.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {TYPE_LABELS[unit.type]}
-              </Typography>
-              <Chip
-                size="small"
-                variant={unit.forsale ? "filled" : "outlined"}
-                color={unit.forsale ? "success" : "default"}
-                label={STATE_LABELS[unit.state]}
-              />
-            </Stack>
-
-            {unit.editable && (
-              <Button
-                component={Link}
-                to={`/mystorage/${storageId}/add`}
-                sx={{ mb: 2 }}
-              >
-                {texts.ADD_CARD}
-              </Button>
-            )}
+            <Title
+              // Through leave(), not a bare navigate: the stand-by discard
+              // warning has to fire from the arrow too.
+              onBack={leave}
+              title={unit.name}
+              subtitle={`${unit.cardcount} ${texts.CARDS}`}
+              tags={[
+                TYPE_LABELS[unit.type],
+                {
+                  label: STATE_LABELS[unit.state],
+                  color: unit.forsale ? "success" : undefined,
+                },
+              ]}
+              buttons={
+                unit.editable
+                  ? [{ label: texts.ADD_CARD, onClick: () => setAdding(true) }]
+                  : []
+              }
+            />
 
             {/* Says why the cards cannot be moved, rather than leaving the
-                absence of buttons to be puzzled over. */}
+                absent controls to be puzzled over. */}
             {!unit.editable && (
               <Alert severity="info" sx={{ mb: 2 }}>
                 {texts.STORAGE_LOCKED}
               </Alert>
             )}
 
-            {!cards.length && (
-              <Alert severity="info">{texts.CONTAINER_EMPTY}</Alert>
+            {unit.type === "binder" ? (
+              <BinderEditor
+                unit={unit}
+                // The owner holds it: they may both rearrange and change what
+                // is in it. While the shop holds it, neither — the shop does
+                // the tidying then, from its own side.
+                arrange={unit.editable}
+                mutate={unit.editable}
+                withdrawable={withdrawable}
+                onMove={move}
+                onDuplicate={duplicate}
+                onRemove={remove}
+                onWithdraw={requestWithdraw}
+              />
+            ) : (
+              <>
+                {!unit.cards?.length && (
+                  <Alert severity="info">{texts.CONTAINER_EMPTY}</Alert>
+                )}
+                {unit.type === "unsorted_box" && unit.cards?.length > 0 && (
+                  <Alert severity="info" sx={{ mb: 1.5 }}>
+                    {texts.UNSORTED_HINT}
+                  </Alert>
+                )}
+                <BoxEditor
+                  unit={unit}
+                  arrange={unit.editable}
+                  mutate={unit.editable}
+                  withdrawable={withdrawable}
+                  onRemove={remove}
+                  onReorder={reorder}
+                  onWithdraw={requestWithdraw}
+                />
+              </>
             )}
-
-            <Stack spacing={1}>
-              {cards.map((card) => (
-                <Box key={card.placementid} className="containerCard">
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    alignItems="center"
-                    flexWrap="wrap"
-                    useFlexGap
-                  >
-                    {card.image && (
-                      <Box
-                        component="img"
-                        src={card.image}
-                        alt={card.name}
-                        loading="lazy"
-                        sx={{
-                          width: 42,
-                          height: 59,
-                          objectFit: "cover",
-                          borderRadius: 0.5,
-                          flex: "0 0 auto",
-                        }}
-                      />
-                    )}
-                    <Typography sx={{ fontWeight: 600, flex: "1 1 180px" }}>
-                      {card.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {card.cardsetname}
-                    </Typography>
-                    <Chip size="small" label={card.condition} />
-                    <Chip size="small" variant="outlined" label={card.language} />
-                    {isFoil(card.variant) && (
-                      <Chip
-                        size="small"
-                        color="secondary"
-                        label={finishLabel(card.variant)}
-                      />
-                    )}
-                    {card.where && (
-                      <Typography variant="caption" color="text.secondary">
-                        {card.where}
-                      </Typography>
-                    )}
-                    {unit.editable && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="error"
-                        sx={{ ml: "auto" }}
-                        onClick={() => removePlacement(card.placementid)}
-                      >
-                        {texts.REMOVE_FROM_CONTAINER}
-                      </Button>
-                    )}
-                  </Stack>
-                </Box>
-              ))}
-            </Stack>
           </>
         )}
       </div>
+
+      {/* Adding stays open across adds: filling a container is a run of
+          them, and every add re-reads the container so the page behind is
+          already current when the sidebar closes. */}
+      {unit && (
+        <SideForm
+          open={adding}
+          onClose={() => setAdding(false)}
+          title={texts.ADD_CARD}
+        >
+          <AddCardPanel unit={unit} onAdded={load} />
+        </SideForm>
+      )}
+
+      <Dialog open={leaving} onClose={() => setLeaving(false)}>
+        <DialogTitle>{texts.STANDBY_DISCARD_TITLE}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {texts.STANDBY_DISCARD_1}
+            {standbyCount}
+            {texts.STANDBY_DISCARD_2}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={() => setLeaving(false)}>
+            {texts.STANDBY_KEEP_EDITING}
+          </Button>
+          <Button color="error" onClick={discardAndLeave}>
+            {texts.STANDBY_DISCARD_CONFIRM}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

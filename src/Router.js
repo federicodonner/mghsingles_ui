@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "./login/Login";
-import AddCard from "./collection/AddCard";
 import Store from "./store/Store";
 import Sales from "./collection/Sales";
 import Account from "./account/Account";
@@ -16,7 +15,6 @@ class Router extends React.Component {
       <Routes>
         <Route path="/" element={<Store />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/mystorage/:storageId/add" element={<AddCard />} />
         <Route path="/sales" element={<Sales />} />
         <Route path="/account" element={<Account />} />
         <Route path="/orders" element={<Orders />} />

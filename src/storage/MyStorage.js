@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from "../utils/toast";
+import { confirmDialog } from "../utils/confirm";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "../header/Header";
+import Title from "../elementos/Title";
+import SideForm from "../elementos/SideForm";
 import Loader from "../loader/Loader";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
@@ -44,6 +48,8 @@ export default function MyStorage() {
   // customer sees their cards now, so a copy with no placement has to be shown
   // somewhere or it simply disappears.
   const [unfiled, setUnfiled] = useState([]);
+  // Whether the new-container form is slid out.
+  const [creating, setCreating] = useState(false);
 
   const nameRef = useRef(null);
   const typeRef = useRef(null);
@@ -60,7 +66,7 @@ export default function MyStorage() {
         setLoader(false);
       },
       (response) => {
-        alert(response.message);
+        toast(response.message);
         logout();
         navigate("/login");
       }
@@ -80,7 +86,8 @@ export default function MyStorage() {
   }, []);
 
   // A container the customer makes starts in their hands, not on sale — they
-  // still have to bring it in and have the shop take delivery.
+  // still have to bring it in and have the shop take delivery. Straight into
+  // the new container afterwards: the reason to create one is to fill it.
   function createUnit(e) {
     e.preventDefault();
     const name = nameRef.current.value.trim();
@@ -89,18 +96,15 @@ export default function MyStorage() {
       "POST",
       "mystorage",
       { name, type: typeRef.current.value },
-      () => {
-        nameRef.current.value = "";
-        load();
-      },
-      (response) => alert(response.message)
+      (response) => navigate(`/mystorage/${response.id}`),
+      (response) => toast(response.message)
     );
   }
 
-  function move(unit, to) {
+  async function move(unit, to) {
     // Retiring is worth a word of warning: the cards stop selling immediately,
     // which is the point, but it is not obvious from a button.
-    if (to === "retired" && !window.confirm(texts.RETIRE_EXPLAIN)) return;
+    if (to === "retired" && !(await confirmDialog(texts.RETIRE_EXPLAIN))) return;
     accessAPI(
       "POST",
       `mystorage/${unit.id}/state`,
@@ -109,7 +113,7 @@ export default function MyStorage() {
         // Copies already promised to a buyer do not come back with the
         // container, so say so rather than letting the count look wrong.
         if (to === "retired" && response.committed > 0) {
-          alert(
+          toast(
             texts.RETIRED_COMMITTED_1 +
               response.committed +
               texts.RETIRED_COMMITTED_2
@@ -117,7 +121,7 @@ export default function MyStorage() {
         }
         load();
       },
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
@@ -129,18 +133,18 @@ export default function MyStorage() {
       `mystorage/${unit.id}`,
       { name: name.trim() },
       () => load(),
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
-  function removeUnit(unit) {
-    if (!window.confirm(texts.CONFIRM_DELETE_STORAGE)) return;
+  async function removeUnit(unit) {
+    if (!(await confirmDialog(texts.CONFIRM_DELETE_STORAGE))) return;
     accessAPI(
       "DELETE",
       `mystorage/${unit.id}`,
       null,
       () => load(),
-      (response) => alert(response.message)
+      (response) => toast(response.message)
     );
   }
 
@@ -150,21 +154,13 @@ export default function MyStorage() {
       {loader && <Loader color="blue" />}
       {!loader && (
         <div className="myStorageContainer">
-          <form className="myStorageForm" onSubmit={createUnit}>
-            <span className="formTitle">{texts.NEW_STORAGE}</span>
-            <TextField type="text" placeholder={texts.STORAGE_NAME} inputRef={nameRef} />
-            <TextField select SelectProps={{ native: true }} inputRef={typeRef} defaultValue="binder">
-              <option value="binder">{texts.BINDER}</option>
-              <option value="sorted_box">{texts.SORTED_BOX}</option>
-              <option value="unsorted_box">{texts.UNSORTED_BOX}</option>
-            </TextField>
-            <Button type="submit">
-              {texts.CREATE}
-            </Button>
-          </form>
-
           <div className="myStorageList">
-            <div className="title">{texts.MY_STORAGE_TITLE}</div>
+            <Title
+              title={texts.MY_STORAGE_TITLE}
+              buttons={[
+                { label: texts.NEW_STORAGE, onClick: () => setCreating(true) },
+              ]}
+            />
             {!units.length && (
               <div className="emptyNote">{texts.NO_STORAGE}</div>
             )}
@@ -220,7 +216,7 @@ export default function MyStorage() {
               cards appear at all. */}
           {unfiled.length > 0 && (
             <div className="myStorageList">
-              <div className="title">{texts.UNFILED_TITLE}</div>
+              <Title title={texts.UNFILED_TITLE} />
               <Alert severity="info" sx={{ mb: 1 }}>
                 {texts.UNFILED_HINT}
               </Alert>
@@ -245,6 +241,34 @@ export default function MyStorage() {
           )}
         </div>
       )}
+
+      <SideForm
+        open={creating}
+        onClose={() => setCreating(false)}
+        title={texts.NEW_STORAGE}
+      >
+        <Stack component="form" onSubmit={createUnit} spacing={2}>
+          <TextField
+            label={texts.STORAGE_NAME}
+            inputRef={nameRef}
+            autoFocus
+            fullWidth
+          />
+          <TextField
+            select
+            SelectProps={{ native: true }}
+            label={texts.STORAGE_TYPE}
+            inputRef={typeRef}
+            defaultValue="binder"
+            fullWidth
+          >
+            <option value="binder">{texts.BINDER}</option>
+            <option value="sorted_box">{texts.SORTED_BOX}</option>
+            <option value="unsorted_box">{texts.UNSORTED_BOX}</option>
+          </TextField>
+          <Button type="submit">{texts.CREATE}</Button>
+        </Stack>
+      </SideForm>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import { accessAPI } from "../utils/fetchFunctions";
 //
 // Suggestions come from the catalogue rather than from stock, because wanting a
 // card the shop does not have is the entire point of a wishlist.
-export default function CardNameAutocomplete({ value, onChange, disabled }) {
+export default function CardNameAutocomplete({ value, onChange, disabled, label }) {
   const [input, setInput] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,7 +74,7 @@ export default function CardNameAutocomplete({ value, onChange, disabled }) {
       renderInput={(params) => (
         <TextField
           {...params}
-          label={texts.WISHLIST_PLACEHOLDER}
+          label={label ?? texts.WISHLIST_PLACEHOLDER}
           slotProps={{
             input: {
               ...params.InputProps,

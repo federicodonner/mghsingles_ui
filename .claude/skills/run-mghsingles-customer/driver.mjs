@@ -109,6 +109,68 @@ async function run(line) {
       await page.waitForTimeout(700);
       return `clicked text "${rest}" -> ${page.url()}`;
 
+    // Drag one element onto another.
+    //
+    // Needed for the binder editor, which uses dnd-kit. A single mouse.move
+    // between press and release is not enough: the PointerSensor arms on a few
+    // pixels of travel and dnd-kit recomputes drop targets per move, so the
+    // gesture is stepped and ends with a pause before the release.
+    //
+    //   drag <fromSelector> >> <toSelector>
+    case "drag": {
+      const [fromSel, toSel] = rest.split(">>").map((x) => x.trim());
+      const from = await page.locator(fromSel).first().boundingBox();
+      const to = await page.locator(toSel).first().boundingBox();
+      if (!from || !to) return `FAIL: could not locate ${!from ? fromSel : toSel}`;
+
+      const start = { x: from.x + from.width / 2, y: from.y + from.height / 2 };
+      const end = { x: to.x + to.width / 2, y: to.y + to.height / 2 };
+
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      for (let i = 1; i <= 10; i++) {
+        await page.mouse.move(
+          start.x + ((end.x - start.x) * i) / 10,
+          start.y + ((end.y - start.y) * i) / 10
+        );
+        await page.waitForTimeout(20);
+      }
+      await page.waitForTimeout(150);
+      await page.mouse.up();
+      await page.waitForTimeout(900);
+      return `dragged ${fromSel} onto ${toSel}`;
+    }
+
+    // Like drag, but screenshots while the card is still held, right before
+    // the release — the only way to see the DragOverlay itself.
+    //
+    //   dragshot <fromSelector> >> <toSelector> >> <shotName>
+    case "dragshot": {
+      const [fromSel, toSel, shotName] = rest.split(">>").map((x) => x.trim());
+      const from = await page.locator(fromSel).first().boundingBox();
+      const to = await page.locator(toSel).first().boundingBox();
+      if (!from || !to) return `FAIL: could not locate ${!from ? fromSel : toSel}`;
+
+      const start = { x: from.x + from.width / 2, y: from.y + from.height / 2 };
+      const end = { x: to.x + to.width / 2, y: to.y + to.height / 2 };
+
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      for (let i = 1; i <= 10; i++) {
+        await page.mouse.move(
+          start.x + ((end.x - start.x) * i) / 10,
+          start.y + ((end.y - start.y) * i) / 10
+        );
+        await page.waitForTimeout(20);
+      }
+      await page.waitForTimeout(150);
+      const p = resolve(SHOTS, `${shotName || "dragshot"}.png`);
+      await page.screenshot({ path: p });
+      await page.mouse.up();
+      await page.waitForTimeout(900);
+      return `dragged ${fromSel} onto ${toSel}, mid-drag shot ${p}`;
+    }
+
     // Some controls only exist while the pointer is over their card, so a
     // plain click never reaches them.
     case "hover":
