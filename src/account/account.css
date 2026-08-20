@@ -1,3 +1,15 @@
+/* Each block reads as its own unit: a section title, its fields, and the
+   button that submits them — with air before the next section starts. */
+
+.detailFields {
+  margin-bottom: 16px;
+}
+
 .detailField {
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+.editDetails .updateDetails {
+  margin-top: 4px;
+  margin-bottom: 40px;
 }

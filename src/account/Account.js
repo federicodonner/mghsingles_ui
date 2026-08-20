@@ -122,7 +122,6 @@ export default function Account() {
         {loader && <Loader />}
         {!loader && (
           <>
-            <div className="moneyAndStats">Stats</div>
             <div className="editDetails">
               <Title title={texts.UPDATE_DETAILS} />
               <div className="detailFields">
@@ -144,15 +143,13 @@ export default function Account() {
                     disabled={updateDetailsLoader}
                   />
                 </div>
-                <Button className="updateDetails"
-                  onClick={updateDetails}
-                >
+              </div>
+              <Button className="updateDetails" onClick={updateDetails}>
                   {updateDetailsLoader && (
                     <img className="loader" src={whiteLoader} alt="loader" />
                   )}
-                  {!updateDetailsLoader && <span>{texts.ACCEPT}</span>}
-                </Button>
-              </div>
+                {!updateDetailsLoader && <span>{texts.ACCEPT}</span>}
+              </Button>
               <Title title={texts.UPDATE_PASSWORD} />
               <div className="detailFields">
                 <div className="detailField">

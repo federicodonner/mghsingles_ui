@@ -15,6 +15,8 @@ import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import TablePagination from "@mui/material/TablePagination";
 
 const TYPE_LABELS = {
   binder: texts.BINDER,
@@ -44,25 +46,35 @@ const MOVE_LABELS = {
 export default function MyStorage() {
   const [loader, setLoader] = useState(true);
   const [units, setUnits] = useState([]);
+  const [total, setTotal] = useState(0);
+  // Search and paging are server-side: a collector with a hundred binders
+  // should not download all of them to see the first screen.
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(25);
   // Copies that are not in any container. Contenedores is the only place a
   // customer sees their cards now, so a copy with no placement has to be shown
   // somewhere or it simply disappears.
   const [unfiled, setUnfiled] = useState([]);
-  // Whether the new-container form is slid out.
-  const [creating, setCreating] = useState(false);
+  // The sidebar: null, {mode:"create"} or {mode:"rename", unit}.
+  const [panel, setPanel] = useState(null);
+  // Controlled rather than a ref: MUI's styled Select (no native <select>)
+  // keeps its value in state, not in a DOM element.
+  const [newType, setNewType] = useState("binder");
 
   const nameRef = useRef(null);
-  const typeRef = useRef(null);
 
   const navigate = useNavigate();
 
   function load() {
     accessAPI(
       "GET",
-      "mystorage",
+      `mystorage?page=${page + 1}&limit=${limit}` +
+        (q.trim() ? `&q=${encodeURIComponent(q.trim())}` : ""),
       null,
       (response) => {
-        setUnits(response);
+        setUnits(response.units ?? []);
+        setTotal(response.total ?? 0);
         setLoader(false);
       },
       (response) => {
@@ -73,8 +85,14 @@ export default function MyStorage() {
     );
   }
 
+  // Typing searches after a pause, not per keystroke.
   useEffect(() => {
-    load();
+    const timer = setTimeout(load, q ? 300 : 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, page, limit]);
+
+  useEffect(() => {
     accessAPI(
       "GET",
       "mystorage/unfiled",
@@ -95,8 +113,26 @@ export default function MyStorage() {
     accessAPI(
       "POST",
       "mystorage",
-      { name, type: typeRef.current.value },
+      { name, type: newType },
       (response) => navigate(`/mystorage/${response.id}`),
+      (response) => toast(response.message)
+    );
+  }
+
+  // The rename form shares the sidebar with creation — no more browser
+  // prompt() with the domain name in its title bar.
+  function renameUnit(e) {
+    e.preventDefault();
+    const name = nameRef.current.value.trim();
+    if (!name) return;
+    accessAPI(
+      "PUT",
+      `mystorage/${panel.unit.id}`,
+      { name },
+      () => {
+        setPanel(null);
+        load();
+      },
       (response) => toast(response.message)
     );
   }
@@ -125,18 +161,6 @@ export default function MyStorage() {
     );
   }
 
-  function rename(unit) {
-    const name = window.prompt(texts.RENAME, unit.name);
-    if (!name || !name.trim()) return;
-    accessAPI(
-      "PUT",
-      `mystorage/${unit.id}`,
-      { name: name.trim() },
-      () => load(),
-      (response) => toast(response.message)
-    );
-  }
-
   async function removeUnit(unit) {
     if (!(await confirmDialog(texts.CONFIRM_DELETE_STORAGE))) return;
     accessAPI(
@@ -158,11 +182,23 @@ export default function MyStorage() {
             <Title
               title={texts.MY_STORAGE_TITLE}
               buttons={[
-                { label: texts.NEW_STORAGE, onClick: () => setCreating(true) },
+                { label: texts.NEW_STORAGE, onClick: () => setPanel({ mode: "create" }) },
               ]}
             />
+            <TextField
+              size="small"
+              placeholder={texts.STORAGE_SEARCH}
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(0);
+              }}
+              sx={{ mb: 1, width: 320, maxWidth: "100%" }}
+            />
             {!units.length && (
-              <div className="emptyNote">{texts.NO_STORAGE}</div>
+              <div className="emptyNote">
+                {q ? texts.STORAGE_NO_MATCHES : texts.NO_STORAGE}
+              </div>
             )}
             {units.map((unit) => (
               <div className="myStorageRow" key={unit.id}>
@@ -195,7 +231,9 @@ export default function MyStorage() {
                     rule as rearranging: only while the customer holds it. */}
                 {unit.editable ? (
                   <>
-                    <Button variant="outlined" size="small" onClick={() => rename(unit)}>
+                    <Button variant="outlined" size="small"
+                      onClick={() => setPanel({ mode: "rename", unit })}
+                    >
                       {texts.RENAME}
                     </Button>
                     <Button variant="outlined" color="error" size="small"
@@ -209,6 +247,21 @@ export default function MyStorage() {
                 )}
               </div>
             ))}
+            {total > limit && (
+              <TablePagination
+                component="div"
+                count={total}
+                page={page}
+                onPageChange={(e, next) => setPage(next)}
+                rowsPerPage={limit}
+                onRowsPerPageChange={(e) => {
+                  setLimit(parseInt(e.target.value, 10));
+                  setPage(0);
+                }}
+                rowsPerPageOptions={[25, 50, 100]}
+                labelRowsPerPage={texts.PER_PAGE}
+              />
+            )}
           </div>
 
           {/* Copies with no container. Shown rather than hidden: they are the
@@ -243,31 +296,46 @@ export default function MyStorage() {
       )}
 
       <SideForm
-        open={creating}
-        onClose={() => setCreating(false)}
-        title={texts.NEW_STORAGE}
+        open={Boolean(panel)}
+        onClose={() => setPanel(null)}
+        title={panel?.mode === "rename" ? texts.RENAME : texts.NEW_STORAGE}
       >
-        <Stack component="form" onSubmit={createUnit} spacing={2}>
-          <TextField
-            label={texts.STORAGE_NAME}
-            inputRef={nameRef}
-            autoFocus
-            fullWidth
-          />
-          <TextField
-            select
-            SelectProps={{ native: true }}
-            label={texts.STORAGE_TYPE}
-            inputRef={typeRef}
-            defaultValue="binder"
-            fullWidth
-          >
-            <option value="binder">{texts.BINDER}</option>
-            <option value="sorted_box">{texts.SORTED_BOX}</option>
-            <option value="unsorted_box">{texts.UNSORTED_BOX}</option>
-          </TextField>
-          <Button type="submit">{texts.CREATE}</Button>
-        </Stack>
+        {panel?.mode === "create" && (
+          <Stack component="form" onSubmit={createUnit} spacing={2}>
+            <TextField
+              label={texts.STORAGE_NAME}
+              inputRef={nameRef}
+              autoFocus
+              fullWidth
+            />
+            {/* MUI's own dropdown, not the OS one: it stays inside the app's
+                look and inside the panel. */}
+            <TextField
+              select
+              label={texts.STORAGE_TYPE}
+              value={newType}
+              onChange={(e) => setNewType(e.target.value)}
+              fullWidth
+            >
+              <MenuItem value="binder">{texts.BINDER}</MenuItem>
+              <MenuItem value="sorted_box">{texts.SORTED_BOX}</MenuItem>
+              <MenuItem value="unsorted_box">{texts.UNSORTED_BOX}</MenuItem>
+            </TextField>
+            <Button type="submit">{texts.CREATE}</Button>
+          </Stack>
+        )}
+        {panel?.mode === "rename" && (
+          <Stack component="form" onSubmit={renameUnit} spacing={2}>
+            <TextField
+              label={texts.STORAGE_NAME}
+              inputRef={nameRef}
+              defaultValue={panel.unit.name}
+              autoFocus
+              fullWidth
+            />
+            <Button type="submit">{texts.SAVE}</Button>
+          </Stack>
+        )}
       </SideForm>
     </div>
   );

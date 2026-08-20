@@ -30,3 +30,12 @@
 .storeSearch .colour-R { color: #b4342a; }
 .storeSearch .colour-G { color: #2e7d4f; }
 .storeSearch .colour-C { color: #777; }
+
+/* ---- phones ----------------------------------------------------------- */
+/* The colour toggles overflowed the viewport as one long strip; they wrap
+   into rows instead. */
+@media (max-width: 700px) {
+  .storeSearch .MuiToggleButtonGroup-root {
+    flex-wrap: wrap;
+  }
+}

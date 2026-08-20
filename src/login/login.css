@@ -15,10 +15,13 @@
   text-align: center;
 }
 
-/* While the loader is up there are no fields to size around. */
+/* While the loader is up there are no fields to size around — but the card
+   itself keeps its size (the element carries both classes, and the shared
+   .loader width is for spinners, not for this container). */
 .loginContainer.loader {
   background-color: #f16e31;
   border-color: #f16e31;
+  width: 340px;
 }
 
 .loginForm {
