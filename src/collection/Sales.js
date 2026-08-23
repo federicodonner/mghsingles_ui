@@ -173,13 +173,7 @@ export default function Sales() {
                                   variant="caption"
                                   color="text.secondary"
                                 >
-                                  {[
-                                    sale.cardsetname,
-                                    sale.condition,
-                                    sale.language,
-                                  ]
-                                    .filter(Boolean)
-                                    .join(" · ")}
+                                  {sale.cardsetname}
                                 </Typography>
                                 {sale.foil && (
                                   <Chip

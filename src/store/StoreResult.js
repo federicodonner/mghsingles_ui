@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import { livePesos } from "../utils/exchange";
 import "./storeResult.css";
 
 // One card the shop actually has.
@@ -34,7 +35,7 @@ const ART_SX = {
   bgcolor: "#f0f0f0",
 };
 
-export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }) {
+export default function StoreResult({ card, rate, loggedIn, wishlisted, onWishlisted }) {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
   // Copies of this row the customer bought in this sitting. Availability on
@@ -113,11 +114,11 @@ export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }
               )}
             </Typography>
 
+            {/* Condition and language are tracked but not shown (2026-08-23,
+                the shop's call) — the tile names printing and finish only.
+                Only say "foil" when it is one; a chip reading "normal" on
+                every other tile is noise. */}
             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-              <Chip size="small" label={card.condition} />
-              <Chip size="small" variant="outlined" label={card.language} />
-              {/* Only say "foil" when it is one — a chip reading "normal" on
-                  every other tile is noise. */}
               {isFoil(card.variant) && (
                 <Chip
                   size="small"
@@ -132,7 +133,12 @@ export default function StoreResult({ card, loggedIn, wishlisted, onWishlisted }
       <Box>
           {card.price != null && (
             <Typography variant="h6" className="storeResultPrice">
+              {/* The peso side is derived on the spot from today's rate.
+                  Both currencies carry the same weight — either one is how
+                  the customer will actually pay. */}
               {texts.CURRENCY} {card.price}
+              {livePesos(card.price, rate) &&
+                ` · ${livePesos(card.price, rate)}`}
             </Typography>
           )}
         <Typography variant="body2" color="text.secondary">

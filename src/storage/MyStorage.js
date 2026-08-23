@@ -281,10 +281,6 @@ export default function MyStorage() {
                   <Typography variant="body2" color="text.secondary">
                     {row.cardsetname}
                   </Typography>
-                  <Stack direction="row" spacing={0.5}>
-                    <Chip size="small" label={row.condition} />
-                    <Chip size="small" variant="outlined" label={row.language} />
-                  </Stack>
                   <Typography variant="body2" color="text.secondary">
                     x{row.copies}
                   </Typography>

@@ -8,11 +8,20 @@ import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import { formatPesos, dualFrozen } from "../utils/exchange";
 import "./orders.css";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
 // A date arrives as unix seconds, not milliseconds.
+// The dollar price with its frozen peso twin, when the line has one. Both
+// come off the order line — snapshots from the day the copy was bagged —
+// never from the card's live price.
+function lineAmount(line) {
+  if (line.kind === "withdrawal") return texts.LINE_FREE;
+  return dualFrozen(line.price, line.pricepesos);
+}
+
 function formatDate(seconds) {
   if (!seconds) return "";
   const date = new Date(seconds * 1000);
@@ -137,6 +146,8 @@ export default function Orders() {
                 )}
                 <span className="orderTotal">
                   {texts.ORDER_TOTAL} U$S {order.total}
+                  {order.totalpesos != null &&
+                    ` · ${formatPesos(order.totalpesos)}`}
                 </span>
                 {order.status === "pending" && (
                   <Button variant="outlined" color="error" size="small"
@@ -154,16 +165,10 @@ export default function Orders() {
                     <span className="lineSet">
                       {(line.cardsetcode ?? "").toUpperCase()}
                     </span>
-                    <span className="lineMeta">{line.condition}</span>
-                    <span className="lineMeta">{line.language}</span>
                     {isFoil(line.variant) && (
                       <span className="lineMeta">{finishLabel(line.variant)}</span>
                     )}
-                    <span className="linePrice">
-                      {line.kind === "withdrawal"
-                        ? texts.LINE_FREE
-                        : `U$S ${line.price}`}
-                    </span>
+                    <span className="linePrice">{lineAmount(line)}</span>
                   </div>
                 ))}
               </div>
@@ -195,6 +200,8 @@ export default function Orders() {
                     <span className="orderDate">{formatDate(order.created)}</span>
                     <span className="orderTotal">
                       {texts.ORDER_TOTAL} U$S {order.total}
+                      {order.totalpesos != null &&
+                        ` · ${formatPesos(order.totalpesos)}`}
                     </span>
                   </div>
                   <div className="orderLines">
@@ -205,11 +212,7 @@ export default function Orders() {
                         <span className="lineSet">
                           {(line.cardsetcode ?? "").toUpperCase()}
                         </span>
-                        <span className="linePrice">
-                          {line.kind === "withdrawal"
-                            ? texts.LINE_FREE
-                            : `U$S ${line.price}`}
-                        </span>
+                        <span className="linePrice">{lineAmount(line)}</span>
                       </div>
                     ))}
                   </div>

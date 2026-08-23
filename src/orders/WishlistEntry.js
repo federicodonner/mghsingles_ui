@@ -9,13 +9,14 @@ import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 
-// One wishlist row, with an expandable editor for its three constraints.
-//
-// Each category is independent and multi-select: nothing ticked means "any", so
-// a customer can pin three acceptable printings while still taking any language,
-// or accept any printing in only English or Spanish.
+// One wishlist row, with an expandable editor for its constraints: printings
+// and finishes. Each category is independent and multi-select: nothing ticked
+// means "any". Language and condition used to be constraints too — the shop
+// stopped showing them (2026-08-23), so the editor no longer offers them and
+// saving clears whatever a wish still carried, or the old, invisible
+// constraints would keep silently filtering matches.
 export default function WishlistEntry(props) {
-  const { entry, conditions, languages, onChanged, onRemove } = props;
+  const { entry, onChanged, onRemove } = props;
 
   // Only offer finishes this card exists in at all — no "foil" for a card that
   // has no foil printing. The API computes this across every printing.
@@ -47,8 +48,6 @@ export default function WishlistEntry(props) {
 
   // Local working copy so ticking boxes does not save on every click.
   const [pickedVersions, setPickedVersions] = useState(entry.versions);
-  const [pickedLanguages, setPickedLanguages] = useState(entry.languageids);
-  const [pickedConditions, setPickedConditions] = useState(entry.conditionids);
   const [pickedVariants, setPickedVariants] = useState(entry.variants);
 
   function toggleOpen() {
@@ -89,8 +88,8 @@ export default function WishlistEntry(props) {
       `wishlist/${entry.id}`,
       {
         versions: pickedVersions,
-        languageids: pickedLanguages,
-        conditionids: pickedConditions,
+        languageids: [],
+        conditionids: [],
         variants: pickedVariants,
       },
       () => {
@@ -106,15 +105,6 @@ export default function WishlistEntry(props) {
   }
 
   // A one-line summary of the constraints, so the list is readable collapsed.
-  // Languages and grades are short lists, so name them; printings are not, so
-  // they get a count.
-  function namedSummary(picked, options) {
-    if (!picked.length) return texts.WISHLIST_ANY;
-    const names = picked
-      .map((id) => options.find((option) => option.id === id)?.name)
-      .filter(Boolean);
-    return names.length ? names.join(", ") : String(picked.length);
-  }
   function countSummary(picked) {
     return picked.length ? `${picked.length}` : texts.WISHLIST_ANY;
   }
@@ -161,14 +151,6 @@ export default function WishlistEntry(props) {
       <div className="constraintSummary">
         <span>
           {texts.WISHLIST_VERSIONS}: {countSummary(entry.versions)}
-        </span>
-        <span>
-          {texts.WISHLIST_LANGUAGES}:{" "}
-          {namedSummary(entry.languageids, languages)}
-        </span>
-        <span>
-          {texts.WISHLIST_GRADES}:{" "}
-          {namedSummary(entry.conditionids, conditions)}
         </span>
         <span>
           {texts.WISHLIST_FINISHES}: {variantSummary(entry.variants)}
@@ -232,42 +214,6 @@ export default function WishlistEntry(props) {
           </div>
 
           <div className="constraintColumns">
-            <div className="constraintColumn">
-              <div className="constraintTitle">{texts.WISHLIST_LANGUAGES}</div>
-              {languages.map((language) => (
-                <FormControlLabel
-                  key={language.id}
-                  className="constraintOption"
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={pickedLanguages.includes(language.id)}
-                      onChange={() => toggle(pickedLanguages, setPickedLanguages, language.id)}
-                    />
-                  }
-                  label={language.name}
-                />
-              ))}
-            </div>
-
-            <div className="constraintColumn">
-              <div className="constraintTitle">{texts.WISHLIST_GRADES}</div>
-              {conditions.map((condition) => (
-                <FormControlLabel
-                  key={condition.id}
-                  className="constraintOption"
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={pickedConditions.includes(condition.id)}
-                      onChange={() => toggle(pickedConditions, setPickedConditions, condition.id)}
-                    />
-                  }
-                  label={condition.name}
-                />
-              ))}
-            </div>
-
             <div className="constraintColumn">
               <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
               {finishOptions.map((finish) => (

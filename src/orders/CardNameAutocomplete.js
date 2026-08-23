@@ -13,7 +13,7 @@ import { accessAPI } from "../utils/fetchFunctions";
 //
 // Suggestions come from the catalogue rather than from stock, because wanting a
 // card the shop does not have is the entire point of a wishlist.
-export default function CardNameAutocomplete({ value, onChange, disabled, label }) {
+export default function CardNameAutocomplete({ value, onChange, disabled, label, fullWidth = false }) {
   const [input, setInput] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -70,7 +70,9 @@ export default function CardNameAutocomplete({ value, onChange, disabled, label 
       noOptionsText={
         query.length < 2 ? texts.AUTOCOMPLETE_HINT : texts.AUTOCOMPLETE_NONE
       }
-      sx={{ flex: "1 1 320px", maxWidth: 420 }}
+      // Capped in open layouts; a sidebar host asks for the full width so
+      // the field and its neighbours form one edge-to-edge control row.
+      sx={{ flex: "1 1 320px", maxWidth: fullWidth ? "none" : 420 }}
       renderInput={(params) => (
         <TextField
           {...params}

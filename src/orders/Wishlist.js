@@ -32,10 +32,6 @@ function sortForDisplay(entries, recent) {
 export default function Wishlist() {
   const [loader, setLoader] = useState(true);
   const [entries, setEntries] = useState([]);
-  // The condition and language lists are shared by every entry's editor, so
-  // they are fetched once here rather than per row.
-  const [conditions, setConditions] = useState([]);
-  const [languages, setLanguages] = useState([]);
   // The chosen suggestion, not free text: the field only yields a real card
   // name, so an entry can never be for a card that does not exist.
   const [chosen, setChosen] = useState(null);
@@ -70,19 +66,6 @@ export default function Wishlist() {
 
   useEffect(() => {
     load();
-    accessAPI(
-      "GET",
-      "card/modifiers",
-      null,
-      (response) => {
-        setConditions(response.conditions ?? []);
-        setLanguages(response.languages ?? []);
-      },
-      () => {
-        setConditions([]);
-        setLanguages([]);
-      }
-    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -133,8 +116,6 @@ export default function Wishlist() {
             <WishlistEntry
               key={entry.id}
               entry={entry}
-              conditions={conditions}
-              languages={languages}
               onChanged={load}
               onRemove={removeEntry}
             />

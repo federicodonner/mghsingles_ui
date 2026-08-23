@@ -10,6 +10,7 @@ import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import StoreSearch from "./StoreSearch";
 import StoreResult from "./StoreResult";
+import { useExchangeRate } from "../utils/exchange";
 import "./store.css";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import texts from "../data/texts";
@@ -23,6 +24,9 @@ import texts from "../data/texts";
 // they say what they want.
 export default function Store() {
   const [loggedIn, setLoggedIn] = useState(false);
+  // Pesos-per-dollar, fetched once for the whole page: every tile converts
+  // with the same rate, so each fetching its own would be noise.
+  const rate = useExchangeRate();
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
   const [criteria, setCriteria] = useState(null);
@@ -175,6 +179,7 @@ export default function Store() {
                 <StoreResult
                   key={card.id}
                   card={card}
+                  rate={rate}
                   loggedIn={loggedIn}
                   wishlisted={Boolean(covered[card.id])}
                   onWishlisted={markWishlisted}
