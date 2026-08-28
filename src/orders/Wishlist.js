@@ -9,9 +9,10 @@ import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import WishlistEntry from "./WishlistEntry";
 import "./orders.css";
+import CardNameAutocomplete from "./CardNameAutocomplete";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import CardNameAutocomplete from "./CardNameAutocomplete";
+import TextField from "@mui/material/TextField";
 
 // Entries are card names, not printings — so one entry covers every printing
 // and condition the shop might take in. Each row says what is on sale for it
@@ -44,6 +45,11 @@ export default function Wishlist() {
   const [recent, setRecent] = useState([]);
   // Whether the add-to-wishlist form is slid out.
   const [adding, setAdding] = useState(false);
+  // The Moxfield import: its sidebar, the pasted link, and the in-flight
+  // flag that keeps the button honest while the deck downloads.
+  const [importOpen, setImportOpen] = useState(false);
+  const [moxUrl, setMoxUrl] = useState("");
+  const [importing, setImporting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -69,19 +75,54 @@ export default function Wishlist() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function addEntry(e) {
-    e.preventDefault();
-    if (!chosen) return;
+  // Picking a suggestion IS adding it: the field only ever yields real card
+  // names, so once one is chosen there is nothing left to confirm.
+  function addEntry(name) {
+    if (!name) return;
     accessAPI(
       "POST",
       "wishlist",
-      { name: chosen },
+      { name },
       (response) => {
         setChosen(null);
         if (response?.id) setRecent((ids) => [response.id, ...ids]);
         load();
       },
-      (response) => toast(response.message)
+      (response) => {
+        setChosen(null);
+        toast(response.message);
+      }
+    );
+  }
+
+  // Pull a public Moxfield deck and add every card it needs as a bare entry
+  // (no preferences) — the API skips names already on the list and reports
+  // names the catalogue does not know.
+  function importMoxfield() {
+    if (!moxUrl.trim() || importing) return;
+    setImporting(true);
+    accessAPI(
+      "POST",
+      "wishlist/import-moxfield",
+      { url: moxUrl.trim() },
+      (result) => {
+        setImporting(false);
+        setMoxUrl("");
+        setImportOpen(false);
+        let message = `${result.added}${texts.MOX_ADDED}`;
+        if (result.existing > 0)
+          message += ` · ${result.existing}${texts.MOX_EXISTING}`;
+        if (result.notfound.length > 0)
+          message += ` · ${result.notfound.length}${texts.MOX_NOTFOUND}`;
+        toast(message, "success");
+        load();
+      },
+      (response) => {
+        setImporting(false);
+        toast(response.message);
+      },
+      // Moxfield plus one insert per card takes a moment on a big deck.
+      { timeout: 60000 }
     );
   }
 
@@ -103,6 +144,10 @@ export default function Wishlist() {
           title={texts.MY_WISHLIST}
           buttons={[
             { label: texts.ADD_WISHLIST, onClick: () => setAdding(true) },
+            {
+              label: texts.IMPORT_MOXFIELD,
+              onClick: () => setImportOpen(true),
+            },
           ]}
         />
 
@@ -129,13 +174,36 @@ export default function Wishlist() {
         onClose={() => setAdding(false)}
         title={texts.ADD_WISHLIST}
       >
-        <Stack component="form" onSubmit={addEntry} spacing={2}>
-          <CardNameAutocomplete value={chosen} onChange={setChosen} />
-          {/* Disabled until a real card is picked — submitting half-typed text
-              would create an entry that never matches anything. */}
-          <Button type="submit" disabled={!chosen}>
-            {texts.ADD_WISHLIST}
+        <CardNameAutocomplete
+          value={chosen}
+          onChange={(name) => {
+            setChosen(name);
+            addEntry(name);
+          }}
+        />
+      </SideForm>
+
+      <SideForm
+        open={importOpen}
+        onClose={() => !importing && setImportOpen(false)}
+        title={texts.IMPORT_MOXFIELD}
+      >
+        <Stack spacing={2}>
+          <TextField
+            label={texts.MOXFIELD_URL}
+            placeholder="https://moxfield.com/decks/..."
+            value={moxUrl}
+            onChange={(e) => setMoxUrl(e.target.value)}
+            disabled={importing}
+            fullWidth
+          />
+          <Button
+            onClick={importMoxfield}
+            disabled={importing || !moxUrl.trim()}
+          >
+            {importing ? texts.ADDING : texts.MOXFIELD_IMPORT}
           </Button>
+          <div className="constraintHint">{texts.MOXFIELD_HINT}</div>
         </Stack>
       </SideForm>
     </div>

@@ -25,7 +25,6 @@ export default function WishlistEntry(props) {
   const [open, setOpen] = useState(false);
   const [versions, setVersions] = useState(null); // printings, loaded lazily
   const [loadingVersions, setLoadingVersions] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [wanted, setWanted] = useState(entry.quantity ?? 1);
 
   // Shown immediately and written behind it. On failure the control goes back
@@ -73,35 +72,40 @@ export default function WishlistEntry(props) {
     }
   }
 
-  function toggle(list, setList, value) {
-    setList(
-      list.includes(value)
-        ? list.filter((item) => item !== value)
-        : [...list, value]
-    );
-  }
-
-  function save() {
-    setSaving(true);
+  // Every tick saves on the spot — there is no Save button to remember.
+  // The whole constraint state travels with each change, so what is stored
+  // is exactly what is on screen (and the language/condition constraints the
+  // editor no longer offers are cleared along the way).
+  function persist(versions, variants) {
     accessAPI(
       "PUT",
       `wishlist/${entry.id}`,
       {
-        versions: pickedVersions,
+        versions,
         languageids: [],
         conditionids: [],
-        variants: pickedVariants,
+        variants,
       },
-      () => {
-        setSaving(false);
-        setOpen(false);
-        onChanged();
-      },
-      (response) => {
-        setSaving(false);
-        toast(response.message);
-      }
+      () => onChanged(),
+      (response) => toast(response.message)
     );
+  }
+
+  const flip = (list, value) =>
+    list.includes(value)
+      ? list.filter((item) => item !== value)
+      : [...list, value];
+
+  function toggleVersion(scryfallid) {
+    const next = flip(pickedVersions, scryfallid);
+    setPickedVersions(next);
+    persist(next, pickedVariants);
+  }
+
+  function toggleVariant(finish) {
+    const next = flip(pickedVariants, finish);
+    setPickedVariants(next);
+    persist(pickedVersions, next);
   }
 
   // A one-line summary of the constraints, so the list is readable collapsed.
@@ -180,13 +184,7 @@ export default function WishlistEntry(props) {
                         className={picked ? "versionTile picked" : "versionTile"}
                         key={version.scryfallid}
                         title={`${version.cardsetname} #${version.collectornumber}`}
-                        onClick={() =>
-                          toggle(
-                            pickedVersions,
-                            setPickedVersions,
-                            version.scryfallid
-                          )
-                        }
+                        onClick={() => toggleVersion(version.scryfallid)}
                       >
                         {version.image ? (
                           <img src={version.image} alt={version.cardsetname} />
@@ -232,7 +230,7 @@ export default function WishlistEntry(props) {
                     <Checkbox
                       size="small"
                       checked={pickedVariants.includes(finish)}
-                      onChange={() => toggle(pickedVariants, setPickedVariants, finish)}
+                      onChange={() => toggleVariant(finish)}
                     />
                   }
                   label={finishLabel(finish)}
@@ -246,9 +244,6 @@ export default function WishlistEntry(props) {
             </div>
           </div>
 
-          <Button onClick={save} disabled={saving}>
-            {texts.WISHLIST_SAVE}
-          </Button>
         </div>
       )}
 
