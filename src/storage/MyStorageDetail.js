@@ -152,11 +152,11 @@ export default function MyStorageDetail() {
       onError
     );
 
-  const shiftPage = (page, direction) =>
+  const shiftPage = (page, frompocket, direction) =>
     accessAPI(
       "POST",
       `mystorage/${unit.id}/page/${page}/shift`,
-      { direction },
+      { frompocket, direction },
       after,
       onError
     );
