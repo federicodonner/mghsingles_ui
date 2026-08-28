@@ -199,6 +199,14 @@ export default function WishlistEntry(props) {
                           {(version.cardsetcode ?? "").toUpperCase()} #
                           {version.collectornumber}
                         </span>
+                        {/* What this printing costs at the shop — quoted by
+                            the API with the full selling rules, so a cheap
+                            rare already reads $1 here. */}
+                        {version.price != null && (
+                          <span className="versionPrice">
+                            U$S {version.price}
+                          </span>
+                        )}
                         {/* Flag the finishes that are unique to this printing,
                             since that is why it exists separately. */}
                         {(version.finishes ?? []).some(isFoil) &&
