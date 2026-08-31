@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
-import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Header from "../header/Header";
@@ -23,6 +24,7 @@ import texts from "../data/texts";
 // for something specific, so the page opens with the search and fills in once
 // they say what they want.
 export default function Store() {
+  const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
   // Pesos-per-dollar, fetched once for the whole page: every tile converts
   // with the same rate, so each fetching its own would be noise.
@@ -39,7 +41,6 @@ export default function Store() {
   // over a version the wishlist will never match would be a lie. The API
   // answers this with the same matcher that actually sets cards aside.
   const [covered, setCovered] = useState({});
-  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     accessAPI(
@@ -75,14 +76,6 @@ export default function Store() {
   useEffect(() => {
     refreshCoverage(results?.cards ?? []);
   }, [results, refreshCoverage]);
-
-  function markWishlisted(card) {
-    setCovered((current) => ({ ...current, [card.id]: true }));
-    setToast(`${card.name} (${card.cardsetcode?.toUpperCase()}) — ${texts.ADDED_TO_WISHLIST}`);
-    // Adding one printing can widen the entry enough to cover others on screen,
-    // so the whole page is re-asked rather than guessed at.
-    refreshCoverage(results?.cards ?? []);
-  }
 
   const run = useCallback((next, wantedPage) => {
     if (!next) {
@@ -130,6 +123,14 @@ export default function Store() {
         logOutHideMenu={logOutHideMenu}
       />
       <div className="content">
+        {/* The other way in: instead of naming a card, leaf through the
+            binders and boxes the way you would at the counter. */}
+        <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1.5 }}>
+          <Button variant="outlined" onClick={() => navigate("/browse")}>
+            {texts.BROWSE_UNITS}
+          </Button>
+        </Stack>
+
         <StoreSearch onSearch={(next) => run(next, 1)} searching={searching} />
 
         {searching && <Loader />}
@@ -182,7 +183,6 @@ export default function Store() {
                   rate={rate}
                   loggedIn={loggedIn}
                   wishlisted={Boolean(covered[card.id])}
-                  onWishlisted={markWishlisted}
                 />
               ))}
             </Box>
@@ -200,14 +200,6 @@ export default function Store() {
           </>
         )}
       </div>
-
-      <Snackbar
-        open={Boolean(toast)}
-        autoHideDuration={3000}
-        onClose={() => setToast(null)}
-        message={toast}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
     </div>
   );
 }

@@ -1,0 +1,65 @@
+/* Browsing the shop's binders and boxes. The binder page itself reuses
+   binder.css — a browsed page must look like the owner's own binder or the
+   two views read as different things. Only the shopping layer lives here. */
+
+.browseUnits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* The price on a pocket, so leafing through shows costs without a click per
+   card. Same visual family as the binder's foil tag. */
+.browsePrice {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 8px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* A pocket with something in it invites the click. */
+.browsePocket {
+  cursor: pointer;
+}
+
+/* Sold-out copies stay visible — the binder really holds them — but clearly
+   not on offer. */
+.browseSoldOut img {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+/* Cards pulled out of pockets mid-sort: still in the shop, still for sale. */
+.browseStandby {
+  margin-top: 20px;
+}
+
+.browseStandbyCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.browseStandbyCard {
+  position: relative;
+  aspect-ratio: 5 / 7;
+  cursor: pointer;
+}
+
+.browseStandbyCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+  display: block;
+}

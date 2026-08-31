@@ -35,30 +35,32 @@ const ART_SX = {
   bgcolor: "#f0f0f0",
 };
 
-export default function StoreResult({ card, rate, loggedIn, wishlisted, onWishlisted }) {
+export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
-  // Copies of this row the customer bought in this sitting. Availability on
-  // screen drops with it, since the copies are reserved server-side.
-  const [bought, setBought] = useState(0);
+  // Copies of this row sent to the cart in this sitting. The cart holds no
+  // stock, but offering a fifth copy of a card with four would only move the
+  // refusal to the confirm step, so the tile counts its own adds.
+  const [inCart, setInCart] = useState(0);
 
-  // Buy THIS copy — printing, grade, language and finish, exactly as clicked.
+  // Send THIS copy — printing and finish, exactly as clicked — to the cart.
   //
-  // Everything on this page is in stock, so there is nothing to wait for: the
-  // API raises the wishlist match itself and puts the copy straight into the
-  // customer's bag, reserved away from everyone else. The wishlist road still
-  // exists — on the Deseados page — for cards the shop does not have yet.
-  function buyCard() {
+  // Nothing is reserved yet: the cart is a draft, and the shop only hears
+  // about it when the customer confirms from the Carrito page. That is the
+  // confirmation step the instant buy used to skip.
+  function addToCart() {
     setAdding(true);
     accessAPI(
       "POST",
-      "wishlist/buy",
+      "cart",
       { cardid: card.id },
       (response) => {
         setAdding(false);
-        setBought((n) => n + 1);
+        setInCart((n) => n + 1);
         toast(response.message, "success");
-        onWishlisted(card);
+        // The menu's cart badge listens for this, so the count follows the
+        // click wherever on the site it happened.
+        window.dispatchEvent(new Event("cartchange"));
       },
       (response) => {
         setAdding(false);
@@ -67,7 +69,7 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted, onWishli
     );
   }
 
-  const availableNow = Math.max(0, (card.available ?? 0) - bought);
+  const availableNow = Math.max(0, (card.available ?? 0) - inCart);
 
   return (
     <Card
@@ -147,7 +149,7 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted, onWishli
         {/* Covered by a wishlist entry — worth knowing, but no reason to stop
             a purchase: the entry answers itself when the copy lands in the
             bag. */}
-        {wishlisted && bought === 0 && (
+        {wishlisted && inCart === 0 && (
           <Typography variant="caption" color="text.secondary">
             {texts.IN_WISHLIST}
           </Typography>
@@ -163,11 +165,11 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted, onWishli
           sx={{ mt: "auto" }}
           variant={availableNow <= 0 ? "outlined" : "contained"}
           disabled={adding || availableNow <= 0}
-          onClick={buyCard}
+          onClick={addToCart}
         >
-          {/* Still buyable while copies remain — somebody may want two. Only
-              when their purchase took the last one does the button retire. */}
-          {availableNow <= 0 && bought > 0 ? texts.RESERVED_FOR_YOU : texts.BUY_NOW}
+          {/* Still addable while copies remain — somebody may want two. Only
+              when their own adds cover the stock does the button retire. */}
+          {availableNow <= 0 && inCart > 0 ? texts.IN_YOUR_CART : texts.ADD_TO_CART}
         </Button>
       ) : (
         <Button

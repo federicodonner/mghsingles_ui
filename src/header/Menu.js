@@ -22,6 +22,7 @@ import { logout, accessAPI, readFromLS } from "../utils/fetchFunctions";
 // both the desktop bar and the phone drawer, for the same reason.
 const LINKS = [
   { to: "/home", label: texts.STORE },
+  { to: "/cart", label: texts.CART, badge: "cart" },
   { to: "/wishlist", label: texts.WISHLIST },
   { to: "/mystorage", label: texts.MY_STORAGE },
   { to: "/orders", label: texts.ORDERS, badge: "unread" },
@@ -71,15 +72,41 @@ export default function Menu(props) {
     );
   }, [loggedIn]);
 
+  // How many copies sit in the cart, for the Carrito badge. Add buttons all
+  // over the site fire a `cartchange` event after the API answers, so the
+  // number follows the clicks without any page telling the menu directly.
+  const [cartCount, setCartCount] = useState(0);
+  useEffect(() => {
+    if (!loggedIn) {
+      setCartCount(0);
+      return;
+    }
+    const refresh = () =>
+      accessAPI(
+        "GET",
+        "cart",
+        null,
+        (response) =>
+          setCartCount(
+            (response?.items ?? []).reduce((sum, i) => sum + i.quantity, 0)
+          ),
+        () => setCartCount(0)
+      );
+    refresh();
+    window.addEventListener("cartchange", refresh);
+    return () => window.removeEventListener("cartchange", refresh);
+  }, [loggedIn]);
+
   function doLogout() {
     logout();
     navigate("/");
     if (props.logOutHideMenu) props.logOutHideMenu();
   }
 
+  const badgeCounts = { unread, cart: cartCount };
   const withBadge = (link, label) =>
-    link.badge === "unread" && unread > 0 ? (
-      <Badge badgeContent={unread} color="secondary">
+    link.badge && badgeCounts[link.badge] > 0 ? (
+      <Badge badgeContent={badgeCounts[link.badge]} color="secondary">
         {label}
       </Badge>
     ) : (

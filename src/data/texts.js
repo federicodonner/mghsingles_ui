@@ -207,6 +207,26 @@ const texts = {
   STORE: "Tienda",
   BUY_NOW: "Comprar",
   RESERVED_FOR_YOU: "Apartada para vos",
+  BROWSE_UNITS: "Mirar carpetas y cajas",
+  BROWSE_SUBTITLE: "Elegí un contenedor para ver sus cartas.",
+  BROWSE_EMPTY:
+    "La tienda no tiene carpetas ni cajas para mirar en este momento.",
+  NOT_FILED_YET: "Sin archivar todavía",
+  SOLD_OUT: "Sin stock",
+  CART: "Carrito",
+  ADD_TO_CART: "Agregar al carrito",
+  IN_YOUR_CART: "En tu carrito",
+  CART_EMPTY_PAGE:
+    "Tu carrito está vacío. Buscá cartas en la tienda o mirá las carpetas y cajas.",
+  CART_HINT:
+    "Al confirmar el pedido, la tienda va a apartar las cartas para que pases a retirarlas.",
+  CART_CONFIRM: "Confirmar pedido",
+  CART_TOTAL: "Total",
+  CART_REMOVE_ITEM: "Quitar",
+  CART_OUT_OF_STOCK: "Ya no hay stock suficiente de esta carta.",
+  CART_PARTIAL:
+    "Algunas cartas ya no estaban disponibles y quedaron en el carrito.",
+  GO_TO_STORE: "Ir a la tienda",
   REQUEST_WITHDRAWAL: "Pedir para retirar",
   FILTER_BY_SET: "Filtrar por edición (nombre o código)",
   FILTER_BY_SET_SHORT: "Edición",
