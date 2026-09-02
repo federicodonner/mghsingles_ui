@@ -27,6 +27,9 @@ export default function Cart() {
   const rate = useExchangeRate();
   const [loader, setLoader] = useState(true);
   const [cart, setCart] = useState({ items: [], total: "0.00" });
+  // The buyer's store credit (dollars), shown beside the total so they can see
+  // at a glance how much of the bill it would cover. Null until loaded.
+  const [credit, setCredit] = useState(null);
   const [working, setWorking] = useState(false);
   // What the last confirmation did, shown in place: which cards the shop is
   // now setting aside, and which went out of stock and stayed in the cart.
@@ -56,6 +59,14 @@ export default function Cart() {
 
   useEffect(() => {
     load();
+    // Credit is fetched once: it does not change while editing the cart.
+    accessAPI(
+      "GET",
+      "player/me",
+      null,
+      (response) => setCredit(response?.credit ?? null),
+      () => setCredit(null)
+    );
   }, [load]);
 
   const setQuantity = (item, quantity) => {
@@ -130,6 +141,15 @@ export default function Cart() {
         );
 
   const anyShort = cart.items.some((i) => i.available < i.quantity);
+
+  // The buyer's credit in pesos, at today's rate (dollars only if the shop has
+  // no rate). Null when we do not know it yet.
+  const creditPesos =
+    credit == null
+      ? null
+      : rate != null
+      ? formatPesos(Math.round(Number(credit) * rate))
+      : `${texts.CURRENCY} ${credit}`;
 
   return (
     <div>
@@ -247,17 +267,20 @@ export default function Cart() {
                           variant="body2"
                           sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
                         >
-                          {/* Pesos round per copy, as the frozen snapshot
-                              will, so a line never disagrees with the total
-                              below by a peso. */}
-                          {texts.CURRENCY}{" "}
-                          {(Number(item.price ?? 0) * item.quantity).toFixed(2)}
-                          {rate != null &&
-                            item.price != null &&
-                            ` · ${formatPesos(
-                              Math.round(Number(item.price) * rate) *
-                                item.quantity
-                            )}`}
+                          {/* Pesos only, rounded per copy — the same rounding
+                              the frozen snapshot uses, so a line never disagrees
+                              with the total below by a peso. Dollars appear only
+                              if the shop has no rate configured. */}
+                          {rate != null && item.price != null
+                            ? formatPesos(
+                                Math.round(Number(item.price) * rate) *
+                                  item.quantity
+                              )
+                            : item.price != null
+                            ? `${texts.CURRENCY} ${(
+                                Number(item.price) * item.quantity
+                              ).toFixed(2)}`
+                            : null}
                         </Typography>
                         <Button
                           size="small"
@@ -279,10 +302,19 @@ export default function Cart() {
                   justifyContent="space-between"
                   sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}
                 >
-                  <Typography variant="h6">
-                    {texts.CART_TOTAL}: {texts.CURRENCY} {cart.total}
-                    {totalPesos != null && ` · ${formatPesos(totalPesos)}`}
-                  </Typography>
+                  <Box>
+                    <Typography variant="h6">
+                      {texts.CART_TOTAL}:{" "}
+                      {totalPesos != null
+                        ? formatPesos(totalPesos)
+                        : `${texts.CURRENCY} ${cart.total}`}
+                    </Typography>
+                    {creditPesos != null && (
+                      <Typography variant="body2" color="text.secondary">
+                        {texts.CART_CREDIT_AVAILABLE}: {creditPesos}
+                      </Typography>
+                    )}
+                  </Box>
                   <Button
                     variant="contained"
                     disabled={working || anyShort}

@@ -3,6 +3,7 @@ import { toast } from "../utils/toast";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { finishLabel, isFoil } from "../utils/finishes";
+import { useExchangeRate, pesosLive } from "../utils/exchange";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
@@ -17,6 +18,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 // constraints would keep silently filtering matches.
 export default function WishlistEntry(props) {
   const { entry, onChanged, onRemove } = props;
+  const rate = useExchangeRate();
 
   // Only offer finishes this card exists in at all — no "foil" for a card that
   // has no foil printing. The API computes this across every printing.
@@ -200,9 +202,9 @@ export default function WishlistEntry(props) {
                         {/* What this printing costs at the shop — quoted by
                             the API with the full selling rules, so a cheap
                             rare already reads $1 here. */}
-                        {version.price != null && (
+                        {pesosLive(version.price, rate) && (
                           <span className="versionPrice">
-                            U$S {version.price}
+                            {pesosLive(version.price, rate)}
                           </span>
                         )}
                         {/* Flag the finishes that are unique to this printing,

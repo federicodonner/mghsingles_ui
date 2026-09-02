@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import texts from "../data/texts";
 import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
-import { livePesos } from "../utils/exchange";
+import { pesosLive } from "../utils/exchange";
 import "./storeResult.css";
 
 // One card the shop actually has.
@@ -61,6 +61,28 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
         // The menu's cart badge listens for this, so the count follows the
         // click wherever on the site it happened.
         window.dispatchEvent(new Event("cartchange"));
+      },
+      (response) => {
+        setAdding(false);
+        toast(response.message);
+      }
+    );
+  }
+
+  // The customer's own consigned card: no price, and the action is to ask for
+  // it back (a withdrawal), not to buy it. Raised through the same endpoint the
+  // wishlist match uses, which detects ownership and files a withdrawal.
+  const [requested, setRequested] = useState(false);
+  function requestReturn() {
+    setAdding(true);
+    accessAPI(
+      "POST",
+      "wishlist/buy",
+      { cardid: card.id },
+      (response) => {
+        setAdding(false);
+        setRequested(true);
+        toast(response.message, "success");
       },
       (response) => {
         setAdding(false);
@@ -133,23 +155,28 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
       </Stack>
 
       <Box>
-          {card.price != null && (
+          {/* A customer's own card shows "es tuya" in place of a price; the
+              price is never even sent for it. Everyone else sees pesos only. */}
+          {card.mine ? (
             <Typography variant="h6" className="storeResultPrice">
-              {/* The peso side is derived on the spot from today's rate.
-                  Both currencies carry the same weight — either one is how
-                  the customer will actually pay. */}
-              {texts.CURRENCY} {card.price}
-              {livePesos(card.price, rate) &&
-                ` · ${livePesos(card.price, rate)}`}
+              {texts.ITS_YOURS}
             </Typography>
+          ) : (
+            pesosLive(card.price, rate) && (
+              <Typography variant="h6" className="storeResultPrice">
+                {pesosLive(card.price, rate)}
+              </Typography>
+            )
           )}
-        <Typography variant="body2" color="text.secondary">
-          {texts.AVAILABLE_NOW}: {availableNow}
-        </Typography>
+        {!card.mine && (
+          <Typography variant="body2" color="text.secondary">
+            {texts.AVAILABLE_NOW}: {availableNow}
+          </Typography>
+        )}
         {/* Covered by a wishlist entry — worth knowing, but no reason to stop
             a purchase: the entry answers itself when the copy lands in the
             bag. */}
-        {wishlisted && inCart === 0 && (
+        {!card.mine && wishlisted && inCart === 0 && (
           <Typography variant="caption" color="text.secondary">
             {texts.IN_WISHLIST}
           </Typography>
@@ -158,7 +185,27 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
 
         {/* Pushed to the bottom so the buttons line up across a row of tiles
             whose text runs to different lengths. */}
-      {loggedIn ? (
+      {!loggedIn ? (
+        <Button
+          size="small"
+          fullWidth
+          sx={{ mt: "auto" }}
+          onClick={() => navigate("/login")}
+        >
+          {texts.LOGIN_TO_ORDER}
+        </Button>
+      ) : card.mine ? (
+        <Button
+          size="small"
+          fullWidth
+          variant={requested ? "outlined" : "contained"}
+          sx={{ mt: "auto" }}
+          disabled={adding || requested}
+          onClick={requestReturn}
+        >
+          {requested ? texts.RESERVED_FOR_YOU : texts.REQUEST_MINE_BACK}
+        </Button>
+      ) : (
         <Button
           size="small"
           fullWidth
@@ -170,15 +217,6 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
           {/* Still addable while copies remain — somebody may want two. Only
               when their own adds cover the stock does the button retire. */}
           {availableNow <= 0 && inCart > 0 ? texts.IN_YOUR_CART : texts.ADD_TO_CART}
-        </Button>
-      ) : (
-        <Button
-          size="small"
-          fullWidth
-          sx={{ mt: "auto" }}
-          onClick={() => navigate("/login")}
-        >
-          {texts.LOGIN_TO_ORDER}
         </Button>
       )}
     </Card>

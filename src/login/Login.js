@@ -18,16 +18,14 @@ export default function Login() {
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
-  const [createUsernameError, setCreateUsernameError] = useState(false);
   const [createNameError, setCreateNameError] = useState(false);
   const [createEmailError, setCreateEmailError] = useState(false);
   const [createPasswordError, setCreatePasswordError] = useState(false);
 
   const [creatingAccount, setCreatingAccount] = useState(false);
 
-  const loginUsername = useRef(null);
+  const loginEmail = useRef(null);
   const loginPassword = useRef(null);
-  const createUsername = useRef(null);
   const createName = useRef(null);
   const createEmail = useRef(null);
   const createPassword = useRef(null);
@@ -56,24 +54,24 @@ export default function Login() {
   function loginUser(e) {
     // Prever navigation for form submit
     e.preventDefault();
-    // Verifies that the user enterd their username and password
-    if (!loginUsername.current.value) {
+    // Verifies that the user entered their email and password
+    if (!loginEmail.current.value) {
       setUsernameError(true);
     }
     if (!loginPassword.current.value) {
       setPasswordError(true);
     }
-    var enteredLoginUsername = loginUsername.current.value;
-    if (!loginUsername.current.value || !loginPassword.current.value) {
+    var enteredLoginEmail = loginEmail.current.value;
+    if (!loginEmail.current.value || !loginPassword.current.value) {
       return false;
     }
-    // If there is a username and a password, send it to the API
+    // Log in by email — the account's only identifier now.
     setLoginLoader(true);
     accessAPI(
       "POST",
       "oauth",
       JSON.stringify({
-        username: loginUsername.current.value,
+        email: loginEmail.current.value,
         password: loginPassword.current.value,
       }),
       (response) => {
@@ -89,8 +87,8 @@ export default function Login() {
         // (Writing to the null ref here used to throw, which is why the old
         // alert() never appeared on a failed login.)
         setTimeout(() => {
-          if (loginUsername.current)
-            loginUsername.current.value = enteredLoginUsername;
+          if (loginEmail.current)
+            loginEmail.current.value = enteredLoginEmail;
         }, 0);
       }
     );
@@ -100,10 +98,7 @@ export default function Login() {
     // Prevent navigation on form submit
     e.preventDefault();
 
-    // Verifies that the user enterd the information
-    if (!createUsername.current.value) {
-      setCreateUsernameError(true);
-    }
+    // Verifies that the user entered the information
     if (!createName.current.value) {
       setCreateNameError(true);
     }
@@ -115,15 +110,13 @@ export default function Login() {
     }
 
     if (
-      !createUsername.current.value ||
       !createName.current.value ||
       !createEmail.current.value ||
       !createPassword.current.value
     ) {
       return false;
     }
-    // If there is a username and a password, send it to the API
-    var createUsernameData = createUsername.current.value;
+    // Register with name + email + password — no username.
     var createNameData = createName.current.value;
     var createEmailData = createEmail.current.value;
     setLoginLoader(true);
@@ -131,7 +124,6 @@ export default function Login() {
       "POST",
       "player",
       JSON.stringify({
-        username: createUsernameData,
         name: createNameData,
         email: createEmailData,
         password: createPassword.current.value,
@@ -147,8 +139,6 @@ export default function Login() {
         // Restore after React re-mounts the form — same null-ref timing as
         // the login path above.
         setTimeout(() => {
-          if (createUsername.current)
-            createUsername.current.value = createUsernameData;
           if (createName.current) createName.current.value = createNameData;
           if (createEmail.current) createEmail.current.value = createEmailData;
         }, 0);
@@ -173,11 +163,11 @@ export default function Login() {
                   {/* inputRef, not ref: TextField is a wrapper, and the code
                       below reads .current.value off the actual input. */}
                   <TextField
-                    type="text"
+                    type="email"
                     placeholder={texts.USER_PLACEHOLDER}
                     error={usernameError}
                     onChange={() => setUsernameError(false)}
-                    inputRef={loginUsername}
+                    inputRef={loginEmail}
                     fullWidth
                   />
                   <TextField
@@ -214,14 +204,6 @@ export default function Login() {
             <div className="fields">
               <form onSubmit={createUser}>
                 <Stack spacing={2}>
-                  <TextField
-                    type="text"
-                    placeholder={texts.CREATE_USERNAME}
-                    error={createUsernameError}
-                    onChange={() => setCreateUsernameError(false)}
-                    inputRef={createUsername}
-                    fullWidth
-                  />
                   <TextField
                     type="text"
                     placeholder={texts.CREATE_NAME}

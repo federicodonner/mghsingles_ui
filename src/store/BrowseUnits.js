@@ -75,8 +75,11 @@ export default function BrowseUnits() {
                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                     {unit.name}
                   </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                     <Chip size="small" label={TYPE_LABELS[unit.type]} />
+                    {unit.mine && (
+                      <Chip size="small" color="success" label={texts.CONTAINER_MINE} />
+                    )}
                     <Typography variant="body2" color="text.secondary">
                       {unit.cardcount} {texts.CARDS}
                     </Typography>

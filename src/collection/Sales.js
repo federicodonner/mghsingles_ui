@@ -4,6 +4,7 @@ import Header from "../header/Header";
 import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import { accessAPI, logout } from "../utils/fetchFunctions";
+import { useExchangeRate, formatPesos } from "../utils/exchange";
 import texts from "../data/texts";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
@@ -42,6 +43,11 @@ export default function Sales() {
   // What the store still owes across every sale — also the credit that can be
   // spent on a purchase at the counter.
   const [pending, setPending] = useState(0);
+  // The customer platform shows everything in pesos, sales included. Sales are
+  // stored in dollars (no frozen peso snapshot), so these are converted at
+  // TODAY's rate — a display convenience, not a re-statement of the debt. If
+  // the shop has no rate configured we fall back to dollars so nothing hides.
+  const rate = useExchangeRate();
 
   let navigate = useNavigate();
 
@@ -64,12 +70,23 @@ export default function Sales() {
 
   // The API settles the money server-side (`net` is the customer's share with
   // the commission rounded first); the commission shown is the difference so
-  // the columns always sum to the total.
+  // the columns always sum to the total. When a rate exists the split is done
+  // in WHOLE PESOS with the same "commission first, yours is the remainder"
+  // rule, so total = commission + yours holds in pesos too.
   function split(sale) {
     const total = Number(sale.price) * sale.quantity;
     const yours = Number(sale.net);
-    return { total, commission: total - yours, yours };
+    const commission = total - yours;
+    if (rate == null) return { total, commission, yours };
+    const pTotal = Math.round(total * rate);
+    const pCommission = Math.round(commission * rate);
+    return { total: pTotal, commission: pCommission, yours: pTotal - pCommission };
   }
+
+  // Display one figure: pesos when a rate exists, dollars as the fallback. The
+  // values from split()/pending are already in the right unit for the mode.
+  const show = (value) =>
+    rate == null ? money(value) : formatPesos(value);
 
   // Paid in full, untouched, or partially consumed as store credit.
   function statusChip(sale) {
@@ -101,7 +118,11 @@ export default function Sales() {
                 pending > 0
                   ? [
                       {
-                        label: `${texts.SALES_PENDING_TOTAL} ${money(pending)}`,
+                        label: `${texts.SALES_PENDING_TOTAL} ${
+                          rate == null
+                            ? money(pending)
+                            : formatPesos(Math.round(pending * rate))
+                        }`,
                         color: "warning",
                       },
                     ]
@@ -186,12 +207,12 @@ export default function Sales() {
                               </Box>
                             </Box>
                           </TableCell>
-                          <TableCell align="right">{money(total)}</TableCell>
+                          <TableCell align="right">{show(total)}</TableCell>
                           <TableCell align="right">
-                            {money(commission)}
+                            {show(commission)}
                           </TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600 }}>
-                            {money(yours)}
+                            {show(yours)}
                           </TableCell>
                           <TableCell align="center">
                             {statusChip(sale)}

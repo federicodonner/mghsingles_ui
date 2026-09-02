@@ -16,7 +16,7 @@ import Loader from "../loader/Loader";
 import texts from "../data/texts";
 import { accessAPI, readFromLS } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
-import { useExchangeRate, dualLive } from "../utils/exchange";
+import { useExchangeRate, pesosLive } from "../utils/exchange";
 import "../storage/binder.css";
 import "./browse.css";
 
@@ -97,6 +97,36 @@ export default function BrowseUnitDetail() {
     );
   }
 
+  // Ask for one of your OWN cards back (a withdrawal). Same endpoint as the
+  // store tile; the API detects ownership and files a withdrawal, not a sale.
+  const [requested, setRequested] = useState({});
+  function requestReturn(card) {
+    if (!loggedIn) {
+      navigate("/login");
+      return;
+    }
+    setAdding(true);
+    accessAPI(
+      "POST",
+      "wishlist/buy",
+      { cardid: card.cardid },
+      (response) => {
+        setAdding(false);
+        setRequested((cur) => ({ ...cur, [card.placementid]: true }));
+        toast(response.message, "success");
+      },
+      (response) => {
+        setAdding(false);
+        toast(response.message);
+      }
+    );
+  }
+
+  // The peso price text for a card, or "es tuya" when it's the viewer's own
+  // (the API sends no price for those).
+  const priceText = (card) =>
+    card.mine ? texts.ITS_YOURS : pesosLive(card.price, rate);
+
   // ---- binder rendering --------------------------------------------------
 
   const spreadForPage = (page) => (page <= 1 ? 0 : Math.floor(page / 2));
@@ -140,10 +170,8 @@ export default function BrowseUnitDetail() {
             {cards.length > 1 && (
               <span className="pocketCount">{cards.length}</span>
             )}
-            {top.price != null && (
-              <span className="browsePrice">
-                {texts.CURRENCY} {top.price}
-              </span>
+            {priceText(top) && (
+              <span className="browsePrice">{priceText(top)}</span>
             )}
           </div>
         )}
@@ -238,20 +266,34 @@ export default function BrowseUnitDetail() {
                   label={finishLabel(card.variant)}
                 />
               )}
-              {card.price != null && (
+              {priceText(card) && (
                 <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-                  {dualLive(card.price, rate)}
+                  {priceText(card)}
                 </Typography>
               )}
-              <Button
-                size="small"
-                variant="contained"
-                disabled={adding || left === 0}
-                onClick={() => addToCart(card)}
-                sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
-              >
-                {left === 0 ? texts.SOLD_OUT : texts.ADD_TO_CART}
-              </Button>
+              {card.mine ? (
+                <Button
+                  size="small"
+                  variant={requested[card.placementid] ? "outlined" : "contained"}
+                  disabled={adding || requested[card.placementid]}
+                  onClick={() => requestReturn(card)}
+                  sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
+                >
+                  {requested[card.placementid]
+                    ? texts.RESERVED_FOR_YOU
+                    : texts.REQUEST_MINE_BACK}
+                </Button>
+              ) : (
+                <Button
+                  size="small"
+                  variant="contained"
+                  disabled={adding || left === 0}
+                  onClick={() => addToCart(card)}
+                  sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
+                >
+                  {left === 0 ? texts.SOLD_OUT : texts.ADD_TO_CART}
+                </Button>
+              )}
             </Stack>
           );
         })}
@@ -272,7 +314,14 @@ export default function BrowseUnitDetail() {
               onBack={() => navigate("/browse")}
               title={unit.name}
               subtitle={`${unit.cardcount} ${texts.CARDS}`}
-              tags={[TYPE_LABELS[unit.type]]}
+              tags={
+                unit.mine
+                  ? [
+                      TYPE_LABELS[unit.type],
+                      { label: texts.CONTAINER_MINE, color: "success" },
+                    ]
+                  : [TYPE_LABELS[unit.type]]
+              }
             />
 
             {unit.type === "binder" ? renderBinder() : renderBox()}
@@ -292,10 +341,8 @@ export default function BrowseUnitDetail() {
                       onClick={() => setViewing([card])}
                     >
                       <img src={card.image} alt={card.name} loading="lazy" />
-                      {card.price != null && (
-                        <span className="browsePrice">
-                          {texts.CURRENCY} {card.price}
-                        </span>
+                      {priceText(card) && (
+                        <span className="browsePrice">{priceText(card)}</span>
                       )}
                     </div>
                   ))}
@@ -337,26 +384,41 @@ export default function BrowseUnitDetail() {
                         />
                       </Box>
                     )}
-                    {card.price != null && (
-                      <Typography variant="h6">
-                        {dualLive(card.price, rate)}
+                    {priceText(card) && (
+                      <Typography variant="h6">{priceText(card)}</Typography>
+                    )}
+                    {!card.mine && (
+                      <Typography variant="body2" color="text.secondary">
+                        {texts.AVAILABLE_NOW}: {left}
                       </Typography>
                     )}
-                    <Typography variant="body2" color="text.secondary">
-                      {texts.AVAILABLE_NOW}: {left}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={adding || left === 0}
-                      onClick={() => addToCart(card)}
-                    >
-                      {!loggedIn
-                        ? texts.LOGIN_TO_ORDER
-                        : left === 0
-                        ? texts.SOLD_OUT
-                        : texts.ADD_TO_CART}
-                    </Button>
+                    {card.mine ? (
+                      <Button
+                        variant={requested[card.placementid] ? "outlined" : "contained"}
+                        size="small"
+                        disabled={adding || requested[card.placementid]}
+                        onClick={() => requestReturn(card)}
+                      >
+                        {!loggedIn
+                          ? texts.LOGIN_TO_ORDER
+                          : requested[card.placementid]
+                          ? texts.RESERVED_FOR_YOU
+                          : texts.REQUEST_MINE_BACK}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={adding || left === 0}
+                        onClick={() => addToCart(card)}
+                      >
+                        {!loggedIn
+                          ? texts.LOGIN_TO_ORDER
+                          : left === 0
+                          ? texts.SOLD_OUT
+                          : texts.ADD_TO_CART}
+                      </Button>
+                    )}
                   </Stack>
                 </Stack>
               );

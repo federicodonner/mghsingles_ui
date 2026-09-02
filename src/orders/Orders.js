@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
-import { formatPesos, dualFrozen } from "../utils/exchange";
+import { useExchangeRate, pesosFrozenOrLive } from "../utils/exchange";
 import "./orders.css";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -17,9 +17,9 @@ import Box from "@mui/material/Box";
 // The dollar price with its frozen peso twin, when the line has one. Both
 // come off the order line — snapshots from the day the copy was bagged —
 // never from the card's live price.
-function lineAmount(line) {
+function lineAmount(line, rate) {
   if (line.kind === "withdrawal") return texts.LINE_FREE;
-  return dualFrozen(line.price, line.pricepesos);
+  return pesosFrozenOrLive(line.price, line.pricepesos, rate);
 }
 
 function formatDate(seconds) {
@@ -38,6 +38,9 @@ export default function Orders() {
   const [loader, setLoader] = useState(true);
   const [orders, setOrders] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  // Orders show their FROZEN peso amount when they have one; older orders are
+  // converted at today's rate so everything reads in pesos.
+  const rate = useExchangeRate();
 
   const navigate = useNavigate();
 
@@ -145,9 +148,8 @@ export default function Orders() {
                   </span>
                 )}
                 <span className="orderTotal">
-                  {texts.ORDER_TOTAL} U$S {order.total}
-                  {order.totalpesos != null &&
-                    ` · ${formatPesos(order.totalpesos)}`}
+                  {texts.ORDER_TOTAL}{" "}
+                  {pesosFrozenOrLive(order.total, order.totalpesos, rate)}
                 </span>
                 {order.status === "pending" && (
                   <Button variant="outlined" color="error" size="small"
@@ -168,7 +170,7 @@ export default function Orders() {
                     {isFoil(line.variant) && (
                       <span className="lineMeta">{finishLabel(line.variant)}</span>
                     )}
-                    <span className="linePrice">{lineAmount(line)}</span>
+                    <span className="linePrice">{lineAmount(line, rate)}</span>
                   </div>
                 ))}
               </div>
@@ -199,9 +201,8 @@ export default function Orders() {
                     </span>
                     <span className="orderDate">{formatDate(order.created)}</span>
                     <span className="orderTotal">
-                      {texts.ORDER_TOTAL} U$S {order.total}
-                      {order.totalpesos != null &&
-                        ` · ${formatPesos(order.totalpesos)}`}
+                      {texts.ORDER_TOTAL}{" "}
+                      {pesosFrozenOrLive(order.total, order.totalpesos, rate)}
                     </span>
                   </div>
                   <div className="orderLines">
@@ -212,7 +213,7 @@ export default function Orders() {
                         <span className="lineSet">
                           {(line.cardsetcode ?? "").toUpperCase()}
                         </span>
-                        <span className="linePrice">{lineAmount(line)}</span>
+                        <span className="linePrice">{lineAmount(line, rate)}</span>
                       </div>
                     ))}
                   </div>
