@@ -55,7 +55,7 @@ const texts = {
   HOME: "Home",
   MY_COLLECTION: "Colección",
   MY_SALES: "Ventas",
-  MY_ACCOUNT: "Cuenta",
+  MY_ACCOUNT: "Mi cuenta",
   BUY: "Comprar",
   LOGIN: "Ingresar",
   LOGOUT: "Salir",
@@ -81,7 +81,6 @@ const texts = {
   CURRENT_PASSWORD: "Contraseña actual",
   NEW_PASSWORD: "Nueva contraseña",
   // Account screen
-  MY_ACCOUNT: "Mi cuenta",
   CREDIT_BALANCE: "Saldo de crédito",
   CREDIT_HINT: "Lo que la tienda te debe. Podés usarlo en tus compras.",
   VIEW_HISTORY: "Ver historial",
@@ -91,7 +90,6 @@ const texts = {
   NOT_SET: "—",
   CHANGE_PASSWORD: "Cambiar contraseña",
   PASSWORD_CHANGED: "Contraseña actualizada.",
-  SAVE: "Guardar",
   EMAIL_IS_LOGIN: "Tu email es tu usuario para ingresar.",
   // History sidebar (same shape as the admin's)
   HISTORY_TITLE: "Historial",
@@ -297,4 +295,4 @@ const texts = {
     "Sólo podés reordenarlo mientras lo tengas vos.",
 };
 
-module.exports = texts;
+export default texts;
