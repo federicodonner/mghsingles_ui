@@ -99,9 +99,68 @@ export default function Orders() {
     );
   }
 
-  // Pending orders are the pick-up list; everything else is history.
+  // Pending orders split into what the shop is still assembling and what is
+  // ready to pick up; everything else is history.
   const pending = orders.filter((order) => order.status === "pending");
+  const preparing = pending.filter((order) => order.preparing);
+  const ready = pending.filter((order) => !order.preparing);
   const closed = orders.filter((order) => order.status !== "pending");
+
+  // One pending-order card, shared by both sections. A preparing order shows a
+  // "being prepared" status and note instead of the pick-up note.
+  const pendingCard = (order) => (
+    <div className={`orderCard ${order.status}`} key={order.id}>
+      <div className="orderHeader">
+        <span
+          className={`orderStatus ${order.preparing ? "preparing" : order.status}`}
+        >
+          {order.preparing
+            ? texts.ORDER_STATUS_preparing
+            : texts[`ORDER_STATUS_${order.status}`] ?? order.status}
+        </span>
+        <span className="orderDate">{formatDate(order.created)}</span>
+        {order.expires && (
+          <span className="orderExpires">
+            {texts.ORDER_EXPIRES} {formatDate(order.expires)}
+          </span>
+        )}
+        <span className="orderTotal">
+          {texts.ORDER_TOTAL}{" "}
+          {pesosFrozenOrLive(order.total, order.totalpesos, rate)}
+        </span>
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={() => cancelOrder(order)}
+        >
+          {texts.CANCEL_ORDER}
+        </Button>
+      </div>
+      <div className="orderLines">
+        {order.lines.map((line) => (
+          <div className="orderLine" key={line.id}>
+            <span className="lineQuantity">{line.quantity}</span>
+            <span className="lineName">{line.name}</span>
+            <span className="lineSet">
+              {(line.cardsetcode ?? "").toUpperCase()}
+            </span>
+            {isFoil(line.variant) && (
+              <span className="lineMeta">{finishLabel(line.variant)}</span>
+            )}
+            <span className="linePrice">{lineAmount(line, rate)}</span>
+          </div>
+        ))}
+      </div>
+      <div className="pickupNote">
+        {order.preparing
+          ? texts.PREPARING_NOTE
+          : order.lines.every((line) => line.kind === "withdrawal")
+          ? texts.PICKUP_NOTE_FREE
+          : texts.PICKUP_NOTE}
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -114,13 +173,19 @@ export default function Orders() {
           {notifications.map((item) => (
             <div className="notice" key={item.id}>
               <span className="noticeText">
-                {item.kind === "wishlist_withdrawal_ready"
-                  ? texts.NOTIF_withdrawal
-                  : texts.NOTIF_purchase}
-                : <strong>{item.cardname}</strong>
-                {item.cardsetcode && ` (${item.cardsetcode.toUpperCase()})`}
-                {item.kind === "wishlist_withdrawal_ready" &&
-                  ` — ${texts.NOTIF_NO_CHARGE}`}
+                {item.kind === "order_ready" ? (
+                  texts.NOTIF_order_ready
+                ) : (
+                  <>
+                    {item.kind === "wishlist_withdrawal_ready"
+                      ? texts.NOTIF_withdrawal
+                      : texts.NOTIF_purchase}
+                    : <strong>{item.cardname}</strong>
+                    {item.cardsetcode && ` (${item.cardsetcode.toUpperCase()})`}
+                    {item.kind === "wishlist_withdrawal_ready" &&
+                      ` — ${texts.NOTIF_NO_CHARGE}`}
+                  </>
+                )}
               </span>
               <Button size="small"
                 onClick={() => dismissNotification(item)}
@@ -130,62 +195,21 @@ export default function Orders() {
             </div>
           ))}
 
+          {preparing.length > 0 && (
+            <>
+              <Title
+                title={texts.PREPARING_TITLE}
+                subtitle={texts.PREPARING_EXPLAIN}
+              />
+              {preparing.map(pendingCard)}
+            </>
+          )}
+
           <Title title={texts.TO_PICK_UP} subtitle={texts.PICKUP_EXPLAIN} />
-          {!pending.length && (
+          {!ready.length && (
             <div className="emptyState">{texts.NOTHING_TO_PICK_UP}</div>
           )}
-          {pending.map((order) => (
-            <div className={`orderCard ${order.status}`} key={order.id}>
-              <div className="orderHeader">
-                <span className={`orderStatus ${order.status}`}>
-                  {texts[`ORDER_STATUS_${order.status}`] ?? order.status}
-                </span>
-                <span className="orderDate">{formatDate(order.created)}</span>
-                {/* Only a live reservation has a deadline worth showing. */}
-                {order.status === "pending" && order.expires && (
-                  <span className="orderExpires">
-                    {texts.ORDER_EXPIRES} {formatDate(order.expires)}
-                  </span>
-                )}
-                <span className="orderTotal">
-                  {texts.ORDER_TOTAL}{" "}
-                  {pesosFrozenOrLive(order.total, order.totalpesos, rate)}
-                </span>
-                {order.status === "pending" && (
-                  <Button variant="outlined" color="error" size="small"
- onClick={() => cancelOrder(order)}
- >
-                    {texts.CANCEL_ORDER}
-                  </Button>
-                )}
-              </div>
-              <div className="orderLines">
-                {order.lines.map((line) => (
-                  <div className="orderLine" key={line.id}>
-                    <span className="lineQuantity">{line.quantity}</span>
-                    <span className="lineName">{line.name}</span>
-                    <span className="lineSet">
-                      {(line.cardsetcode ?? "").toUpperCase()}
-                    </span>
-                    {isFoil(line.variant) && (
-                      <span className="lineMeta">{finishLabel(line.variant)}</span>
-                    )}
-                    <span className="linePrice">{lineAmount(line, rate)}</span>
-                  </div>
-                ))}
-              </div>
-
-              {order.status === "pending" && (
-                <div className="pickupNote">
-                  {/* A bag of nothing but the customer's own cards has nothing
-                      to pay for, so do not tell them to pay. */}
-                  {order.lines.every((line) => line.kind === "withdrawal")
-                    ? texts.PICKUP_NOTE_FREE
-                    : texts.PICKUP_NOTE}
-                </div>
-              )}
-            </div>
-          ))}
+          {ready.map(pendingCard)}
 
           {/* Closed orders are history, not something to act on. */}
           {closed.length > 0 && (
