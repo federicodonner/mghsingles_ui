@@ -11,7 +11,6 @@ import { isFoil, finishLabel } from "../utils/finishes";
 import { useExchangeRate, pesosFrozenOrLive } from "../utils/exchange";
 import "./orders.css";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
 
 // A date arrives as unix seconds, not milliseconds.
 // The dollar price with its frozen peso twin, when the line has one. Both
@@ -195,28 +194,30 @@ export default function Orders() {
             </div>
           ))}
 
+          {/* Each state is its own panel with a divider between, so the three
+              read as distinct stages, not one long list. */}
           {preparing.length > 0 && (
-            <>
+            <section className="ordersSection">
               <Title
                 title={texts.PREPARING_TITLE}
                 subtitle={texts.PREPARING_EXPLAIN}
               />
               {preparing.map(pendingCard)}
-            </>
+            </section>
           )}
 
-          <Title title={texts.TO_PICK_UP} subtitle={texts.PICKUP_EXPLAIN} />
-          {!ready.length && (
-            <div className="emptyState">{texts.NOTHING_TO_PICK_UP}</div>
-          )}
-          {ready.map(pendingCard)}
+          <section className="ordersSection">
+            <Title title={texts.TO_PICK_UP} subtitle={texts.PICKUP_EXPLAIN} />
+            {!ready.length && (
+              <div className="emptyState">{texts.NOTHING_TO_PICK_UP}</div>
+            )}
+            {ready.map(pendingCard)}
+          </section>
 
           {/* Closed orders are history, not something to act on. */}
           {closed.length > 0 && (
-            <>
-              <Box className="historyTitle">
-                <Title title={texts.ORDER_HISTORY} />
-              </Box>
+            <section className="ordersSection">
+              <Title title={texts.ORDER_HISTORY} />
               {closed.map((order) => (
                 <div className={`orderCard ${order.status}`} key={order.id}>
                   <div className="orderHeader">
@@ -243,7 +244,7 @@ export default function Orders() {
                   </div>
                 </div>
               ))}
-            </>
+            </section>
           )}
         </div>
       )}

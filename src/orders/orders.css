@@ -316,6 +316,11 @@
   flex: 1 1 auto;
 }
 
-.historyTitle {
-  margin-top: 32px;
+/* Each order state is its own panel. A divider and generous space between
+   consecutive sections make the three stages read as clearly separate — the
+   first section (after any notices) has no divider above it. */
+.ordersSection + .ordersSection {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 2px solid #ededed;
 }
