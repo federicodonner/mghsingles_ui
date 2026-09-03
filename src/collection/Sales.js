@@ -40,9 +40,6 @@ function formatDate(seconds) {
 export default function Sales() {
   const [loader, setLoader] = useState(true);
   const [sales, setSales] = useState([]);
-  // What the store still owes across every sale — also the credit that can be
-  // spent on a purchase at the counter.
-  const [pending, setPending] = useState(0);
   // The customer platform shows everything in pesos, sales included. Sales are
   // stored in dollars (no frozen peso snapshot), so these are converted at
   // TODAY's rate — a display convenience, not a re-statement of the debt. If
@@ -58,7 +55,6 @@ export default function Sales() {
       null,
       (collection) => {
         setSales(collection.sales ?? []);
-        setPending(Number(collection.pending ?? 0));
         setLoader(false);
       },
       (response) => {
@@ -84,25 +80,9 @@ export default function Sales() {
   }
 
   // Display one figure: pesos when a rate exists, dollars as the fallback. The
-  // values from split()/pending are already in the right unit for the mode.
+  // values from split() are already in the right unit for the mode.
   const show = (value) =>
     rate == null ? money(value) : formatPesos(value);
-
-  // Paid in full, untouched, or partially consumed as store credit.
-  function statusChip(sale) {
-    if (sale.paid) {
-      return <Chip size="small" color="success" label={texts.SALE_PAID} />;
-    }
-    const partial = Number(sale.remaining) < Number(sale.net);
-    return (
-      <Chip
-        size="small"
-        color={partial ? "warning" : "default"}
-        variant="outlined"
-        label={partial ? texts.SALE_PARTIAL : texts.SALE_PENDING}
-      />
-    );
-  }
 
   return (
     <div>
@@ -111,23 +91,13 @@ export default function Sales() {
         {loader && <Loader />}
         {!loader && (
           <>
+            {/* No paid/unpaid status here (2026-09-02): a sold card earns the
+                consignor store credit at once, and that credit is tracked on
+                its own in Mi Cuenta — the card's payment state is not a thing
+                this list should carry. */}
             <Title
               title={texts.SOLD_CARDS}
               subtitle={sales.length ? texts.SALES_HINT : undefined}
-              tags={
-                pending > 0
-                  ? [
-                      {
-                        label: `${texts.SALES_PENDING_TOTAL} ${
-                          rate == null
-                            ? money(pending)
-                            : formatPesos(Math.round(pending * rate))
-                        }`,
-                        color: "warning",
-                      },
-                    ]
-                  : []
-              }
             />
 
             {!sales.length && (
@@ -153,9 +123,6 @@ export default function Sales() {
                         sx={{ width: 140, whiteSpace: "nowrap" }}
                       >
                         {texts.SALE_YOURS}
-                      </TableCell>
-                      <TableCell align="center" sx={{ width: 110 }}>
-                        {texts.SALE_STATUS}
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -213,9 +180,6 @@ export default function Sales() {
                           </TableCell>
                           <TableCell align="right" sx={{ fontWeight: 600 }}>
                             {show(yours)}
-                          </TableCell>
-                          <TableCell align="center">
-                            {statusChip(sale)}
                           </TableCell>
                         </TableRow>
                       );
