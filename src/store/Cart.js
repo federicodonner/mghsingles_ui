@@ -27,9 +27,10 @@ export default function Cart() {
   const rate = useExchangeRate();
   const [loader, setLoader] = useState(true);
   const [cart, setCart] = useState({ items: [], total: "0.00" });
-  // The buyer's store credit (dollars), shown beside the total so they can see
-  // at a glance how much of the bill it would cover. Null until loaded.
-  const [credit, setCredit] = useState(null);
+  // The buyer's two balances (dollars), shown beside the total so they can see
+  // at a glance how much of the bill they cover. Null until loaded.
+  const [saleMoney, setSaleMoney] = useState(null);
+  const [storeCredit, setStoreCredit] = useState(null);
   const [working, setWorking] = useState(false);
   // What the last confirmation did, shown in place: which cards the shop is
   // now setting aside, and which went out of stock and stayed in the cart.
@@ -59,13 +60,19 @@ export default function Cart() {
 
   useEffect(() => {
     load();
-    // Credit is fetched once: it does not change while editing the cart.
+    // Balances are fetched once: they do not change while editing the cart.
     accessAPI(
       "GET",
       "player/me",
       null,
-      (response) => setCredit(response?.credit ?? null),
-      () => setCredit(null)
+      (response) => {
+        setSaleMoney(response?.saleMoney ?? null);
+        setStoreCredit(response?.storeCredit ?? null);
+      },
+      () => {
+        setSaleMoney(null);
+        setStoreCredit(null);
+      }
     );
   }, [load]);
 
@@ -142,14 +149,16 @@ export default function Cart() {
 
   const anyShort = cart.items.some((i) => i.available < i.quantity);
 
-  // The buyer's credit in pesos, at today's rate (dollars only if the shop has
-  // no rate). Null when we do not know it yet.
-  const creditPesos =
-    credit == null
+  // A dollar balance in pesos, at today's rate (dollars only if the shop has no
+  // rate). Null when we do not know it yet.
+  const inPesos = (usd) =>
+    usd == null
       ? null
       : rate != null
-      ? formatPesos(Math.round(Number(credit) * rate))
-      : `${texts.CURRENCY} ${credit}`;
+      ? formatPesos(Math.round(Number(usd) * rate))
+      : `${texts.CURRENCY} ${usd}`;
+  const saleMoneyPesos = inPesos(saleMoney);
+  const storeCreditPesos = inPesos(storeCredit);
 
   return (
     <div>
@@ -309,9 +318,16 @@ export default function Cart() {
                         ? formatPesos(totalPesos)
                         : `${texts.CURRENCY} ${cart.total}`}
                     </Typography>
-                    {creditPesos != null && (
+                    {/* Both balances, so the buyer sees what they can put
+                        toward the bill. */}
+                    {saleMoneyPesos != null && (
                       <Typography variant="body2" color="text.secondary">
-                        {texts.CART_CREDIT_AVAILABLE}: {creditPesos}
+                        {texts.SALE_MONEY_LABEL}: {saleMoneyPesos}
+                      </Typography>
+                    )}
+                    {storeCreditPesos != null && (
+                      <Typography variant="body2" color="text.secondary">
+                        {texts.STORE_CREDIT_LABEL}: {storeCreditPesos}
                       </Typography>
                     )}
                   </Box>

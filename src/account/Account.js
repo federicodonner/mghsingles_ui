@@ -85,27 +85,44 @@ export default function Account() {
             <Title title={texts.MY_ACCOUNT} />
 
             {/* Store credit */}
+            {/* Two separate balances: money earned from selling cards (which
+                can be cashed out or spent) and store credit loaded by the shop
+                (spendable only). */}
             <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
-              <Typography variant="overline" color="text.secondary">
-                {texts.CREDIT_BALANCE}
-              </Typography>
               <Stack
                 direction="row"
-                alignItems="flex-end"
+                alignItems="flex-start"
                 justifyContent="space-between"
                 gap={2}
-                sx={{ mt: 0.5 }}
               >
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  {creditPesos(me.credit, rate)}
-                </Typography>
+                <Stack direction="row" gap={4} flexWrap="wrap" useFlexGap>
+                  <Box>
+                    <Typography variant="overline" color="text.secondary">
+                      {texts.SALE_MONEY_LABEL}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                      {creditPesos(me.saleMoney, rate)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {texts.SALE_MONEY_HINT}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" color="text.secondary">
+                      {texts.STORE_CREDIT_LABEL}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                      {creditPesos(me.storeCredit, rate)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {texts.STORE_CREDIT_HINT}
+                    </Typography>
+                  </Box>
+                </Stack>
                 <Button variant="outlined" onClick={() => setSidebar("history")}>
                   {texts.VIEW_HISTORY}
                 </Button>
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {texts.CREDIT_HINT}
-              </Typography>
             </Paper>
 
             {/* Details */}

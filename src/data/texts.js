@@ -83,6 +83,10 @@ const texts = {
   // Account screen
   CREDIT_BALANCE: "Saldo de crédito",
   CREDIT_HINT: "Lo que la tienda te debe. Podés usarlo en tus compras.",
+  SALE_MONEY_LABEL: "Dinero en la tienda",
+  SALE_MONEY_HINT: "De la venta de tus cartas. Podés cobrarlo o usarlo en compras.",
+  STORE_CREDIT_LABEL: "Store credit",
+  STORE_CREDIT_HINT: "Cargado por la tienda. Solo para usar en compras.",
   VIEW_HISTORY: "Ver historial",
   MY_DETAILS: "Mis datos",
   EDIT: "Editar",
