@@ -166,6 +166,7 @@ const texts = {
   ONLY_FINISH: "Solo existe en",
   WISHLIST_EDIT: "Preferencias",
   WISHLIST_QUANTITY: "Cantidad",
+  WISHLIST_AUTOBUY: "Comprar automáticamente",
   WISHLIST_WANT: "Querés",
   WISHLIST_CLOSE: "Cerrar",
   CLOSE: "Cerrar",

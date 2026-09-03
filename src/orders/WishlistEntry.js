@@ -9,6 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 // One wishlist row, with an expandable editor for its constraints: printings
 // and finishes. Each category is independent and multi-select: nothing ticked
@@ -28,6 +29,7 @@ export default function WishlistEntry(props) {
   const [versions, setVersions] = useState(null); // printings, loaded lazily
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [wanted, setWanted] = useState(entry.quantity ?? 1);
+  const [autobuy, setAutobuy] = useState(entry.autobuy ?? false);
 
   // Shown immediately and written behind it. On failure the control goes back
   // to what the server still holds, rather than displaying a number that was
@@ -42,6 +44,23 @@ export default function WishlistEntry(props) {
       () => {},
       (response) => {
         setWanted(previous);
+        toast(response.message);
+      }
+    );
+  }
+
+  // "Buy it for me automatically" — when the shop gets it in stock, it goes
+  // straight into a pending order for me instead of waiting for the shop to
+  // ask. Saved on the spot; reverts on failure.
+  function changeAutobuy(next) {
+    setAutobuy(next);
+    accessAPI(
+      "PUT",
+      `wishlist/${entry.id}`,
+      { autobuy: next },
+      () => {},
+      (response) => {
+        setAutobuy(!next);
         toast(response.message);
       }
     );
@@ -141,6 +160,19 @@ export default function WishlistEntry(props) {
             </MenuItem>
           ))}
         </TextField>
+        {/* Buy it for me automatically when it comes in — no waiting for the
+            shop to ask. */}
+        <FormControlLabel
+          sx={{ ml: 0 }}
+          control={
+            <Switch
+              size="small"
+              checked={autobuy}
+              onChange={(e) => changeAutobuy(e.target.checked)}
+            />
+          }
+          label={texts.WISHLIST_AUTOBUY}
+        />
         <Button size="small" onClick={toggleOpen}>
           {open ? texts.WISHLIST_CLOSE : texts.WISHLIST_EDIT}
         </Button>
