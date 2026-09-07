@@ -444,10 +444,29 @@ function EditDetailsForm({ me, onSaved, onAuthFail }) {
 function ChangePasswordForm({ onSaved, onAuthFail }) {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
+  // The confirmation ("verificación") the customer reported was missing: the
+  // new password is typed twice and must match before anything is sent, so a
+  // typo is caught here instead of silently setting an unknown password.
+  const [confirm, setConfirm] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // The confirmation only counts as a mismatch once something has been typed
+  // into it — an empty box is not yet an error while the customer is still on
+  // the new-password field.
+  const mismatch = confirm.length > 0 && next !== confirm;
+
   function save() {
-    if (!current || !next) return;
+    if (!current || !next || !confirm) return;
+    // Guard the two client-side rules before the request so the customer gets
+    // an immediate, specific reason rather than a generic server rejection.
+    if (next !== confirm) {
+      toast(texts.PASSWORD_MISMATCH);
+      return;
+    }
+    if (next.length < 8) {
+      toast(texts.PASSWORD_TOO_SHORT);
+      return;
+    }
     setSaving(true);
     accessAPI(
       "PUT",
@@ -486,10 +505,20 @@ function ChangePasswordForm({ onSaved, onAuthFail }) {
         disabled={saving}
         fullWidth
       />
+      <TextField
+        label={texts.CONFIRM_PASSWORD}
+        type="password"
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        error={mismatch}
+        helperText={mismatch ? texts.PASSWORD_MISMATCH : ""}
+        disabled={saving}
+        fullWidth
+      />
       <Button
         variant="contained"
         onClick={save}
-        disabled={saving || !current || !next}
+        disabled={saving || !current || !next || !confirm || mismatch}
       >
         {saving ? <CircularProgress size={22} /> : texts.SAVE}
       </Button>

@@ -20,6 +20,7 @@ export default function Login() {
 
   const [createNameError, setCreateNameError] = useState(false);
   const [createEmailError, setCreateEmailError] = useState(false);
+  const [createPhoneError, setCreatePhoneError] = useState(false);
   const [createPasswordError, setCreatePasswordError] = useState(false);
 
   const [creatingAccount, setCreatingAccount] = useState(false);
@@ -28,6 +29,7 @@ export default function Login() {
   const loginPassword = useRef(null);
   const createName = useRef(null);
   const createEmail = useRef(null);
+  const createPhone = useRef(null);
   const createPassword = useRef(null);
 
   let navigate = useNavigate();
@@ -105,6 +107,9 @@ export default function Login() {
     if (!createEmail.current.value) {
       setCreateEmailError(true);
     }
+    if (!createPhone.current.value) {
+      setCreatePhoneError(true);
+    }
     if (!createPassword.current.value) {
       setCreatePasswordError(true);
     }
@@ -112,13 +117,15 @@ export default function Login() {
     if (
       !createName.current.value ||
       !createEmail.current.value ||
+      !createPhone.current.value ||
       !createPassword.current.value
     ) {
       return false;
     }
-    // Register with name + email + password — no username.
+    // Register with name + email + phone + password — no username.
     var createNameData = createName.current.value;
     var createEmailData = createEmail.current.value;
+    var createPhoneData = createPhone.current.value;
     setLoginLoader(true);
     accessAPI(
       "POST",
@@ -126,6 +133,7 @@ export default function Login() {
       JSON.stringify({
         name: createNameData,
         email: createEmailData,
+        phone: createPhoneData,
         password: createPassword.current.value,
       }),
       (response) => {
@@ -141,6 +149,7 @@ export default function Login() {
         setTimeout(() => {
           if (createName.current) createName.current.value = createNameData;
           if (createEmail.current) createEmail.current.value = createEmailData;
+          if (createPhone.current) createPhone.current.value = createPhoneData;
         }, 0);
       }
     );
@@ -218,6 +227,14 @@ export default function Login() {
                     error={createEmailError}
                     onChange={() => setCreateEmailError(false)}
                     inputRef={createEmail}
+                    fullWidth
+                  />
+                  <TextField
+                    type="tel"
+                    placeholder={texts.CREATE_PHONE}
+                    error={createPhoneError}
+                    onChange={() => setCreatePhoneError(false)}
+                    inputRef={createPhone}
                     fullWidth
                   />
                   <TextField

@@ -116,11 +116,26 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  /* The name plus its four controls do not fit on one line on a phone, so the
+     row wraps instead of overflowing the card. */
+  flex-wrap: wrap;
 }
 
 .wishlistName {
   flex: 1 1 auto;
   font-weight: bold;
+}
+
+/* On a phone the name takes its own line and the controls sit in a tidy
+   wrapping row beneath it, each staying tappable rather than crushed. */
+@media (max-width: 600px) {
+  .wishlistName {
+    flex-basis: 100%;
+  }
+
+  .wishlistHead {
+    gap: 8px 12px;
+  }
 }
 
 /* ---- reserve control on a store card --------------------------------- */

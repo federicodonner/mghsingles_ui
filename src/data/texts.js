@@ -63,6 +63,7 @@ const texts = {
   CREATE_USERNAME: "Nombre de usuario",
   CREATE_NAME: "Nombre completo",
   CREATE_EMAIL: "Email",
+  CREATE_PHONE: "Celular",
   CREATE_PASSWORD: "Contraseña",
   CONFIRM_DELETE_CARD_START: "¿Eliminar ",
   CONFIRM_DELETE_CARD_END: "?",
@@ -80,6 +81,9 @@ const texts = {
   UPDATE_PASSWORD: "Actualiza tu contraseña",
   CURRENT_PASSWORD: "Contraseña actual",
   NEW_PASSWORD: "Nueva contraseña",
+  CONFIRM_PASSWORD: "Repetir nueva contraseña",
+  PASSWORD_MISMATCH: "Las contraseñas no coinciden.",
+  PASSWORD_TOO_SHORT: "La contraseña debe tener al menos 8 caracteres.",
   // Account screen
   CREDIT_BALANCE: "Saldo de crédito",
   CREDIT_HINT: "Lo que la tienda te debe. Podés usarlo en tus compras.",
@@ -199,6 +203,7 @@ const texts = {
   ADD_TO_WISHLIST: "Agregar a deseados",
   IN_WISHLIST: "Ya está en tus deseados",
   ADDED_TO_WISHLIST: "agregada a tus deseados",
+  REMOVED_FROM_WISHLIST: "eliminada de tus deseados",
   CURRENCY: "U$S",
   COLOR_W: "Blanco",
   COLOR_U: "Azul",
@@ -302,6 +307,9 @@ const texts = {
   RETIRED_COMMITTED_2:
     " carta(s) apartadas para un pedido; esas ya están comprometidas y se quedan en la tienda.",
   CONFIRM_DELETE_STORAGE: "¿Eliminar este contenedor?",
+  CONFIRM_DELETE_STORAGE_CARDS_1: "Este contenedor tiene ",
+  CONFIRM_DELETE_STORAGE_CARDS_2:
+    " carta(s) adentro. Al eliminarlo también se eliminan esas cartas. ¿Continuar?",
   STORAGE_LOCKED:
     "Sólo podés reordenarlo mientras lo tengas vos.",
 };

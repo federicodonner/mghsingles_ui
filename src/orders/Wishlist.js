@@ -45,6 +45,10 @@ export default function Wishlist() {
   const [recent, setRecent] = useState([]);
   // Whether the add-to-wishlist form is slid out.
   const [adding, setAdding] = useState(false);
+  // Bumped after each add so the name field remounts fresh — otherwise its
+  // internal input text lingers and the suggestion list keeps loading for the
+  // card that was just added.
+  const [pickerKey, setPickerKey] = useState(0);
   // The Moxfield import: its sidebar, the pasted link, and the in-flight
   // flag that keeps the button honest while the deck downloads.
   const [importOpen, setImportOpen] = useState(false);
@@ -84,12 +88,17 @@ export default function Wishlist() {
       "wishlist",
       { name },
       (response) => {
+        // Clear the selection and remount the picker so it is ready (empty, not
+        // stuck loading) for the next card.
         setChosen(null);
+        setPickerKey((k) => k + 1);
         if (response?.id) setRecent((ids) => [response.id, ...ids]);
+        toast(`${name} ${texts.ADDED_TO_WISHLIST}`, "success");
         load();
       },
       (response) => {
         setChosen(null);
+        setPickerKey((k) => k + 1);
         toast(response.message);
       }
     );
@@ -126,13 +135,21 @@ export default function Wishlist() {
     );
   }
 
+  // Optimistic delete: the row leaves the list at once (that IS the feedback —
+  // there is no per-row spinner), and only comes back if the server rejects it.
   function removeEntry(entry) {
+    const previous = entries;
+    setEntries((list) => list.filter((e) => e.id !== entry.id));
     accessAPI(
       "DELETE",
       `wishlist/${entry.id}`,
       null,
-      () => load(),
-      (response) => toast(response.message)
+      () => toast(`${entry.name} ${texts.REMOVED_FROM_WISHLIST}`, "success"),
+      (response) => {
+        // Put it back exactly where it was and say why.
+        setEntries(previous);
+        toast(response.message);
+      }
     );
   }
 
@@ -175,6 +192,7 @@ export default function Wishlist() {
         title={texts.ADD_WISHLIST}
       >
         <CardNameAutocomplete
+          key={pickerKey}
           value={chosen}
           onChange={(name) => {
             setChosen(name);

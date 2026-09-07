@@ -79,7 +79,14 @@ export default function Title({
         )}
       </Box>
       {(buttons.length > 0 || children) && (
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: "auto" }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ ml: "auto" }}
+        >
           {buttons.map((button) => (
             <Button
               key={button.label}

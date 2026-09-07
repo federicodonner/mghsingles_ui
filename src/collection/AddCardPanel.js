@@ -5,6 +5,7 @@ import { accessAPI } from "../utils/fetchFunctions";
 import { finishesFor, finishLabel, isFoil, DEFAULT_FINISH } from "../utils/finishes";
 import texts from "../data/texts";
 import CatalogueSearch from "./CatalogueSearch";
+import { useExchangeRate, pesosLive } from "../utils/exchange";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -31,6 +32,7 @@ const VERSIONS_PAGE = 60;
 function VersionRow({
   version,
   onAdd,
+  rate,
   changing = false,
   current = false,
   currentVariant = null,
@@ -90,6 +92,13 @@ function VersionRow({
             .filter(Boolean)
             .join(" · ")}
         </Typography>
+        {/* What a copy of this printing would sell for at the shop, so the
+            customer sees the price as they file cards in. */}
+        {pesosLive(version.price, rate) && (
+          <Typography variant="caption" sx={{ fontWeight: 600, display: "block" }}>
+            {pesosLive(version.price, rate)}
+          </Typography>
+        )}
       </Box>
       {finishes.length > 1 ? (
         <ToggleButtonGroup
@@ -167,6 +176,7 @@ export default function AddCardPanel({
   const [setFilter, setSetFilter] = useState("");
   const [versionsLoading, setVersionsLoading] = useState(false);
   const [collectionId, setCollectionId] = useState(null);
+  const rate = useExchangeRate();
 
   useEffect(() => {
     accessAPI(
@@ -344,6 +354,7 @@ export default function AddCardPanel({
             <VersionRow
               key={version.scryfallid ?? index}
               version={version}
+              rate={rate}
               changing={Boolean(changeTarget)}
               current={changeTarget?.scryfallid === version.scryfallid}
               currentVariant={changeTarget?.variant ?? null}

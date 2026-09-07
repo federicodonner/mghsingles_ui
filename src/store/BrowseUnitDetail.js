@@ -122,10 +122,9 @@ export default function BrowseUnitDetail() {
     );
   }
 
-  // The peso price text for a card, or "es tuya" when it's the viewer's own
-  // (the API sends no price for those).
-  const priceText = (card) =>
-    card.mine ? texts.ITS_YOURS : pesosLive(card.price, rate);
+  // The peso price text for a card. Own cards carry their price too now; the
+  // "es tuya" indicator is a chip shown next to it rather than replacing it.
+  const priceText = (card) => pesosLive(card.price, rate);
 
   // ---- binder rendering --------------------------------------------------
 
@@ -271,6 +270,15 @@ export default function BrowseUnitDetail() {
                   {priceText(card)}
                 </Typography>
               )}
+              {card.mine && (
+                <Chip
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  label={texts.ITS_YOURS}
+                  sx={{ flex: "0 0 auto" }}
+                />
+              )}
               {card.mine ? (
                 <Button
                   size="small"
@@ -384,9 +392,19 @@ export default function BrowseUnitDetail() {
                         />
                       </Box>
                     )}
-                    {priceText(card) && (
-                      <Typography variant="h6">{priceText(card)}</Typography>
-                    )}
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                      {priceText(card) && (
+                        <Typography variant="h6">{priceText(card)}</Typography>
+                      )}
+                      {card.mine && (
+                        <Chip
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                          label={texts.ITS_YOURS}
+                        />
+                      )}
+                    </Stack>
                     {!card.mine && (
                       <Typography variant="body2" color="text.secondary">
                         {texts.AVAILABLE_NOW}: {left}

@@ -155,18 +155,23 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
       </Stack>
 
       <Box>
-          {/* A customer's own card shows "es tuya" in place of a price; the
-              price is never even sent for it. Everyone else sees pesos only. */}
-          {card.mine ? (
-            <Typography variant="h6" className="storeResultPrice">
-              {texts.ITS_YOURS}
-            </Typography>
-          ) : (
-            pesosLive(card.price, rate) && (
+          {/* The price shows for everyone, including the owner of the card; an
+              own card also wears an "es tuya" chip so the ownership is still
+              obvious next to the price. */}
+          {pesosLive(card.price, rate) && (
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
               <Typography variant="h6" className="storeResultPrice">
                 {pesosLive(card.price, rate)}
               </Typography>
-            )
+              {card.mine && (
+                <Chip size="small" color="success" variant="outlined" label={texts.ITS_YOURS} />
+              )}
+            </Stack>
+          )}
+          {/* A priceless own card (the shop has not priced it yet) still needs
+              its ownership shown. */}
+          {card.mine && !pesosLive(card.price, rate) && (
+            <Chip size="small" color="success" variant="outlined" label={texts.ITS_YOURS} />
           )}
         {!card.mine && (
           <Typography variant="body2" color="text.secondary">
