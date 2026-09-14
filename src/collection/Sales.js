@@ -13,7 +13,9 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 // Money is stored to the cent; the arithmetic below multiplies floats, and an
@@ -40,6 +42,11 @@ function formatDate(seconds) {
 export default function Sales() {
   const [loader, setLoader] = useState(true);
   const [sales, setSales] = useState([]);
+  // Filter by card name and page the result, entirely client-side — the whole
+  // list already arrives in one request, so this is a view concern.
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   // The customer platform shows everything in pesos, sales included. Sales are
   // stored in dollars (no frozen peso snapshot), so these are converted at
   // TODAY's rate — a display convenience, not a re-statement of the debt. If
@@ -63,6 +70,21 @@ export default function Sales() {
       }
     );
   }, [navigate]);
+
+  const term = search.trim().toLowerCase();
+  const filtered = term
+    ? sales.filter((sale) => (sale.name ?? "").toLowerCase().includes(term))
+    : sales;
+  const pageRows = filtered.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  // A search that empties the current page must not strand the reader past the
+  // end of the results.
+  useEffect(() => {
+    setPage(0);
+  }, [term, sales.length]);
 
   // The API settles the money server-side (`net` is the customer's share with
   // the commission rounded first); the commission shown is the difference so
@@ -103,7 +125,24 @@ export default function Sales() {
             {!sales.length && (
               <Typography color="text.secondary">{texts.NO_SALES}</Typography>
             )}
+
             {sales.length > 0 && (
+              <TextField
+                size="small"
+                placeholder={texts.SALES_SEARCH}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ mb: 1.5, width: 320, maxWidth: "100%" }}
+              />
+            )}
+
+            {sales.length > 0 && !filtered.length && (
+              <Typography color="text.secondary">
+                {texts.SALES_NONE_MATCH}
+              </Typography>
+            )}
+
+            {filtered.length > 0 && (
               <TableContainer>
                 <Table size="small">
                   <TableHead>
@@ -127,7 +166,7 @@ export default function Sales() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {sales.map((sale, index) => {
+                    {pageRows.map((sale, index) => {
                       const { total, commission, yours } = split(sale);
                       return (
                         <TableRow key={index} hover>
@@ -187,6 +226,25 @@ export default function Sales() {
                   </TableBody>
                 </Table>
               </TableContainer>
+            )}
+
+            {filtered.length > 0 && (
+              <TablePagination
+                component="div"
+                count={filtered.length}
+                page={page}
+                onPageChange={(e, next) => setPage(next)}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setRowsPerPage(parseInt(e.target.value, 10));
+                  setPage(0);
+                }}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                labelRowsPerPage={texts.PER_PAGE}
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}–${to} ${texts.OF} ${count}`
+                }
+              />
             )}
           </>
         )}

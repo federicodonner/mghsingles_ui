@@ -16,6 +16,8 @@ const texts = {
   SALES_HINT:
     "Cada venta muestra el total, la comisión de la tienda y lo que te corresponde.",
   NO_SALES: "Todavía no se vendió ninguna de tus cartas.",
+  SALES_SEARCH: "Buscar por nombre de carta",
+  SALES_NONE_MATCH: "Ninguna carta coincide con la búsqueda.",
   SALE_DATE: "Fecha",
   SALE_TOTAL: "Total",
   SALE_COMMISSION: "Comisión",
