@@ -22,6 +22,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 // A store-credit amount (stored in dollars) shown in pesos at today's rate,
 // dollars only when the shop has no rate. Same rule the admin uses.
@@ -152,6 +153,21 @@ export default function Account() {
                 {texts.CHANGE_PASSWORD}
               </Button>
             </Paper>
+
+            {/* Signing out lives here now, not in the top bar. */}
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              startIcon={<LogoutIcon />}
+              sx={{ mt: 3 }}
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              {texts.LOGOUT}
+            </Button>
           </Box>
         )}
       </div>

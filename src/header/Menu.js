@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from "react";
 import "./menu.css";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Badge from "@mui/material/Badge";
-import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import Stack from "@mui/material/Stack";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import texts from "../data/texts";
-import { logout, accessAPI, readFromLS } from "../utils/fetchFunctions";
+import { accessAPI, readFromLS } from "../utils/fetchFunctions";
 
 // The routes in the bar, in order. Keeping them as data rather than seven
 // near-identical JSX blocks is what stops one of them quietly drifting out of
 // step with the others — which is how the old menu ended up with each link
 // carrying its own copy of the active-class expression. The same list feeds
 // both the desktop bar and the phone drawer, for the same reason.
+// The cart is not in this list any more — it lives on the right of the bar as
+// a classic cart icon (see `cartButton` below), not a text link among the rest.
 const LINKS = [
   { to: "/home", label: texts.STORE },
-  { to: "/cart", label: texts.CART, badge: "cart" },
   { to: "/wishlist", label: texts.WISHLIST },
   { to: "/mystorage", label: texts.MY_STORAGE },
   { to: "/orders", label: texts.ORDERS, badge: "unread" },
@@ -42,8 +43,6 @@ const itemSx = {
 };
 
 export default function Menu(props) {
-  const navigate = useNavigate();
-
   // The single compact-layout breakpoint, shared with header.css: below it
   // the bar becomes a burger AND the header sheds the partner logo — the two
   // must flip together or the burger floats mid-header next to a logo that
@@ -97,13 +96,7 @@ export default function Menu(props) {
     return () => window.removeEventListener("cartchange", refresh);
   }, [loggedIn]);
 
-  function doLogout() {
-    logout();
-    navigate("/");
-    if (props.logOutHideMenu) props.logOutHideMenu();
-  }
-
-  const badgeCounts = { unread, cart: cartCount };
+  const badgeCounts = { unread };
   const withBadge = (link, label) =>
     link.badge && badgeCounts[link.badge] > 0 ? (
       <Badge badgeContent={badgeCounts[link.badge]} color="secondary">
@@ -113,21 +106,47 @@ export default function Menu(props) {
       label
     );
 
+  // The cart, as a classic shopping-cart icon with a count badge, sitting on
+  // the right of the bar rather than as one text link among the others. Its
+  // count still follows the site-wide `cartchange` event via `cartCount`.
+  const cartButton = (
+    <IconButton
+      component={NavLink}
+      to="/cart"
+      aria-label={texts.CART}
+      disableRipple
+      sx={{
+        color: "#fff",
+        "&:hover": { backgroundColor: "rgba(255,255,255,0.14)" },
+        "&.active": { backgroundColor: "rgba(255,255,255,0.2)" },
+      }}
+    >
+      <Badge badgeContent={cartCount} color="secondary">
+        <ShoppingCartOutlinedIcon />
+      </Badge>
+    </IconButton>
+  );
+
   // Phones get a burger and a drawer: seven links do not fit beside a logo on
   // a 375px strip, and the wrapped three-row bar they used to form ate half
   // the screen. Signed out there is only "Ingresar", which fits as it is.
   if (phone && loggedIn) {
     return (
       <>
-        <IconButton
-          aria-label={texts.MENU}
-          onClick={() => setDrawerOpen(true)}
-          sx={{ color: "#fff", ml: "auto" }}
-        >
-          <Badge variant="dot" color="secondary" invisible={unread === 0}>
-            <MenuIcon />
-          </Badge>
-        </IconButton>
+        {/* Cart icon and burger together on the right; the cart stays one tap
+            away instead of being buried in the drawer. */}
+        <Stack direction="row" alignItems="center" sx={{ ml: "auto" }}>
+          {cartButton}
+          <IconButton
+            aria-label={texts.MENU}
+            onClick={() => setDrawerOpen(true)}
+            sx={{ color: "#fff" }}
+          >
+            <Badge variant="dot" color="secondary" invisible={unread === 0}>
+              <MenuIcon />
+            </Badge>
+          </IconButton>
+        </Stack>
         <Drawer
           anchor="right"
           open={drawerOpen}
@@ -145,10 +164,6 @@ export default function Menu(props) {
                 <ListItemText primary={withBadge(link, link.label)} />
               </ListItemButton>
             ))}
-            <Divider sx={{ my: 1 }} />
-            <ListItemButton onClick={doLogout}>
-              <ListItemText primary={texts.LOGOUT} />
-            </ListItemButton>
           </List>
         </Drawer>
       </>
@@ -176,17 +191,12 @@ export default function Menu(props) {
           </Button>
         ))}
 
-      {loggedIn ? (
-        <Button
-          variant="text"
-          disableRipple
-          className="logoutButton"
-          sx={itemSx}
-          onClick={doLogout}
-        >
-          {texts.LOGOUT}
-        </Button>
-      ) : (
+      {/* The cart lives on the right of the link cluster, as an icon. */}
+      {loggedIn && cartButton}
+
+      {/* Signing out moved to the Mi cuenta page — the bar carries navigation
+          only, and just the "Ingresar" call to action when signed out. */}
+      {!loggedIn && (
         <Button
           component={NavLink}
           to="/login"
