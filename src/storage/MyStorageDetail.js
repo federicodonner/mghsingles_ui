@@ -342,6 +342,7 @@ export default function MyStorageDetail() {
                   arrange={unit.editable}
                   mutate={unit.editable}
                   withdrawable={withdrawable}
+                  onDuplicate={duplicate}
                   onRemove={remove}
                   onReorder={reorder}
                   onEditVersion={unit.editable ? setChanging : null}
