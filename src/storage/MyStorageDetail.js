@@ -18,6 +18,7 @@ import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import BinderEditor from "./BinderEditor";
 import BoxEditor from "./BoxEditor";
+import { withDuplicate, withoutPlacement } from "./optimistic";
 import "./myStorage.css";
 
 const TYPE_LABELS = {
@@ -139,14 +140,26 @@ export default function MyStorageDetail() {
       }
     );
 
-  const duplicate = (placementid) =>
+  // Optimistic: the copy appears the moment the button is clicked, where the
+  // API will put it, and the reload swaps in its real id behind the scenes.
+  // On failure the copy vanishes again, with the API's reason in a toast.
+  // A provisional (negative) id cannot be duplicated — the server does not
+  // know that copy yet.
+  const duplicate = (placementid) => {
+    if (placementid < 0) return;
+    const tempid = -Date.now();
+    setUnit((u) => withDuplicate(u, placementid, tempid));
     accessAPI(
       "POST",
       `mystorage/placement/${placementid}/duplicate`,
       null,
       after,
-      onError
+      (response) => {
+        toast(`${texts.DUPLICATE_FAILED} ${response.message}`);
+        setUnit((u) => withoutPlacement(u, tempid));
+      }
     );
+  };
 
   // Shift every card on one binder page a pocket ahead or back; the edge
   // stack is kicked to the stand-by area by the API.
@@ -189,14 +202,23 @@ export default function MyStorageDetail() {
       onError
     );
 
-  const remove = (placementid) =>
+  // Optimistic like duplicate: the card leaves the screen immediately, and a
+  // failure brings it back by reloading — only fresh server data knows where
+  // it really was.
+  const remove = (placementid) => {
+    if (placementid < 0) return;
+    setUnit((u) => withoutPlacement(u, placementid));
     accessAPI(
       "DELETE",
       `mystorage/placement/${placementid}`,
       null,
       after,
-      onError
+      (response) => {
+        toast(`${texts.REMOVE_FAILED} ${response.message}`);
+        load();
+      }
     );
+  };
 
   const reorder = (placementids) =>
     accessAPI(
