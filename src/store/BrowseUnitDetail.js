@@ -8,12 +8,14 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import IconButton from "@mui/material/IconButton";
+import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Header from "../header/Header";
 import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import texts from "../data/texts";
+import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI, readFromLS } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import { useExchangeRate, pesosLive } from "../utils/exchange";
@@ -45,6 +47,9 @@ export default function BrowseUnitDetail() {
   // The stack of cards being looked at, or null. A pocket click passes its
   // whole stack; a box row passes a single card.
   const [viewing, setViewing] = useState(null);
+  // Which fifty rows of a box are on screen — same page size as the owner's
+  // box editor, clamped rather than reset when the list shrinks.
+  const [boxPage, setBoxPage] = useState(1);
   // Copies sent to the cart in this sitting, by cardid — so availability on
   // screen follows the clicks even though the cart reserves nothing.
   const [added, setAdded] = useState({});
@@ -161,7 +166,13 @@ export default function BrowseUnitDetail() {
         {!top && <span className="pocketEmpty">·</span>}
         {top && (
           <div className="binderCard">
-            {top.image ? (
+            {/* A stacked pocket shows no magnifier: only its top card is
+                visible, and zooming that would suggest it is the whole
+                story. Opening the pocket (the click it already invites)
+                shows every card, each with its own magnifier. */}
+            {top.image && cards.length === 1 ? (
+              <PreviewCarta image={top.image} name={top.name} fill />
+            ) : top.image ? (
               <img src={top.image} alt={top.name} loading="lazy" />
             ) : (
               <div className="binderCard binderCardNoArt">{top.name}</div>
@@ -216,6 +227,11 @@ export default function BrowseUnitDetail() {
 
   // ---- box rendering -----------------------------------------------------
 
+  // Ten rows per page, like the owner's box editor: a store box holds
+  // hundreds of copies and one endless list is heavy to render and heavier
+  // to scroll.
+  const BOX_PAGE_SIZE = 10;
+
   function renderBox() {
     // An unsorted box has no order of its own, so it reads alphabetically —
     // the same convention as the owner's view.
@@ -225,9 +241,15 @@ export default function BrowseUnitDetail() {
             (a.name ?? "").localeCompare(b.name ?? "")
           )
         : unit.cards ?? [];
+    const pageCount = Math.max(1, Math.ceil(cards.length / BOX_PAGE_SIZE));
+    const curPage = Math.min(boxPage, pageCount);
+    const visible = cards.slice(
+      (curPage - 1) * BOX_PAGE_SIZE,
+      curPage * BOX_PAGE_SIZE
+    );
     return (
       <Stack spacing={1}>
-        {cards.map((card) => {
+        {visible.map((card) => {
           const left = availableNow(card);
           return (
             <Stack
@@ -242,11 +264,10 @@ export default function BrowseUnitDetail() {
                 opacity: left === 0 ? 0.6 : 1,
               }}
             >
-              <Box
-                component="img"
-                src={card.image}
-                alt={card.name}
-                loading="lazy"
+              <PreviewCarta
+                image={card.image}
+                name={card.name}
+                small
                 sx={{ width: 44, height: 61, borderRadius: 1, objectFit: "cover" }}
               />
               <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
@@ -305,6 +326,14 @@ export default function BrowseUnitDetail() {
             </Stack>
           );
         })}
+        {pageCount > 1 && (
+          <Pagination
+            count={pageCount}
+            page={curPage}
+            onChange={(e, next) => setBoxPage(next)}
+            sx={{ display: "flex", justifyContent: "center", my: 1.5 }}
+          />
+        )}
       </Stack>
     );
   }
@@ -348,7 +377,7 @@ export default function BrowseUnitDetail() {
                       }`}
                       onClick={() => setViewing([card])}
                     >
-                      <img src={card.image} alt={card.name} loading="lazy" />
+                      <PreviewCarta image={card.image} name={card.name} fill />
                       {priceText(card) && (
                         <span className="browsePrice">{priceText(card)}</span>
                       )}
@@ -371,11 +400,10 @@ export default function BrowseUnitDetail() {
               const left = availableNow(card);
               return (
                 <Stack key={card.placementid} direction="row" spacing={2}>
-                  <Box
-                    component="img"
-                    src={card.image}
-                    alt={card.name}
-                    sx={{ width: 120, borderRadius: 2, alignSelf: "flex-start" }}
+                  <PreviewCarta
+                    image={card.image}
+                    name={card.name}
+                    sx={{ width: 120, borderRadius: 2 }}
                   />
                   <Stack spacing={0.75} sx={{ flex: "1 1 auto" }}>
                     <Typography variant="subtitle2">{card.name}</Typography>
