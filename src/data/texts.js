@@ -184,13 +184,13 @@ const texts = {
   WISHLIST_QUANTITY: "Cantidad",
   WISHLIST_AUTOBUY: "Comprar automáticamente",
   WISHLIST_WANT: "Querés",
-  WISHLIST_CLOSE: "Cerrar",
   CLOSE: "Cerrar",
   WISHLIST_SAVE: "Guardar preferencias",
   WISHLIST_SAVED: "Preferencias guardadas.",
   WISHLIST_ANY_HINT:
     "Si no marcas nada en una categoría, aceptas cualquiera.",
   WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
+  WISHLIST_FILTER_SET: "Filtrar por código de set",
   AUTOCOMPLETE_HINT: "Escribí al menos dos letras.",
   AUTOCOMPLETE_NONE: "No hay cartas con ese nombre.",
 
@@ -224,9 +224,6 @@ const texts = {
   // services/storageState.js in the API.
   MY_STORAGE: "Contenedores",
   MY_STORAGE_TITLE: "Mis carpetas y cajas",
-  UNFILED_TITLE: "Cartas sin contenedor",
-  UNFILED_HINT:
-    "Estas copias tuyas todavía no están en ninguna carpeta o caja.",
   CONTAINER_EMPTY: "Este contenedor está vacío.",
   STANDBY_TITLE: "En espera",
   STANDBY_HINT:

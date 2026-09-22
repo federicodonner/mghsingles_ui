@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { toast } from "../utils/toast";
 import texts from "../data/texts";
 import PreviewCarta from "../elementos/PreviewCarta";
+import SideForm from "../elementos/SideForm";
 import { accessAPI } from "../utils/fetchFunctions";
 import { finishLabel, isFoil } from "../utils/finishes";
 import { useExchangeRate, pesosLive } from "../utils/exchange";
@@ -12,8 +13,10 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 
-// One wishlist row, with an expandable editor for its constraints: printings
-// and finishes. Each category is independent and multi-select: nothing ticked
+// One wishlist row. Its constraints — printings and finishes — are edited in
+// a wide sidebar (the same 720px surface the storage add-card panel uses),
+// because the version picker is a grid of card images that needs room, not an
+// inline form. Each category is independent and multi-select: nothing ticked
 // means "any". Language and condition used to be constraints too — the shop
 // stopped showing them (2026-08-23), so the editor no longer offers them and
 // saving clears whatever a wish still carried, or the old, invisible
@@ -29,6 +32,10 @@ export default function WishlistEntry(props) {
   const [open, setOpen] = useState(false);
   const [versions, setVersions] = useState(null); // printings, loaded lazily
   const [loadingVersions, setLoadingVersions] = useState(false);
+  // Narrows the version grid by set code as you type — some cards have dozens
+  // of printings and you usually know which set you are after. Display-only:
+  // hidden tiles keep whatever picked state they have.
+  const [setFilter, setSetFilter] = useState("");
   const [wanted, setWanted] = useState(entry.quantity ?? 1);
   const [autobuy, setAutobuy] = useState(entry.autobuy ?? false);
 
@@ -71,12 +78,11 @@ export default function WishlistEntry(props) {
   const [pickedVersions, setPickedVersions] = useState(entry.versions);
   const [pickedVariants, setPickedVariants] = useState(entry.variants);
 
-  function toggleOpen() {
-    const next = !open;
-    setOpen(next);
+  function openEditor() {
+    setOpen(true);
     // A card can have dozens of printings, so only fetch them when the editor
     // is actually opened.
-    if (next && versions === null && !loadingVersions) {
+    if (versions === null && !loadingVersions) {
       setLoadingVersions(true);
       accessAPI(
         "GET",
@@ -174,8 +180,8 @@ export default function WishlistEntry(props) {
           }
           label={texts.WISHLIST_AUTOBUY}
         />
-        <Button size="small" onClick={toggleOpen}>
-          {open ? texts.WISHLIST_CLOSE : texts.WISHLIST_EDIT}
+        <Button size="small" onClick={openEditor}>
+          {texts.WISHLIST_EDIT}
         </Button>
         <Button
           variant="outlined"
@@ -196,95 +202,116 @@ export default function WishlistEntry(props) {
         </span>
       </div>
 
-      {open && (
-        <div className="constraintEditor">
+      {/* The preferences workbench: finishes first (a couple of checkboxes),
+          then the version grid, which grows as long as it needs — the drawer
+          itself scrolls. Every tick still saves on the spot, so closing the
+          sidebar never loses anything. */}
+      <SideForm
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`${texts.WISHLIST_EDIT} · ${entry.name}`}
+        width={720}
+      >
+        <div className="wishlistEditorPanel">
           <div className="constraintHint">{texts.WISHLIST_ANY_HINT}</div>
 
-          <div className="constraintColumn versions">
-              <div className="constraintTitle">{texts.WISHLIST_VERSIONS}</div>
-              {loadingVersions && (
-                <div className="constraintLoading">
-                  {texts.WISHLIST_LOADING_VERSIONS}
-                </div>
-              )}
-              {/* Picked by eye: printings differ by art, and an etched
-                  printing has its own collector number and image, so it shows
-                  up here as its own tile. */}
-              <div className="versionGrid">
-                {versions &&
-                  versions.map((version) => {
-                    const picked = pickedVersions.includes(version.scryfallid);
-                    return (
-                      <div
-                        className={picked ? "versionTile picked" : "versionTile"}
-                        key={version.scryfallid}
-                        title={`${version.cardsetname} #${version.collectornumber}`}
-                        onClick={() => toggleVersion(version.scryfallid)}
-                      >
-                        {version.image ? (
-                          <PreviewCarta
-                            image={version.image}
-                            name={version.cardsetname}
-                            fill
-                          />
-                        ) : (
-                          <span className="versionNoImage">
-                            {version.cardsetname}
-                          </span>
-                        )}
-                        <span className="versionCaption">
-                          {(version.cardsetcode ?? "").toUpperCase()} #
-                          {version.collectornumber}
-                        </span>
-                        {/* What this printing costs at the shop — quoted by
-                            the API with the full selling rules, so a cheap
-                            rare already reads $1 here. */}
-                        {pesosLive(version.price, rate) && (
-                          <span className="versionPrice">
-                            {pesosLive(version.price, rate)}
-                          </span>
-                        )}
-                        {/* Flag the finishes that are unique to this printing,
-                            since that is why it exists separately. */}
-                        {(version.finishes ?? []).some(isFoil) &&
-                          !(version.finishes ?? []).includes("nonfoil") && (
-                            <span className="versionFinish">
-                              {version.finishes.map(finishLabel).join(" / ")}
-                            </span>
-                          )}
-                      </div>
-                    );
-                  })}
+          <div className="constraintColumn">
+            <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
+            {finishOptions.map((finish) => (
+              <FormControlLabel
+                key={finish}
+                className="constraintOption"
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={pickedVariants.includes(finish)}
+                    onChange={() => toggleVariant(finish)}
+                  />
+                }
+                label={finishLabel(finish)}
+              />
+            ))}
+            {finishOptions.length === 1 && (
+              <div className="onlyFinish">
+                {texts.ONLY_FINISH} {finishLabel(finishOptions[0])}
               </div>
+            )}
           </div>
 
-          <div className="constraintColumns">
-            <div className="constraintColumn">
-              <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
-              {finishOptions.map((finish) => (
-                <FormControlLabel
-                  key={finish}
-                  className="constraintOption"
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={pickedVariants.includes(finish)}
-                      onChange={() => toggleVariant(finish)}
-                    />
-                  }
-                  label={finishLabel(finish)}
-                />
-              ))}
-              {finishOptions.length === 1 && (
-                <div className="onlyFinish">
-                  {texts.ONLY_FINISH} {finishLabel(finishOptions[0])}
-                </div>
-              )}
+          <div className="constraintColumn">
+            <div className="constraintTitle">{texts.WISHLIST_VERSIONS}</div>
+            <TextField
+              size="small"
+              label={texts.WISHLIST_FILTER_SET}
+              value={setFilter}
+              onChange={(e) => setSetFilter(e.target.value)}
+              sx={{ mb: 1.5, width: 280 }}
+            />
+            {loadingVersions && (
+              <div className="constraintLoading">
+                {texts.WISHLIST_LOADING_VERSIONS}
+              </div>
+            )}
+            {/* Picked by eye: printings differ by art, and an etched
+                printing has its own collector number and image, so it shows
+                up here as its own tile. */}
+            <div className="versionGrid">
+              {versions &&
+                versions
+                  .filter(
+                    (version) =>
+                      !setFilter.trim() ||
+                      (version.cardsetcode ?? "")
+                        .toLowerCase()
+                        .includes(setFilter.trim().toLowerCase())
+                  )
+                  .map((version) => {
+                  const picked = pickedVersions.includes(version.scryfallid);
+                  return (
+                    <div
+                      className={picked ? "versionTile picked" : "versionTile"}
+                      key={version.scryfallid}
+                      title={`${version.cardsetname} #${version.collectornumber}`}
+                      onClick={() => toggleVersion(version.scryfallid)}
+                    >
+                      {version.image ? (
+                        <PreviewCarta
+                          image={version.image}
+                          name={version.cardsetname}
+                          fill
+                        />
+                      ) : (
+                        <span className="versionNoImage">
+                          {version.cardsetname}
+                        </span>
+                      )}
+                      <span className="versionCaption">
+                        {(version.cardsetcode ?? "").toUpperCase()} #
+                        {version.collectornumber}
+                      </span>
+                      {/* What this printing costs at the shop — quoted by
+                          the API with the full selling rules, so a cheap
+                          rare already reads $1 here. */}
+                      {pesosLive(version.price, rate) && (
+                        <span className="versionPrice">
+                          {pesosLive(version.price, rate)}
+                        </span>
+                      )}
+                      {/* Flag the finishes that are unique to this printing,
+                          since that is why it exists separately. */}
+                      {(version.finishes ?? []).some(isFoil) &&
+                        !(version.finishes ?? []).includes("nonfoil") && (
+                          <span className="versionFinish">
+                            {version.finishes.map(finishLabel).join(" / ")}
+                          </span>
+                        )}
+                    </div>
+                  );
+                })}
             </div>
           </div>
-
         </div>
-      )}
+      </SideForm>
 
     </div>
   );

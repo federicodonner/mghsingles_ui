@@ -175,18 +175,7 @@ export default function AddCardPanel({
   const [versionsTotal, setVersionsTotal] = useState(0);
   const [setFilter, setSetFilter] = useState("");
   const [versionsLoading, setVersionsLoading] = useState(false);
-  const [collectionId, setCollectionId] = useState(null);
   const rate = useExchangeRate();
-
-  useEffect(() => {
-    accessAPI(
-      "GET",
-      "collection",
-      null,
-      (response) => setCollectionId(response?.[0]?.id ?? null),
-      () => setCollectionId(null)
-    );
-  }, []);
 
   // Change mode arms the search with the card being edited, every time a
   // different card is picked for editing.
@@ -267,20 +256,21 @@ export default function AddCardPanel({
     return () => observer.disconnect();
   }, [chosenName, setFilter, versions.length, versionsTotal, versionsLoading]);
 
-  // File `remaining` copies of the card into the container, one at a time.
-  // Sequential rather than fired together: the API assigns each placement the
-  // lowest copy that is not already somewhere, so simultaneous requests would
-  // race for the same copy.
-  function placeCopies(cardid, remaining, done) {
+  // File `remaining` copies into the container, one request at a time. Each
+  // request creates-or-grows the card row AND places the new copy in one
+  // transaction on the server, so a failure mid-way leaves fewer copies, not
+  // copies with no container. Sequential because simultaneous requests would
+  // race for the same copy index.
+  function addCopies(body, remaining, done) {
     if (remaining <= 0) {
       done(true);
       return;
     }
     accessAPI(
       "POST",
-      `mystorage/${unit.id}/place`,
-      unit.type === "binder" ? { cardid, standby: true } : { cardid },
-      () => placeCopies(cardid, remaining - 1, done),
+      `mystorage/${unit.id}/add`,
+      body,
+      () => addCopies(body, remaining - 1, done),
       (response) => {
         toast(response.message);
         done(false);
@@ -288,36 +278,20 @@ export default function AddCardPanel({
     );
   }
 
-  // Add straight from the row: create (or grow) the card in the collection,
-  // then file every copy into the container.
+  // Add straight from the row.
   function addVersion(version, variant, quantity, done) {
-    accessAPI(
-      "POST",
-      `card/${collectionId}`,
-      JSON.stringify({
-        scryfallId: version.scryfallid,
-        quantity,
-        variant,
-      }),
-      (response) => {
-        if (response?.card?.id) {
-          placeCopies(response.card.id, quantity, (ok) => {
-            done();
-            if (ok) {
-              toast(
-                `${quantity}× ${version.name} — ${texts.ADDED_TO_CONTAINER} ${unit.name}`,
-                "success"
-              );
-              onAdded();
-            }
-          });
-        } else {
-          done();
-        }
-      },
-      (response) => {
+    addCopies(
+      { scryfallid: version.scryfallid, variant },
+      quantity,
+      (ok) => {
         done();
-        toast(response.message);
+        if (ok) {
+          toast(
+            `${quantity}× ${version.name} — ${texts.ADDED_TO_CONTAINER} ${unit.name}`,
+            "success"
+          );
+          onAdded();
+        }
       }
     );
   }

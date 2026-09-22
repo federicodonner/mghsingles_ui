@@ -11,9 +11,7 @@ import { accessAPI, logout } from "../utils/fetchFunctions";
 import "./myStorage.css";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import TablePagination from "@mui/material/TablePagination";
@@ -52,10 +50,6 @@ export default function MyStorage() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(25);
-  // Copies that are not in any container. Contenedores is the only place a
-  // customer sees their cards now, so a copy with no placement has to be shown
-  // somewhere or it simply disappears.
-  const [unfiled, setUnfiled] = useState([]);
   // The sidebar: null, {mode:"create"} or {mode:"rename", unit}.
   const [panel, setPanel] = useState(null);
   // Controlled rather than a ref: MUI's styled Select (no native <select>)
@@ -91,17 +85,6 @@ export default function MyStorage() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, page, limit]);
-
-  useEffect(() => {
-    accessAPI(
-      "GET",
-      "mystorage/unfiled",
-      null,
-      (response) => setUnfiled(response ?? []),
-      () => setUnfiled([])
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // A container the customer makes starts in their hands, not on sale — they
   // still have to bring it in and have the shop take delivery. Straight into
@@ -275,30 +258,6 @@ export default function MyStorage() {
             )}
           </div>
 
-          {/* Copies with no container. Shown rather than hidden: they are the
-              customer's cards, and Contenedores is now the only place their
-              cards appear at all. */}
-          {unfiled.length > 0 && (
-            <div className="myStorageList">
-              <Title title={texts.UNFILED_TITLE} />
-              <Alert severity="info" sx={{ mb: 1 }}>
-                {texts.UNFILED_HINT}
-              </Alert>
-              {unfiled.map((row) => (
-                <div className="myStorageRow" key={row.cardid}>
-                  <Typography sx={{ fontWeight: 600, flex: "1 1 200px" }}>
-                    {row.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {row.cardsetname}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    x{row.copies}
-                  </Typography>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 

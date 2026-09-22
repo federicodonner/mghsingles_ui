@@ -27,7 +27,11 @@ const HEADLESS = process.env.HEADFUL !== "1";
 mkdirSync(SHOTS, { recursive: true });
 
 const browser = await chromium.launch({ channel: "chrome", headless: HEADLESS });
-const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+// VIEWPORT=375x812 emulates a phone; the default is a desktop window.
+const [VW, VH] = (process.env.VIEWPORT || "1280x900")
+  .split("x")
+  .map((n) => parseInt(n, 10));
+const ctx = await browser.newContext({ viewport: { width: VW, height: VH } });
 const page = await ctx.newPage();
 
 // Buffer console + failed requests so `console` / `net` can dump them later.

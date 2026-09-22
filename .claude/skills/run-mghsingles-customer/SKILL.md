@@ -207,12 +207,11 @@ TOK=$(curl -s -X POST http://localhost:3101/oauth -H 'Content-Type: application/
   holding them or not — and nothing is greyed out. Only EDITING is gated, and
   the page says why rather than leaving the missing buttons to be puzzled over.
 
-  The list also shows copies with no container at all (`mystorage/unfiled`),
-  because with Colección gone those would otherwise be invisible.
-
-  Adding a card is two API calls — create the card, then place a copy — since
-  the card exists whether or not it has a home. The customer performs one
-  action; AddCard does the second half.
+  Adding a card is ONE API call per copy — `POST mystorage/:storageId/add`
+  creates-or-grows the card row and places the copy in the same transaction —
+  so a copy without a container cannot exist (the old two-step
+  create-then-place flow, the `/unfiled` listing that displayed its orphans
+  and the `/place` route that filed them were all removed 2026-09-22).
 
 - **`/mystorage` is the customer's own binders and boxes** (`src/storage/`,
   menu label "Contenedores"). It is the customer half of the container

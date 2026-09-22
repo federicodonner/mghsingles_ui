@@ -11,6 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../header/Header";
 import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
@@ -44,6 +45,10 @@ export default function BrowseUnitDetail() {
   const [unit, setUnit] = useState(null);
   // Which spread is open — mirrored from the binder editor: 0 is [cover, 1].
   const [spread, setSpread] = useState(0);
+  // On a phone two facing pages do not fit, so the binder leafs one page at
+  // a time — its own position, because a page index is finer than a spread.
+  const phone = useMediaQuery("(max-width:700px)");
+  const [phonePage, setPhonePage] = useState(1);
   // The stack of cards being looked at, or null. A pocket click passes its
   // whole stack; a box row passes a single card.
   const [viewing, setViewing] = useState(null);
@@ -189,6 +194,37 @@ export default function BrowseUnitDetail() {
     );
   }
 
+  // One page between the arrows — the phone's whole binder view. No blank
+  // "inside cover": pages run 1..maxPage and each one fills the screen.
+  function renderBinderPhone() {
+    const maxPage = unit.maxPage ?? 1;
+    const current = pageAt(phonePage);
+    return (
+      <div className="binderPages" style={{ alignItems: "center", display: "flex" }}>
+        <IconButton
+          className="pageNav"
+          disabled={phonePage <= 1}
+          onClick={() => setPhonePage(phonePage - 1)}
+        >
+          ‹
+        </IconButton>
+        <div className="binderPage" key={current.page}>
+          <Typography variant="caption" className="binderPageLabel">
+            {texts.PAGE} {current.page}
+          </Typography>
+          <div className="binderGrid">{current.pockets.map(renderPocket)}</div>
+        </div>
+        <IconButton
+          className="pageNav"
+          disabled={phonePage >= maxPage}
+          onClick={() => setPhonePage(phonePage + 1)}
+        >
+          ›
+        </IconButton>
+      </div>
+    );
+  }
+
   function renderBinder() {
     const visible = pagesInSpread(spread).map(pageAt);
     return (
@@ -251,6 +287,56 @@ export default function BrowseUnitDetail() {
       <Stack spacing={1}>
         {visible.map((card) => {
           const left = availableNow(card);
+          // The row's trailing pieces, built once and slotted into the
+          // desktop row or the phone's second line — same chips, same
+          // button, different homes.
+          const foilChip = isFoil(card.variant) && (
+            <Chip
+              size="small"
+              color="secondary"
+              label={finishLabel(card.variant)}
+            />
+          );
+          const priceEl = priceText(card) && (
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, whiteSpace: "nowrap" }}
+            >
+              {priceText(card)}
+            </Typography>
+          );
+          const mineChip = card.mine && (
+            <Chip
+              size="small"
+              color="success"
+              variant="outlined"
+              label={texts.ITS_YOURS}
+              sx={{ flex: "0 0 auto" }}
+            />
+          );
+          const actionButton = card.mine ? (
+            <Button
+              size="small"
+              variant={requested[card.placementid] ? "outlined" : "contained"}
+              disabled={adding || requested[card.placementid]}
+              onClick={() => requestReturn(card)}
+              sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
+            >
+              {requested[card.placementid]
+                ? texts.RESERVED_FOR_YOU
+                : texts.REQUEST_MINE_BACK}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              variant="contained"
+              disabled={adding || left === 0}
+              onClick={() => addToCart(card)}
+              sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
+            >
+              {left === 0 ? texts.SOLD_OUT : texts.ADD_TO_CART}
+            </Button>
+          );
           return (
             <Stack
               key={card.placementid}
@@ -271,58 +357,59 @@ export default function BrowseUnitDetail() {
                 sx={{ width: 44, height: 61, borderRadius: 1, objectFit: "cover" }}
               />
               <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
+                {/* On a phone the set code rides inline with the name — the
+                    full set name needs a width the screen does not have. */}
                 <Typography variant="subtitle2" noWrap>
                   {card.name}
+                  {card.cardsetcode && (
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 0.75, display: { xs: "inline", sm: "none" } }}
+                    >
+                      {card.cardsetcode.toUpperCase()}
+                    </Typography>
+                  )}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: { xs: "none", sm: "block" } }}
+                >
                   {card.cardsetname}
                   {card.cardsetcode && ` (${card.cardsetcode.toUpperCase()})`}
                 </Typography>
+                {/* The phone's second line: price and tags left, the action
+                    on the right edge where a thumb expects it. Wraps so a
+                    crowded line (foil + price + tag) drops the button under
+                    them instead of pushing it off the card. */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                  useFlexGap
+                  sx={{ display: { xs: "flex", sm: "none" }, mt: 0.5, rowGap: 0.5 }}
+                >
+                  {foilChip}
+                  {priceEl}
+                  {mineChip}
+                  <Box sx={{ ml: "auto" }}>{actionButton}</Box>
+                </Stack>
               </Box>
-              {isFoil(card.variant) && (
-                <Chip
-                  size="small"
-                  color="secondary"
-                  label={finishLabel(card.variant)}
-                />
-              )}
-              {priceText(card) && (
-                <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-                  {priceText(card)}
-                </Typography>
-              )}
-              {card.mine && (
-                <Chip
-                  size="small"
-                  color="success"
-                  variant="outlined"
-                  label={texts.ITS_YOURS}
-                  sx={{ flex: "0 0 auto" }}
-                />
-              )}
-              {card.mine ? (
-                <Button
-                  size="small"
-                  variant={requested[card.placementid] ? "outlined" : "contained"}
-                  disabled={adding || requested[card.placementid]}
-                  onClick={() => requestReturn(card)}
-                  sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
-                >
-                  {requested[card.placementid]
-                    ? texts.RESERVED_FOR_YOU
-                    : texts.REQUEST_MINE_BACK}
-                </Button>
-              ) : (
-                <Button
-                  size="small"
-                  variant="contained"
-                  disabled={adding || left === 0}
-                  onClick={() => addToCart(card)}
-                  sx={{ whiteSpace: "nowrap", flex: "0 0 auto" }}
-                >
-                  {left === 0 ? texts.SOLD_OUT : texts.ADD_TO_CART}
-                </Button>
-              )}
+              {/* Desktop keeps the single-row layout. */}
+              <Stack
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
+                sx={{ display: { xs: "none", sm: "flex" }, flex: "0 0 auto" }}
+              >
+                {foilChip}
+                {priceEl}
+                {mineChip}
+                {actionButton}
+              </Stack>
             </Stack>
           );
         })}
@@ -361,7 +448,11 @@ export default function BrowseUnitDetail() {
               }
             />
 
-            {unit.type === "binder" ? renderBinder() : renderBox()}
+            {unit.type === "binder"
+              ? phone
+                ? renderBinderPhone()
+                : renderBinder()
+              : renderBox()}
 
             {unit.type === "binder" && unit.standby?.length > 0 && (
               <Box className="browseStandby">
