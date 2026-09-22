@@ -52,8 +52,8 @@ Then drive it:
 UI_URL=http://localhost:3100 node .claude/skills/run-mghsingles-customer/driver.mjs <<'EOF'
 goto /login
 waitms 1200
-fill 'input[placeholder="Usuario"]' devuser
-fill 'input[placeholder="Contraseña"]' devpass123
+fill 'input[placeholder="Email"]' ana@example.com
+fill 'input[placeholder="Contraseña"]' ana1234
 click button.login
 waitms 2000
 shot after-login
@@ -63,23 +63,26 @@ net
 EOF
 ```
 
-Verified output:
+Login is by **email** (usernames were retired). The dev database has `fede`
+(owner), `lucia` (staff) and customers `ana`/`diego`/`martin`/`sofia`, all
+`<username>@example.com` with password `<username>1234` (the
+`scripts/seedDev.mjs` rule). Do NOT reseed or edit this data; it is managed by
+hand. Verified output:
 
 ```
 > click button.login
 clicked button.login -> http://localhost:3100/home
 
-> shot after-login
-wrote .../run-mghsingles-customer/shots/after-login.png
-
 > eval localStorage.getItem('mghsinglesToken')
-"q9dKWcWwGwVeMsqrPSaFRaZ5L"
+"mngpmvFvNDnMMMnXaSQmB7L5s"
 
 > text
-Colección
+Tienda
+Deseados
+Contenedores
+Pedidos
 Ventas
-Cuenta
-Salir
+Mi cuenta
 ...
 ```
 
@@ -92,7 +95,7 @@ Screenshots land in `.claude/skills/run-mghsingles-customer/shots/`
 |---|---|
 | `goto <path\|url>` | Navigate (paths resolve against `UI_URL`), then wait 700ms for React to mount |
 | `ls` | List every input/button/link/select with usable selectors — **start here** |
-| `fill <selector> <value>` | Fill a field. **Quote the selector** if it contains spaces: `fill 'input[placeholder="Card name"]' bolt` |
+| `fill <selector> <value>` | Fill a field. **Quote the selector** if it contains spaces: `fill 'input[placeholder="Email"]' ana@example.com`. Card-name fields are MUI Autocompletes with a **label, not a placeholder** — fill them via `fill input.MuiAutocomplete-input bolt` |
 | `click <selector>` | Click, then wait 700ms |
 | `clicktext <text>` | Click by visible text — the nav links have no stable ids |
 | `text [selector]` | innerText of `body` (or a selector) |
@@ -118,13 +121,14 @@ browser at `http://localhost:3000` and expects the API on `:3101` (from
 `.env.development`). Useless headless — and it fails outright if 3000 is taken,
 which is why the agent path pins `PORT` and `BROWSER=none`.
 
-Skipping the login form is often faster than driving it. Grab a token from the
-API and inject it:
+Skipping the login form is often faster than driving it — and needs **no
+password**. A token is just a row in the `login` table: insert one for the
+player you want, use it, delete it at the end (verified end to end):
 
 ```bash
-TOK=$(curl -s -X POST http://localhost:3101/oauth -H 'Content-Type: application/json' \
-  -d '{"username":"devuser","password":"devpass123"}' \
-  | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).token')
+TOK="skilltoken$RANDOM$RANDOM"
+psql -d mghsingles -qc "INSERT INTO login (playerid, token, date) \
+  SELECT id, '$TOK', now() FROM player WHERE email='ana@example.com';"
 UI_URL=http://localhost:3100 node .claude/skills/run-mghsingles-customer/driver.mjs <<EOF
 goto /
 token $TOK
@@ -132,6 +136,15 @@ goto /account
 waitms 2000
 shot account
 EOF
+psql -d mghsingles -qc "DELETE FROM login WHERE token='$TOK';"
+```
+
+With a real password, `POST /oauth` works too — the body field is `email`:
+
+```bash
+TOK=$(curl -s -X POST http://localhost:3101/oauth -H 'Content-Type: application/json' \
+  -d '{"email":"ana@example.com","password":"ana1234"}' \
+  | node -pe 'JSON.parse(require("fs").readFileSync(0,"utf8")).token')
 ```
 
 ## Gotchas
@@ -153,9 +166,11 @@ EOF
   by name, so free text lets a typo create an entry that silently never matches.
   The add button stays disabled until a real card is picked.
 
-  Driving it: the field is `input[role="combobox"]`, and note the form contains
-  **two** buttons — the Autocomplete's own popup toggle comes first, so
-  `click form button` hits that one. Use `click button[type=submit]`.
+  Driving it: the wishlist lives at `/wishlist` (menu label **Deseados**), and
+  the add form slides out after `clicktext Agregar a deseados`. The name field
+  is a MUI Autocomplete whose TextField uses a **label** ("Buscá una carta"),
+  not a placeholder, so a placeholder selector finds nothing — fill it via
+  `fill input.MuiAutocomplete-input <name>` and pick from the suggestions.
 
 - **The storefront shows nothing until you search.** `/` opens with the search
   panel and an empty state; it no longer loads every card in the shop as full
@@ -186,7 +201,8 @@ EOF
 
 - **Contenedores is the customer's only view of their cards.** The separate
   Colección section is gone; `/mystorage` lists containers, `/mystorage/:id`
-  opens one, `/mystorage/:id/add` adds a card into it. Every container opens
+  opens one, and adding a card happens from a slide-out `AddCardPanel` inside
+  the container detail page (there is no separate `/add` route). Every container opens
   whatever state it is in — the cards are the customer's whether the shop is
   holding them or not — and nothing is greyed out. Only EDITING is gated, and
   the page says why rather than leaving the missing buttons to be puzzled over.
@@ -222,16 +238,17 @@ EOF
   in `src/theme.js`. Two consequences when driving it:
 
   - **Class names are MUI's**, e.g. `MuiButton-root MuiButton-contained ...`,
-    plus any `className` the component passes through. The hooks the flows below
-    rely on — `button.login`, `button.create`, `button.search` — are still
-    present, because they are passed as `className` deliberately. Anything else,
-    run `ls` and read the real classes rather than guessing.
-  - **`input[placeholder="..."]` still works.** A `TextField` renders a real
-    `<input>` with the placeholder on it; the Spanish text is unchanged
-    (`input[placeholder="Usuario"]`, `input[placeholder="Contraseña"]` — note
-    the accented `ñ`). Selects are `TextField select` with
-    `SelectProps={{native: true}}`, so they are still real `<select>` elements
-    with `<option>` children and `fill` works on them.
+    plus any `className` the component passes through. The hooks passed as
+    `className` on `/login` — `button.login`, `button.create` — are still
+    present. Anything else, run `ls` and read the real classes rather than
+    guessing.
+  - **Selectors for the fields.** Login is by email now:
+    `input[placeholder="Email"]` and `input[placeholder="Contraseña"]` (note
+    the accented `ñ`). Card-name fields are MUI `Autocomplete`s whose TextField
+    usually carries a **label instead of a placeholder**, so target the input
+    by class: `input.MuiAutocomplete-input`. Selects are `TextField select`
+    with `SelectProps={{native: true}}`, so they are still real `<select>`
+    elements with `<option>` children and `fill` works on them.
 
   Do NOT restyle a button by editing CSS — set the MUI props (`variant`,
   `color`, `size`) or change the theme. The old `.dark` / `.light` / `.orange`
@@ -243,19 +260,16 @@ EOF
   renders `Store` — the same component as `/`. Don't read a `/home` URL as a
   distinct page.
 
-- **A `403 GET /player/me` on every page load is normal.** `Login` and the
+- **A `401 GET /player/me` on every page load is normal.** `Login` and the
   header probe `player/me` unauthenticated to decide whether to show the
   logged-in menu. It appears in `net` output even on a healthy run.
 
-- **`Colección`, `Ventas` and the search box all work now.** They used to hang
-  on a blank page because `GET /collection`, `GET /sale` and
-  `GET /store/search/:name` threw in the API without responding. Fixed in the
-  API; if a blank page comes back, check `console` for a React error before
-  assuming it is the API again.
-
-  Endpoints per page: `/` → `player/me`, `store/:page`; `/collection` →
-  `collection`; `/sales` → `sale`; `/account` → `player/me`, `player`,
-  `player/password`.
+- **The routes are** `/` (Tienda), `/browse` (+ `/browse/:storageId`), `/cart`,
+  `/login`, `/sales` (Ventas), `/account` (Mi cuenta), `/orders` (Pedidos),
+  `/wishlist` (Deseados) and `/mystorage` (+ `/mystorage/:storageId`,
+  Contenedores); anything else falls through to the store. There is no
+  `/collection` route any more. If a blank page comes back, check `console`
+  for a React error before assuming it is the API.
 
 - **One bad field blanks the entire page.** There is no error boundary, so a
   render-time `TypeError` in a single card unmounts the whole route and you get
@@ -263,9 +277,10 @@ EOF
   `text` returning empty is the tell. `cardgeneral.cardsetcode` (not
   `.cardset`) is the field that caused this.
 
-- **Only the newest API token per player is valid.** Logging in through the UI
-  invalidates a token the API smoke script took, and vice versa. Two browser
-  sessions as the same user will fight; the older one starts getting 403s.
+- **Sessions coexist now.** The API used to honour only the newest token per
+  player; `middleware/authentication.js` now accepts any token present in the
+  `login` table, so a UI login, a curl token and an injected psql token can all
+  be live as the same player at once.
 
 - **Seeded card images 404.** The dev seed uses invented Scryfall URLs, so
   `net` reports `ERR_BLOCKED_BY_ORB` on card images and tiles show a broken
@@ -280,7 +295,7 @@ EOF
 | `Cannot find module 'playwright-core'` | `cd .claude/skills/run-mghsingles-customer && npm install` |
 | Blank page, `net` shows `ECONNREFUSED :3101` | API isn't running, or `REACT_APP_API_URL` points at the wrong port |
 | Login does nothing, `net` shows `404 POST /oauth` | `REACT_APP_API_URL` unset — CRA bakes it in **at start time**, so restart the dev server after changing it |
-| Login returns 404 with the API up | `devuser` doesn't exist — run the API skill's `smoke.mjs --seed-user` |
+| Login fails with the API up | Wrong identifier — login is by **email** (`ana@example.com`, not `ana`); check `SELECT email, role FROM player;`. Do not reseed — the test data is managed by hand; the psql token trick above needs no password |
 | `clicktext` fails with strict-mode / timeout | Text appears more than once; the driver takes `.first()`, so use a CSS selector instead |
-| Store shows 0 cards | API `/store/1` returns `numberOfCards: 0` — reseed via the API skill |
+| Store shows 0 cards | The store only renders after a search; if a search that should hit stock returns nothing, check the API's `card/names?q=...&stock=1` response. Do not reseed — the test data is managed by hand |
 | White page, `text` returns nothing | Render-time error; run `console` to see it (no error boundary) |
