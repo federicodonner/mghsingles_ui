@@ -3,6 +3,8 @@ import { toast } from "../utils/toast";
 import { confirmDialog } from "../utils/confirm";
 import Header from "../header/Header";
 import Title from "../elementos/Title";
+import SideForm from "../elementos/SideForm";
+import PreviewCarta from "../elementos/PreviewCarta";
 import Loader from "../loader/Loader";
 import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
@@ -11,6 +13,9 @@ import { isFoil, finishLabel } from "../utils/finishes";
 import { useExchangeRate, pesosFrozenOrLive } from "../utils/exchange";
 import "./orders.css";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 // A date arrives as unix seconds, not milliseconds.
 // The dollar price with its frozen peso twin, when the line has one. Both
@@ -93,7 +98,35 @@ export default function Orders() {
       "DELETE",
       `order/${order.id}`,
       null,
-      () => load(),
+      () => {
+        setEditingId(null);
+        load();
+      },
+      (response) => toast(response.message)
+    );
+  }
+
+  // The order being edited in the sidebar — derived from the list, so every
+  // reload refreshes its lines, and it closes itself when the order stops
+  // being pending (cancelled here, or completed under our feet).
+  const [editingId, setEditingId] = useState(null);
+  const editingOrder =
+    orders.find((o) => o.id === editingId && o.status === "pending") ?? null;
+
+  // Take ONE copy off the order. Only the removal that would cancel the whole
+  // order asks first — that is the moment this stops being an edit.
+  async function removeLine(order, line) {
+    const lastCopy = order.lines.length === 1 && line.quantity === 1;
+    if (lastCopy && !(await confirmDialog(texts.CONFIRM_CANCEL_ORDER))) return;
+    accessAPI(
+      "DELETE",
+      `order/${order.id}/line/${line.id}`,
+      null,
+      (response) => {
+        if (response.ordercancelled) setEditingId(null);
+        toast(response.message, "success");
+        load();
+      },
       (response) => toast(response.message)
     );
   }
@@ -129,11 +162,10 @@ export default function Orders() {
         </span>
         <Button
           variant="outlined"
-          color="error"
           size="small"
-          onClick={() => cancelOrder(order)}
+          onClick={() => setEditingId(order.id)}
         >
-          {texts.CANCEL_ORDER}
+          {texts.EDIT_ORDER}
         </Button>
       </div>
       <div className="orderLines">
@@ -248,6 +280,75 @@ export default function Orders() {
           )}
         </div>
       )}
+
+      {/* Editing a pending order: one row per card with its own "quitar".
+          Emptying the order cancels it — said in the hint, and confirmed on
+          the removal that would do it. */}
+      <SideForm
+        open={Boolean(editingOrder)}
+        onClose={() => setEditingId(null)}
+        title={texts.EDIT_ORDER_TITLE}
+        width={480}
+      >
+        {editingOrder && (
+          <Stack spacing={1.5}>
+            <Typography variant="body2" color="text.secondary">
+              {texts.EDIT_ORDER_HINT}
+            </Typography>
+            {editingOrder.lines.map((line) => (
+              <Stack
+                key={line.id}
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
+              >
+                <PreviewCarta
+                  image={line.image}
+                  name={line.name}
+                  small
+                  sx={{ width: 40, height: 56, borderRadius: 0.5 }}
+                />
+                <Typography sx={{ flex: 1, fontWeight: 600, minWidth: 0 }}>
+                  {line.quantity > 1 && `${line.quantity} × `}
+                  {line.name}
+                </Typography>
+                {isFoil(line.variant) && (
+                  <Chip
+                    size="small"
+                    color="secondary"
+                    label={finishLabel(line.variant)}
+                  />
+                )}
+                <Typography variant="caption" color="text.secondary">
+                  {(line.cardsetcode ?? "").toUpperCase()}
+                </Typography>
+                <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+                  {lineAmount(line, rate)}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => removeLine(editingOrder, line)}
+                >
+                  {texts.REMOVE_FROM_ORDER}
+                </Button>
+              </Stack>
+            ))}
+            <Typography variant="subtitle2" sx={{ textAlign: "right" }}>
+              {texts.ORDER_TOTAL}{" "}
+              {pesosFrozenOrLive(editingOrder.total, editingOrder.totalpesos, rate)}
+            </Typography>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => cancelOrder(editingOrder)}
+            >
+              {texts.CANCEL_ORDER_FULL}
+            </Button>
+          </Stack>
+        )}
+      </SideForm>
     </div>
   );
 }

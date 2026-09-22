@@ -152,6 +152,12 @@ const texts = {
   RESERVED_OK: "Reservado. Pasa por la tienda a retirarlo.",
   CANCEL_ORDER: "Cancelar",
   CONFIRM_CANCEL_ORDER: "¿Cancelar este pedido?",
+  EDIT_ORDER: "Editar",
+  EDIT_ORDER_TITLE: "Editar pedido",
+  EDIT_ORDER_HINT:
+    "Quitá las cartas que ya no quieras. Si quitás todas, el pedido se cancela.",
+  REMOVE_FROM_ORDER: "Quitar",
+  CANCEL_ORDER_FULL: "Cancelar todo el pedido",
   ORDER_STATUS_pending: "Reservado",
   ORDER_STATUS_completed: "Entregado",
   ORDER_STATUS_cancelled: "Cancelado",
@@ -232,6 +238,7 @@ const texts = {
   TO_STANDBY: "A espera",
   DUPLICATE_COPY: "Duplicar (tengo otra igual)",
   DUPLICATE_FAILED: "No se pudo duplicar la carta:",
+  ZOOM_CARD: "Ampliar carta",
   REMOVE_FAILED: "No se pudo sacar la carta:",
   DRAG_TO_REORDER: "Arrastrá para reordenar",
   UNSORTED_HINT:
