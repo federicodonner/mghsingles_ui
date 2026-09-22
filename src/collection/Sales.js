@@ -6,6 +6,7 @@ import Loader from "../loader/Loader";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { useExchangeRate, formatPesos } from "../utils/exchange";
 import texts from "../data/texts";
+import PreviewCarta from "../elementos/PreviewCarta";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Table from "@mui/material/Table";
@@ -179,15 +180,12 @@ export default function Sales() {
                                 gap: 1.5,
                               }}
                             >
-                              {sale.image && (
-                                <Box
-                                  component="img"
-                                  src={sale.image}
-                                  alt={sale.name}
-                                  loading="lazy"
-                                  sx={{ width: 32, height: 45, borderRadius: 0.5 }}
-                                />
-                              )}
+                              <PreviewCarta
+                                image={sale.image}
+                                name={sale.name}
+                                small
+                                sx={{ width: 32, height: 45, borderRadius: 0.5 }}
+                              />
                               <Box>
                                 <Typography
                                   variant="body2"

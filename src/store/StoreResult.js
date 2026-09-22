@@ -8,6 +8,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import texts from "../data/texts";
+import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import { pesosLive } from "../utils/exchange";
@@ -113,13 +114,7 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
           column to run down rather than three. */}
       <Stack direction="row" spacing={1.5}>
           {card.image ? (
-            <Box
-              component="img"
-              src={card.image}
-              alt={card.name}
-              loading="lazy"
-              sx={ART_SX}
-            />
+            <PreviewCarta image={card.image} name={card.name} sx={ART_SX} />
           ) : (
             <Box sx={{ ...ART_SX, border: "1px dashed #ccc" }} />
           )}

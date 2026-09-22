@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "../utils/toast";
 import texts from "../data/texts";
+import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI } from "../utils/fetchFunctions";
 import { finishLabel, isFoil } from "../utils/finishes";
 import { useExchangeRate, pesosLive } from "../utils/exchange";
@@ -221,7 +222,11 @@ export default function WishlistEntry(props) {
                         onClick={() => toggleVersion(version.scryfallid)}
                       >
                         {version.image ? (
-                          <img src={version.image} alt={version.cardsetname} />
+                          <PreviewCarta
+                            image={version.image}
+                            name={version.cardsetname}
+                            fill
+                          />
                         ) : (
                           <span className="versionNoImage">
                             {version.cardsetname}

@@ -12,6 +12,7 @@ import Header from "../header/Header";
 import Title from "../elementos/Title";
 import Loader from "../loader/Loader";
 import texts from "../data/texts";
+import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
 import { useExchangeRate, formatPesos } from "../utils/exchange";
@@ -212,11 +213,10 @@ export default function Cart() {
                           borderRadius: 2,
                         }}
                       >
-                        <Box
-                          component="img"
-                          src={item.image}
-                          alt={item.name}
-                          loading="lazy"
+                        <PreviewCarta
+                          image={item.image}
+                          name={item.name}
+                          small
                           sx={{
                             width: 44,
                             height: 61,
