@@ -2,11 +2,87 @@
    binder.css — a browsed page must look like the owner's own binder or the
    two views read as different things. Only the shopping layer lives here. */
 
+/* The shelf: two tiles per row at every width, because each one carries a fan
+   of card art and a narrower tile would shrink the art to nothing.
+
+   Everything here is derived from one number, --fan-w, so the art, the space
+   it needs to lean into and the gaps between rows can never drift apart.
+   1.393 is the card aspect (680/488); --fan-over is how much of that height
+   hangs over the top edge of the tile — most of it, which is what keeps the
+   tile itself small while the art stays readable. */
 .browseUnits {
+  /* Tracks the tile, which is half of --page-width (min(1180px, 94vw)) less
+     the gap, so the art stays at about a quarter of the tile at every size
+     and the cap takes over where the page stops growing. */
+  /* The floor is legibility, not proportion: below about 52px the art stops
+     being a card you recognise and becomes a smudge. */
+  --fan-w: clamp(52px, 12vw, 110px);
+  --fan-over: calc(var(--fan-w) * 0.84);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
-  margin-top: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  /* Two per row of the full page width made each tile a 580px strip 150px
+     tall. Capping the shelf keeps the two columns and gives the tiles a shape
+     instead. */
+  max-width: 760px;
+  margin-inline: auto;
+  gap: calc(var(--fan-over) + 12px) 12px;
+  /* The first row has to lean into something too. */
+  margin-top: calc(var(--fan-over) + 6px);
+}
+
+/* One per row on a phone. Two columns of a 390px screen left the art at 52px,
+   which is the floor where a card stops being a card — so instead of squeezing
+   the layout to fit two, give each tile the whole width and get back twice the
+   card. The gaps follow --fan-w on their own, which is the point of deriving
+   everything from it. */
+@media (max-width: 600px) {
+  .browseUnits {
+    --fan-w: clamp(84px, 26vw, 124px);
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The fan's footprint INSIDE the tile. The art is taller than this and sits on
+   the bottom edge of it, so the difference is exactly --fan-over. */
+.browseFan {
+  position: relative;
+  height: calc(var(--fan-w) * 1.393 - var(--fan-over));
+  margin-bottom: 6px;
+}
+
+.browseFan img {
+  /* How far the back two are pushed out, as a multiple of their resting
+     offset. They sit mostly tucked behind the front card; hovering the tile
+     opens the hand a little. The middle card has an offset of zero, so this
+     moves only the two behind it. */
+  --spread: 1;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: var(--fan-w);
+  aspect-ratio: 488 / 680;
+  object-fit: cover;
+  border-radius: 5px;
+  /* Card stock, so a slow image does not flash a white rectangle. */
+  background: #ded9d1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* Pivot at the bottom so the tops splay apart like a hand of cards, rather
+     than the whole card swinging around its middle. */
+  transform-origin: bottom center;
+  transform: translateX(-50%)
+    translateX(calc(var(--fan-w) * var(--x) * var(--spread)))
+    rotate(calc(var(--rot) * var(--spread)));
+  transition: transform 180ms ease-out;
+}
+
+.browseUnitCard:hover .browseFan img {
+  --spread: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browseFan img {
+    transition: none;
+  }
 }
 
 /* The price on a pocket, so leafing through shows costs without a click per

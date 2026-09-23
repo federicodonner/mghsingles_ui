@@ -299,6 +299,9 @@ const texts = {
   BINDER: "Carpeta",
   SORTED_BOX: "Caja ordenada",
   UNSORTED_BOX: "Caja sin ordenar",
+  // Only the shop makes these, but its cards are on the shelf like any
+  // other's, so the storefront has to be able to name one.
+  EDITION_BOX: "Caja de edición",
   CREATE: "Crear",
   CARDS: "cartas",
   RENAME: "Renombrar",

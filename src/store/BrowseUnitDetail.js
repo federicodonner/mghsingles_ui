@@ -27,6 +27,9 @@ const TYPE_LABELS = {
   binder: texts.BINDER,
   sorted_box: texts.SORTED_BOX,
   unsorted_box: texts.UNSORTED_BOX,
+  // The shop's own; a customer never makes one, but its cards are on the
+  // shelf like any other's.
+  edition_box: texts.EDITION_BOX,
 };
 
 // One for-sale container, opened for shopping.
