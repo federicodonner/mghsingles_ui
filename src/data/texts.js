@@ -286,6 +286,7 @@ const texts = {
   LOADING_VERSIONS: "Cargando versiones...",
   PREV_PAGES: "Páginas anteriores",
   NEXT_PAGES: "Páginas siguientes",
+  GO_TO_PAGE: "Ir a página",
   BACK_TO_STORAGE: "Volver",
   REMOVE_FROM_CONTAINER: "Sacar",
   PAGE: "Página",
