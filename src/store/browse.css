@@ -2,8 +2,9 @@
    binder.css — a browsed page must look like the owner's own binder or the
    two views read as different things. Only the shopping layer lives here. */
 
-/* The shelf: two tiles per row at every width, because each one carries a fan
-   of card art and a narrower tile would shrink the art to nothing.
+/* The shelf: three tiles per row at full width, two on a tablet, one on a
+   phone. Each tile carries a fan of card art, so the column count drops before
+   a tile gets narrow enough to shrink the art to nothing.
 
    Everything here is derived from one number, --fan-w, so the art, the space
    it needs to lean into and the gaps between rows can never drift apart.
@@ -11,23 +12,29 @@
    hangs over the top edge of the tile — most of it, which is what keeps the
    tile itself small while the art stays readable. */
 .browseUnits {
-  /* Tracks the tile, which is half of --page-width (min(1180px, 94vw)) less
-     the gap, so the art stays at about a quarter of the tile at every size
-     and the cap takes over where the page stops growing. */
+  /* Tracks the tile, which follows --page-width (min(1180px, 94vw)), so the
+     art stays in proportion to the tile at every size and the cap takes over
+     where the shelf stops growing. */
   /* The floor is legibility, not proportion: below about 52px the art stops
      being a card you recognise and becomes a smudge. */
   --fan-w: clamp(52px, 12vw, 110px);
   --fan-over: calc(var(--fan-w) * 0.84);
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  /* Two per row of the full page width made each tile a 580px strip 150px
-     tall. Capping the shelf keeps the two columns and gives the tiles a shape
-     instead. */
-  max-width: 760px;
+  grid-template-columns: repeat(3, 1fr);
+  /* Tiles across the full page width turn into long flat strips. Capping the
+     shelf gives them a shape instead: about 310px each, three to a row. */
+  max-width: 960px;
   margin-inline: auto;
   gap: calc(var(--fan-over) + 12px) 12px;
   /* The first row has to lean into something too. */
   margin-top: calc(var(--fan-over) + 6px);
+}
+
+/* Two per row until there is room for three tiles of roughly 280px. */
+@media (max-width: 900px) {
+  .browseUnits {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* One per row on a phone. Two columns of a 390px screen left the art at 52px,
