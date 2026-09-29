@@ -36,9 +36,36 @@ const TYPE_LABELS = {
 //
 // A binder shows the same facing pages its owner sees — same grid, same
 // spread arithmetic — because the point of browsing is to leaf through the
-// physical object from home. Boxes are lists, exactly as they are on a table.
-// Clicking a card (or a stack) opens the shopping view: price in both
+// physical object from home. Sorted and unsorted boxes are shown the same
+// way — their cards dealt into 3x3 pages, one per pocket, in the box's own
+// order (alphabetical for an unsorted box) — so every shelf browses alike.
+// Edition boxes stay lists. Clicking a card (or a stack) opens the shopping view: price in both
 // currencies, availability, and the add-to-cart button.
+// A box's cards in reading order. An unsorted box has no order of its own, so
+// it reads alphabetically — the same convention as the owner's view.
+function boxCards(unit) {
+  return unit.type === "unsorted_box"
+    ? [...(unit.cards ?? [])].sort((a, b) =>
+        (a.name ?? "").localeCompare(b.name ?? "")
+      )
+    : unit.cards ?? [];
+}
+
+// A box dealt into binder pages: nine cards a page, one per pocket, shaped
+// like the binder response so the binder renderer draws it unchanged.
+function boxLayout(unit) {
+  const cards = boxCards(unit);
+  const maxPage = Math.max(1, Math.ceil(cards.length / 9));
+  const pages = Array.from({ length: maxPage }, (_, p) => ({
+    page: p + 1,
+    pockets: Array.from({ length: 9 }, (_, i) => {
+      const card = cards[p * 9 + i];
+      return { pocket: i + 1, cards: card ? [card] : [] };
+    }),
+  }));
+  return { pages, maxPage };
+}
+
 export default function BrowseUnitDetail() {
   const { storageId } = useParams();
   const navigate = useNavigate();
@@ -149,7 +176,7 @@ export default function BrowseUnitDetail() {
   const pageAt = (page) =>
     page === null
       ? null
-      : unit.pages?.find((p) => p && p.page === page) ?? {
+      : layout.pages.find((p) => p && p.page === page) ?? {
           page,
           pockets: Array.from({ length: 9 }, (_, i) => ({
             pocket: i + 1,
@@ -157,7 +184,17 @@ export default function BrowseUnitDetail() {
           })),
         };
 
-  const lastSpread = unit ? spreadForPage(unit.maxPage ?? 1) : 0;
+  // Sorted and unsorted boxes browse like binders: their cards dealt nine to
+  // a page, one per pocket. Only the drawing changes; the cards, their order
+  // and the shopping dialog are the same as before.
+  const pagedBox = unit?.type === "sorted_box" || unit?.type === "unsorted_box";
+  const layout = !unit
+    ? { pages: [], maxPage: 1 }
+    : pagedBox
+    ? boxLayout(unit)
+    : { pages: unit.pages ?? [], maxPage: unit.maxPage ?? 1 };
+
+  const lastSpread = spreadForPage(layout.maxPage);
 
   function renderPocket(pocket) {
     const cards = pocket.cards ?? [];
@@ -200,7 +237,7 @@ export default function BrowseUnitDetail() {
   // One page between the arrows — the phone's whole binder view. No blank
   // "inside cover": pages run 1..maxPage and each one fills the screen.
   function renderBinderPhone() {
-    const maxPage = unit.maxPage ?? 1;
+    const maxPage = layout.maxPage;
     const current = pageAt(phonePage);
     return (
       <div className="binderPages" style={{ alignItems: "center", display: "flex" }}>
@@ -268,18 +305,11 @@ export default function BrowseUnitDetail() {
 
   // Ten rows per page, like the owner's box editor: a store box holds
   // hundreds of copies and one endless list is heavy to render and heavier
-  // to scroll.
+  // to scroll. Only edition boxes are drawn as a list now.
   const BOX_PAGE_SIZE = 10;
 
   function renderBox() {
-    // An unsorted box has no order of its own, so it reads alphabetically —
-    // the same convention as the owner's view.
-    const cards =
-      unit.type === "unsorted_box"
-        ? [...(unit.cards ?? [])].sort((a, b) =>
-            (a.name ?? "").localeCompare(b.name ?? "")
-          )
-        : unit.cards ?? [];
+    const cards = boxCards(unit);
     const pageCount = Math.max(1, Math.ceil(cards.length / BOX_PAGE_SIZE));
     const curPage = Math.min(boxPage, pageCount);
     const visible = cards.slice(
@@ -451,7 +481,7 @@ export default function BrowseUnitDetail() {
               }
             />
 
-            {unit.type === "binder"
+            {unit.type === "binder" || pagedBox
               ? phone
                 ? renderBinderPhone()
                 : renderBinder()
