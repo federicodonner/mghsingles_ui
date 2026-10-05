@@ -62,7 +62,7 @@ export default function MyStorageDetail() {
   const [importing, setImporting] = useState(false);
 
   // Read the picked CSV and hand it to the API, which maps rows to pockets
-  // (empty lines skip one) and keeps the scan's condition and language.
+  // (empty lines skip one) and records every card as near-mint English: only the shop grades cards.
   async function importCollection(e) {
     const file = e.target.files?.[0];
     e.target.value = "";
