@@ -19,6 +19,8 @@ import texts from "../data/texts";
 import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI, readFromLS } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import GradeChip from "../elementos/GradeChip";
+import { gradeLabel } from "../utils/grade";
 import { useExchangeRate, pesosLive } from "../utils/exchange";
 import "../storage/binder.css";
 import "./browse.css";
@@ -225,6 +227,11 @@ export default function BrowseUnitDetail() {
             {cards.length > 1 && (
               <span className="pocketCount">{cards.length}</span>
             )}
+            {/* Same tag as the customer's own binder: only a copy that is
+                not near-mint English says so, one row above the price. */}
+            {gradeLabel(top) && (
+              <Chip size="small" label={gradeLabel(top)} className="gradeTag" />
+            )}
             {priceText(top) && (
               <span className="browsePrice">{priceText(top)}</span>
             )}
@@ -425,6 +432,7 @@ export default function BrowseUnitDetail() {
                   useFlexGap
                   sx={{ display: { xs: "flex", sm: "none" }, mt: 0.5, rowGap: 0.5 }}
                 >
+                  <GradeChip card={card} />
                   {foilChip}
                   {priceEl}
                   {mineChip}
@@ -438,6 +446,7 @@ export default function BrowseUnitDetail() {
                 alignItems="center"
                 sx={{ display: { xs: "none", sm: "flex" }, flex: "0 0 auto" }}
               >
+                <GradeChip card={card} />
                 {foilChip}
                 {priceEl}
                 {mineChip}
@@ -535,15 +544,16 @@ export default function BrowseUnitDetail() {
                       {card.cardsetname}
                       {card.cardsetcode && ` (${card.cardsetcode.toUpperCase()})`}
                     </Typography>
-                    {isFoil(card.variant) && (
-                      <Box>
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                      <GradeChip card={card} />
+                      {isFoil(card.variant) && (
                         <Chip
                           size="small"
                           color="secondary"
                           label={finishLabel(card.variant)}
                         />
-                      </Box>
-                    )}
+                      )}
+                    </Stack>
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                       {priceText(card) && (
                         <Typography variant="h6">{priceText(card)}</Typography>

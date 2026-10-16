@@ -11,6 +11,7 @@ import texts from "../data/texts";
 import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import GradeChip from "../elementos/GradeChip";
 import { pesosLive } from "../utils/exchange";
 import "./storeResult.css";
 
@@ -133,11 +134,10 @@ export default function StoreResult({ card, rate, loggedIn, wishlisted }) {
               )}
             </Typography>
 
-            {/* Condition and language are tracked but not shown (2026-08-23,
-                the shop's call) — the tile names printing and finish only.
-                Only say "foil" when it is one; a chip reading "normal" on
-                every other tile is noise. */}
+            {/* Grade and finish only when they are not the usual — a chip
+                reading "NM · Inglés" or "normal" on every tile is noise. */}
             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+              <GradeChip card={card} />
               {isFoil(card.variant) && (
                 <Chip
                   size="small"

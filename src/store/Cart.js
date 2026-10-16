@@ -15,6 +15,7 @@ import texts from "../data/texts";
 import PreviewCarta from "../elementos/PreviewCarta";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import GradeChip from "../elementos/GradeChip";
 import { useExchangeRate, formatPesos } from "../utils/exchange";
 
 // The cart: the pause between wanting cards and asking the shop for them.
@@ -244,6 +245,7 @@ export default function Cart() {
                             </Typography>
                           )}
                         </Box>
+                        <GradeChip card={item} />
                         {isFoil(item.variant) && (
                           <Chip
                             size="small"

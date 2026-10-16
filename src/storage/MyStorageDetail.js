@@ -62,7 +62,7 @@ export default function MyStorageDetail() {
   const [importing, setImporting] = useState(false);
 
   // Read the picked CSV and hand it to the API, which maps rows to pockets
-  // (empty lines skip one) and records every card as near-mint English: only the shop grades cards.
+  // (empty lines skip one), keeping each row's condition and language.
   async function importCollection(e) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -174,13 +174,14 @@ export default function MyStorageDetail() {
       onError
     );
 
-  // Swap ONE copy's printing/finish for the chosen one; the placement
-  // keeps its exact spot. Closes the change sidebar on success.
-  const changeVersion = (version, variant, done) =>
+  // Swap ONE copy's printing/finish — and grade, when `grade` carries one —
+  // for the chosen one; the placement keeps its exact spot. Closes the change
+  // sidebar on success.
+  const changeVersion = (version, variant, done, grade = {}) =>
     accessAPI(
       "PUT",
       `mystorage/placement/${changing.placementid}/version`,
-      { scryfallid: version.scryfallid, variant },
+      { scryfallid: version.scryfallid, variant, ...grade },
       () => {
         done();
         setChanging(null);

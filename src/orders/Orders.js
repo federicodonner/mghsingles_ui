@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import texts from "../data/texts";
 import { accessAPI, logout } from "../utils/fetchFunctions";
 import { isFoil, finishLabel } from "../utils/finishes";
+import GradeChip from "../elementos/GradeChip";
+import { gradeLabel } from "../utils/grade";
 import { useExchangeRate, pesosFrozenOrLive } from "../utils/exchange";
 import "./orders.css";
 import Button from "@mui/material/Button";
@@ -176,6 +178,9 @@ export default function Orders() {
             <span className="lineSet">
               {(line.cardsetcode ?? "").toUpperCase()}
             </span>
+            {gradeLabel(line) && (
+              <span className="lineMeta">{gradeLabel(line)}</span>
+            )}
             {isFoil(line.variant) && (
               <span className="lineMeta">{finishLabel(line.variant)}</span>
             )}
@@ -312,6 +317,7 @@ export default function Orders() {
                   {line.quantity > 1 && `${line.quantity} × `}
                   {line.name}
                 </Typography>
+                <GradeChip card={line} />
                 {isFoil(line.variant) && (
                   <Chip
                     size="small"
