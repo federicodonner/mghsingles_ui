@@ -107,7 +107,8 @@ export default function Login() {
     if (!createEmail.current.value) {
       setCreateEmailError(true);
     }
-    if (!createPhone.current.value) {
+    // Spaces are not a phone: the API refuses them, with a less useful message.
+    if (!createPhone.current.value.trim()) {
       setCreatePhoneError(true);
     }
     if (!createPassword.current.value) {
@@ -117,7 +118,7 @@ export default function Login() {
     if (
       !createName.current.value ||
       !createEmail.current.value ||
-      !createPhone.current.value ||
+      !createPhone.current.value.trim() ||
       !createPassword.current.value
     ) {
       return false;
@@ -193,9 +194,11 @@ export default function Login() {
                 </Stack>
               </form>
             </div>
+            {/* Hidden until password recovery exists: the button does nothing.
             <Button variant="text" color="secondary" className="forgot">
               {texts.FORGOT_PASSWORD}
             </Button>
+            */}
             <Divider sx={{ my: 2 }} />
             <Button
               variant="outlined"
