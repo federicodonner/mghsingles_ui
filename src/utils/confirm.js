@@ -12,9 +12,11 @@ export function setConfirmListener(fn) {
   listener = fn;
 }
 
-export function confirmDialog(message) {
+// `options` may name the two buttons — { cancelLabel, confirmLabel } — when
+// the generic Cancelar / Aceptar would be ambiguous (e.g. cancelling a form).
+export function confirmDialog(message, options = {}) {
   // Before the Confirmer mounts (or in tests) there is nothing to show; the
   // native dialog is a truthful fallback rather than silently answering "no".
   if (!listener) return Promise.resolve(window.confirm(message));
-  return listener(message);
+  return listener(message, options);
 }

@@ -55,6 +55,10 @@ export default function Wishlist() {
   const [moxUrl, setMoxUrl] = useState("");
   const [importing, setImporting] = useState(false);
 
+  // Languages and grades the shop files copies under, for the wish editor's
+  // checkboxes and summaries. Loaded once here rather than per row.
+  const [modifiers, setModifiers] = useState({ languages: [], conditions: [] });
+
   const navigate = useNavigate();
 
   function load() {
@@ -76,6 +80,17 @@ export default function Wishlist() {
 
   useEffect(() => {
     load();
+    accessAPI(
+      "GET",
+      "card/modifiers",
+      null,
+      (response) =>
+        setModifiers({
+          languages: response.languages ?? [],
+          conditions: response.conditions ?? [],
+        }),
+      (response) => toast(response.message)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -178,6 +193,7 @@ export default function Wishlist() {
             <WishlistEntry
               key={entry.id}
               entry={entry}
+              modifiers={modifiers}
               onChanged={load}
               onRemove={removeEntry}
             />

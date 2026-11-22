@@ -171,7 +171,9 @@
    finishes on top, then the version grid. The drawer scrolls as a whole, so
    nothing here caps its own height. */
 .wishlistEditorPanel .constraintColumn + .constraintColumn {
-  margin-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .constraintHint {
@@ -267,9 +269,11 @@
 }
 
 .constraintTitle {
+  display: flex;
+  align-items: center;
   font-weight: bold;
   margin-bottom: 6px;
-  color: #e8722c;
+  color: #000;
 }
 
 .constraintOption {

@@ -12,17 +12,21 @@ import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Alert from "@mui/material/Alert";
+import Stack from "@mui/material/Stack";
+import { confirmDialog } from "../utils/confirm";
 
-// One wishlist row. Its constraints — printings and finishes — are edited in
-// a wide sidebar (the same 720px surface the storage add-card panel uses),
-// because the version picker is a grid of card images that needs room, not an
-// inline form. Each category is independent and multi-select: nothing ticked
-// means "any". Language and condition used to be constraints too — the shop
-// stopped showing them (2026-08-23), so the editor no longer offers them and
-// saving clears whatever a wish still carried, or the old, invisible
-// constraints would keep silently filtering matches.
+// One wishlist row. Its constraints — printings, languages, grades and
+// finishes — are edited in a wide sidebar (the same 720px surface the storage
+// add-card panel uses), because the version picker is a grid of card images
+// that needs room, not an inline form. Each category is independent and
+// multi-select, and an explicit list: everything starts ticked, the section
+// checkbox ticks or unticks the lot, and Aceptar refuses a category left
+// empty. Nothing is saved until Aceptar.
 export default function WishlistEntry(props) {
-  const { entry, onChanged, onRemove } = props;
+  const { entry, modifiers, onChanged, onRemove } = props;
+  const languageOptions = modifiers?.languages ?? [];
+  const conditionOptions = modifiers?.conditions ?? [];
   const rate = useExchangeRate();
 
   // Only offer finishes this card exists in at all — no "foil" for a card that
@@ -53,7 +57,7 @@ export default function WishlistEntry(props) {
       (response) => {
         setWanted(previous);
         toast(response.message);
-      }
+      },
     );
   }
 
@@ -70,15 +74,28 @@ export default function WishlistEntry(props) {
       (response) => {
         setAutobuy(!next);
         toast(response.message);
-      }
+      },
     );
   }
 
-  // Local working copy so ticking boxes does not save on every click.
-  const [pickedVersions, setPickedVersions] = useState(entry.versions);
-  const [pickedVariants, setPickedVariants] = useState(entry.variants);
+  // The editor works on a DRAFT of all four categories, copied from the entry
+  // when it opens and written only on Aceptar. Cancel (or clicking away)
+  // throws it away. Lists are explicit: what is ticked is what is accepted.
+  const [draft, setDraft] = useState(null);
+  // Categories Aceptar found empty, shown as an error inside the sidebar.
+  const [emptyCategories, setEmptyCategories] = useState([]);
+  const [saving, setSaving] = useState(false);
+
+  const fromEntry = () => ({
+    versions: entry.versions,
+    languageids: entry.languageids,
+    conditionids: entry.conditionids,
+    variants: entry.variants,
+  });
 
   function openEditor() {
+    setDraft(fromEntry());
+    setEmptyCategories([]);
     setOpen(true);
     // A card can have dozens of printings, so only fetch them when the editor
     // is actually opened.
@@ -95,54 +112,158 @@ export default function WishlistEntry(props) {
         () => {
           setVersions([]);
           setLoadingVersions(false);
-        }
+        },
       );
     }
   }
 
-  // Every tick saves on the spot — there is no Save button to remember.
-  // The whole constraint state travels with each change, so what is stored
-  // is exactly what is on screen (and the language/condition constraints the
-  // editor no longer offers are cleared along the way).
-  function persist(versions, variants) {
+  // Every option of each category, for the section checkboxes. Versions are
+  // only known once the grid has loaded.
+  const allOf = {
+    versions: (versions ?? []).map((version) => version.scryfallid),
+    languageids: languageOptions.map((option) => option.id),
+    conditionids: conditionOptions.map((option) => option.id),
+    variants: finishOptions,
+  };
+  const categoryTitle = {
+    versions: texts.WISHLIST_VERSIONS,
+    languageids: texts.WISHLIST_LANGUAGES,
+    conditionids: texts.WISHLIST_GRADES,
+    variants: texts.WISHLIST_FINISHES,
+  };
+
+  function toggle(key, value) {
+    setDraft((current) => ({
+      ...current,
+      [key]: current[key].includes(value)
+        ? current[key].filter((item) => item !== value)
+        : [...current[key], value],
+    }));
+    setEmptyCategories((current) => current.filter((k) => k !== key));
+  }
+
+  // The section checkbox: everything ticked -> untick everything (so the
+  // customer can then pick exactly the one they want); anything less -> tick
+  // everything.
+  function toggleAll(key) {
+    const all = allOf[key];
+    setDraft((current) => ({
+      ...current,
+      [key]: all.every((value) => current[key].includes(value)) ? [] : all,
+    }));
+    setEmptyCategories((current) => current.filter((k) => k !== key));
+  }
+
+  // Aceptar: every category must keep at least one option; if one does not,
+  // say which and stay open.
+  function accept() {
+    const empty = Object.keys(categoryTitle).filter(
+      (key) => !draft[key].length,
+    );
+    if (empty.length) {
+      setEmptyCategories(empty);
+      return;
+    }
+    setSaving(true);
     accessAPI(
       "PUT",
       `wishlist/${entry.id}`,
-      {
-        versions,
-        languageids: [],
-        conditionids: [],
-        variants,
+      draft,
+      () => {
+        setSaving(false);
+        setOpen(false);
+        onChanged();
       },
-      () => onChanged(),
-      (response) => toast(response.message)
+      (response) => {
+        setSaving(false);
+        toast(response.message);
+      },
     );
   }
 
-  const flip = (list, value) =>
-    list.includes(value)
-      ? list.filter((item) => item !== value)
-      : [...list, value];
-
-  function toggleVersion(scryfallid) {
-    const next = flip(pickedVersions, scryfallid);
-    setPickedVersions(next);
-    persist(next, pickedVariants);
-  }
-
-  function toggleVariant(finish) {
-    const next = flip(pickedVariants, finish);
-    setPickedVariants(next);
-    persist(pickedVersions, next);
+  // Cancelar (and clicking away / Escape): always asks before closing without
+  // saving, whether or not anything was changed.
+  async function cancel() {
+    const leave = await confirmDialog(texts.WISHLIST_DISCARD, {
+      cancelLabel: texts.WISHLIST_DISCARD_NO,
+      confirmLabel: texts.WISHLIST_DISCARD_YES,
+    });
+    if (!leave) return;
+    setOpen(false);
   }
 
   // A one-line summary of the constraints, so the list is readable collapsed.
-  function countSummary(picked) {
-    return picked.length ? `${picked.length}` : texts.WISHLIST_ANY;
+  // "Todas"/"Todos" when everything is accepted, otherwise what is.
+  function versionSummary(picked) {
+    const total = entry.versionCount ?? 0;
+    if (total && picked.length >= total) return texts.WISHLIST_ALL_F;
+    return total
+      ? `${picked.length} ${texts.WISHLIST_OF} ${total}`
+      : `${picked.length}`;
   }
   function variantSummary(picked) {
-    if (!picked.length) return texts.WISHLIST_ANY;
+    if (
+      finishOptions.length &&
+      finishOptions.every((f) => picked.includes(f))
+    ) {
+      return texts.WISHLIST_ALL_F;
+    }
     return picked.map(finishLabel).join(", ");
+  }
+  // Names in the shop's own order; an id the shop no longer has is skipped.
+  function namesSummary(picked, options) {
+    if (options.length && options.every((o) => picked.includes(o.id))) {
+      return texts.WISHLIST_ALL_M;
+    }
+    const names = options
+      .filter((option) => picked.includes(option.id))
+      .map((option) => option.name);
+    return names.length ? names.join(", ") : `${picked.length}`;
+  }
+
+  // A section title with its tick-all / untick-all checkbox.
+  function sectionTitle(key) {
+    const all = allOf[key];
+    const picked = draft?.[key] ?? [];
+    const count = all.filter((value) => picked.includes(value)).length;
+    return (
+      <div className="constraintTitle">
+        <Checkbox
+          size="small"
+          sx={{ p: 0.5, mr: 0.5 }}
+          checked={all.length > 0 && count === all.length}
+          indeterminate={count > 0 && count < all.length}
+          disabled={!all.length}
+          onChange={() => toggleAll(key)}
+          inputProps={{ "aria-label": texts.WISHLIST_TOGGLE_ALL }}
+        />
+        {categoryTitle[key]}
+      </div>
+    );
+  }
+
+  // A column of checkboxes for one id-based constraint (language, grade).
+  function idColumn(key, options) {
+    if (!options.length || !draft) return null;
+    return (
+      <div className="constraintColumn">
+        {sectionTitle(key)}
+        {options.map((option) => (
+          <FormControlLabel
+            key={option.id}
+            className="constraintOption"
+            control={
+              <Checkbox
+                size="small"
+                checked={draft[key].includes(option.id)}
+                onChange={() => toggle(key, option.id)}
+              />
+            }
+            label={option.name}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -195,124 +316,159 @@ export default function WishlistEntry(props) {
 
       <div className="constraintSummary">
         <span>
-          {texts.WISHLIST_VERSIONS}: {countSummary(entry.versions)}
+          {texts.WISHLIST_VERSIONS}: {versionSummary(entry.versions)}
+        </span>
+        <span>
+          {texts.WISHLIST_LANGUAGES}:{" "}
+          {namesSummary(entry.languageids, languageOptions)}
+        </span>
+        <span>
+          {texts.WISHLIST_GRADES}:{" "}
+          {namesSummary(entry.conditionids, conditionOptions)}
         </span>
         <span>
           {texts.WISHLIST_FINISHES}: {variantSummary(entry.variants)}
         </span>
       </div>
 
-      {/* The preferences workbench: finishes first (a couple of checkboxes),
+      {/* The preferences workbench: languages, grades and finishes first
+          (a few checkboxes each),
           then the version grid, which grows as long as it needs — the drawer
-          itself scrolls. Every tick still saves on the spot, so closing the
-          sidebar never loses anything. */}
+          itself scrolls. Edits are a draft until Aceptar, pinned at the
+          top; Cancelar or clicking away discards them (after asking). */}
       <SideForm
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={cancel}
         title={`${texts.WISHLIST_EDIT} · ${entry.name}`}
         width={720}
+        notice={
+          emptyCategories.length > 0 && (
+            <Alert severity="error">
+              {texts.WISHLIST_EMPTY_CATEGORIES}{" "}
+              {emptyCategories.map((key) => categoryTitle[key]).join(", ")}
+            </Alert>
+          )
+        }
+        actions={
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+            <Button variant="outlined" onClick={cancel} disabled={saving}>
+              {texts.CANCEL}
+            </Button>
+            <Button variant="contained" onClick={accept} disabled={saving}>
+              {texts.ACCEPT}
+            </Button>
+          </Stack>
+        }
       >
-        <div className="wishlistEditorPanel">
-          <div className="constraintHint">{texts.WISHLIST_ANY_HINT}</div>
+        {draft && (
+          <div className="wishlistEditorPanel">
+            <div className="constraintHint">{texts.WISHLIST_ANY_HINT}</div>
 
-          <div className="constraintColumn">
-            <div className="constraintTitle">{texts.WISHLIST_FINISHES}</div>
-            {finishOptions.map((finish) => (
-              <FormControlLabel
-                key={finish}
-                className="constraintOption"
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={pickedVariants.includes(finish)}
-                    onChange={() => toggleVariant(finish)}
-                  />
-                }
-                label={finishLabel(finish)}
+            {idColumn("languageids", languageOptions)}
+            {idColumn("conditionids", conditionOptions)}
+
+            <div className="constraintColumn">
+              {sectionTitle("variants")}
+              {finishOptions.map((finish) => (
+                <FormControlLabel
+                  key={finish}
+                  className="constraintOption"
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={draft.variants.includes(finish)}
+                      onChange={() => toggle("variants", finish)}
+                    />
+                  }
+                  label={finishLabel(finish)}
+                />
+              ))}
+              {finishOptions.length === 1 && (
+                <div className="onlyFinish">
+                  {texts.ONLY_FINISH} {finishLabel(finishOptions[0])}
+                </div>
+              )}
+            </div>
+
+            <div className="constraintColumn">
+              {sectionTitle("versions")}
+              <TextField
+                size="small"
+                label={texts.WISHLIST_FILTER_SET}
+                value={setFilter}
+                onChange={(e) => setSetFilter(e.target.value)}
+                sx={{ mb: 1.5, width: 280 }}
               />
-            ))}
-            {finishOptions.length === 1 && (
-              <div className="onlyFinish">
-                {texts.ONLY_FINISH} {finishLabel(finishOptions[0])}
-              </div>
-            )}
-          </div>
-
-          <div className="constraintColumn">
-            <div className="constraintTitle">{texts.WISHLIST_VERSIONS}</div>
-            <TextField
-              size="small"
-              label={texts.WISHLIST_FILTER_SET}
-              value={setFilter}
-              onChange={(e) => setSetFilter(e.target.value)}
-              sx={{ mb: 1.5, width: 280 }}
-            />
-            {loadingVersions && (
-              <div className="constraintLoading">
-                {texts.WISHLIST_LOADING_VERSIONS}
-              </div>
-            )}
-            {/* Picked by eye: printings differ by art, and an etched
+              {loadingVersions && (
+                <div className="constraintLoading">
+                  {texts.WISHLIST_LOADING_VERSIONS}
+                </div>
+              )}
+              {/* Picked by eye: printings differ by art, and an etched
                 printing has its own collector number and image, so it shows
                 up here as its own tile. */}
-            <div className="versionGrid">
-              {versions &&
-                versions
-                  .filter(
-                    (version) =>
-                      !setFilter.trim() ||
-                      (version.cardsetcode ?? "")
-                        .toLowerCase()
-                        .includes(setFilter.trim().toLowerCase())
-                  )
-                  .map((version) => {
-                  const picked = pickedVersions.includes(version.scryfallid);
-                  return (
-                    <div
-                      className={picked ? "versionTile picked" : "versionTile"}
-                      key={version.scryfallid}
-                      title={`${version.cardsetname} #${version.collectornumber}`}
-                      onClick={() => toggleVersion(version.scryfallid)}
-                    >
-                      {version.image ? (
-                        <PreviewCarta
-                          image={version.image}
-                          name={version.cardsetname}
-                          fill
-                        />
-                      ) : (
-                        <span className="versionNoImage">
-                          {version.cardsetname}
-                        </span>
-                      )}
-                      <span className="versionCaption">
-                        {(version.cardsetcode ?? "").toUpperCase()} #
-                        {version.collectornumber}
-                      </span>
-                      {/* What this printing costs at the shop — quoted by
+              <div className="versionGrid">
+                {versions &&
+                  versions
+                    .filter(
+                      (version) =>
+                        !setFilter.trim() ||
+                        (version.cardsetcode ?? "")
+                          .toLowerCase()
+                          .includes(setFilter.trim().toLowerCase()),
+                    )
+                    .map((version) => {
+                      const picked = draft.versions.includes(
+                        version.scryfallid,
+                      );
+                      return (
+                        <div
+                          className={
+                            picked ? "versionTile picked" : "versionTile"
+                          }
+                          key={version.scryfallid}
+                          title={`${version.cardsetname} #${version.collectornumber}`}
+                          onClick={() => toggle("versions", version.scryfallid)}
+                        >
+                          {version.image ? (
+                            <PreviewCarta
+                              image={version.image}
+                              name={version.cardsetname}
+                              fill
+                            />
+                          ) : (
+                            <span className="versionNoImage">
+                              {version.cardsetname}
+                            </span>
+                          )}
+                          <span className="versionCaption">
+                            {(version.cardsetcode ?? "").toUpperCase()} #
+                            {version.collectornumber}
+                          </span>
+                          {/* What this printing costs at the shop — quoted by
                           the API with the full selling rules, so a cheap
                           rare already reads $1 here. */}
-                      {pesosLive(version.price, rate) && (
-                        <span className="versionPrice">
-                          {pesosLive(version.price, rate)}
-                        </span>
-                      )}
-                      {/* Flag the finishes that are unique to this printing,
+                          {pesosLive(version.price, rate) && (
+                            <span className="versionPrice">
+                              {pesosLive(version.price, rate)}
+                            </span>
+                          )}
+                          {/* Flag the finishes that are unique to this printing,
                           since that is why it exists separately. */}
-                      {(version.finishes ?? []).some(isFoil) &&
-                        !(version.finishes ?? []).includes("nonfoil") && (
-                          <span className="versionFinish">
-                            {version.finishes.map(finishLabel).join(" / ")}
-                          </span>
-                        )}
-                    </div>
-                  );
-                })}
+                          {(version.finishes ?? []).some(isFoil) &&
+                            !(version.finishes ?? []).includes("nonfoil") && (
+                              <span className="versionFinish">
+                                {version.finishes.map(finishLabel).join(" / ")}
+                              </span>
+                            )}
+                        </div>
+                      );
+                    })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </SideForm>
-
     </div>
   );
 }

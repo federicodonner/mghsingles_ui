@@ -188,7 +188,16 @@ const texts = {
   WISHLIST_SAVE: "Guardar preferencias",
   WISHLIST_SAVED: "Preferencias guardadas.",
   WISHLIST_ANY_HINT:
-    "Si no marcas nada en una categoría, aceptas cualquiera.",
+    "Lo que está tildado es lo que aceptás. Destildá lo que no te sirva.",
+  WISHLIST_ALL_F: "Todas",
+  WISHLIST_ALL_M: "Todos",
+  WISHLIST_OF: "de",
+  WISHLIST_TOGGLE_ALL: "Marcar o desmarcar todas",
+  WISHLIST_EMPTY_CATEGORIES:
+    "Tenés que elegir al menos una opción en cada categoría. Falta en:",
+  WISHLIST_DISCARD: "¿Salir sin guardar los cambios?",
+  WISHLIST_DISCARD_NO: "No, volver a editar",
+  WISHLIST_DISCARD_YES: "Sí, salir sin guardar",
   WISHLIST_LOADING_VERSIONS: "Cargando versiones...",
   WISHLIST_FILTER_SET: "Filtrar por código de set",
   AUTOCOMPLETE_HINT: "Escribí al menos dos letras.",
